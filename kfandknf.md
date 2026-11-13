@@ -117,6 +117,17 @@
 27. Sistem memperhitungkan penggunaan variasi barang yang sama apabila barang tersebut disewakan secara satuan maupun melalui Paket Penyewaan agar tidak terjadi pengalokasian stok secara berlebihan.
 28. Sistem menampilkan rincian kebutuhan dan ketersediaan setiap variasi barang penyusun Paket Penyewaan ketika dilakukan pemeriksaan ketersediaan paket.
 29. Sistem memperbarui alokasi stok setiap variasi barang penyusun paket ketika booking dikonfirmasi, transaksi penyewaan diproses, atau booking dibatalkan sesuai dengan kondisi transaksi.
+30. Sistem menyediakan fitur Detail Unit pada setiap variasi Barang Sewa yang ditampilkan dalam Ringkasan per Variasi.
+31. Sistem menampilkan halaman Detail Unit berdasarkan variasi barang yang dipilih, meliputi nama produk, merek, ukuran, kapasitas, jenis, dan spesifikasi lainnya sesuai karakteristik produk.
+32. Sistem menampilkan seluruh unit fisik dari variasi barang yang dipilih dalam bentuk daftar atau tabel, dengan setiap unit ditampilkan pada baris tersendiri berdasarkan kode uniknya.
+33. Sistem menampilkan informasi kondisi terkini setiap unit Barang Sewa, meliputi Tersedia, Disewa, Dicuci, Persiapan, Rusak, dan Perawatan.
+34. Sistem menyediakan fitur untuk melihat detail setiap unit barang berdasarkan kode unit yang dipilih.
+35. Sistem menyediakan fitur perubahan kondisi setiap unit Barang Sewa secara individual oleh Admin sesuai dengan hasil pemeriksaan atau kondisi fisik barang.
+36. Sistem menyediakan pilihan perubahan kondisi unit barang sesuai dengan status operasional yang telah ditentukan, yaitu Tersedia, Disewa, Dicuci, Persiapan, Rusak, dan Perawatan.
+37. Sistem mencatat setiap perubahan kondisi unit barang secara terpisah, termasuk kondisi sebelumnya, kondisi terbaru, waktu perubahan, dan pengguna yang melakukan perubahan.
+38. Sistem memperbarui ringkasan jumlah stok berdasarkan perubahan kondisi setiap unit barang sehingga jumlah unit dalam setiap kategori kondisi selalu sesuai dengan data unit individual.
+39. Sistem menyediakan fitur pencarian dan penyaringan unit barang berdasarkan kode unit dan kondisi barang pada halaman Detail Unit.
+40. Sistem menyediakan navigasi kembali dari halaman Detail Unit ke halaman Stok dan Ketersediaan atau Ringkasan per Variasi.
 
 
 
@@ -198,15 +209,20 @@
 
 ### 2. Transaksi Penjualan
 1. Sistem menyediakan submenu Transaksi Penjualan untuk mencatat transaksi penjualan barang.
-2. Sistem menyediakan pemilihan data pelanggan dan barang yang akan dibeli.
-3. Sistem menampilkan informasi harga jual dan jumlah stok barang.
-4. Sistem menghitung total pembayaran berdasarkan barang dan jumlah pembelian.
-5. Sistem menyediakan kode transaksi penjualan secara otomatis.
-6. Sistem mencatat informasi transaksi dan pembayaran.
-7. Sistem mengurangi jumlah stok barang berdasarkan jumlah barang yang terjual.
-8. Sistem menyediakan detail transaksi penjualan beserta riwayat pembayarannya.
-9. Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi, pelanggan, dan periode transaksi.
-10. Sistem menyimpan riwayat perubahan transaksi yang dilakukan oleh pengguna.
+2. Sistem menampilkan daftar produk berjenis Barang Jual yang dapat dipilih oleh Admin untuk dimasukkan ke dalam keranjang transaksi.
+3. Sistem menyediakan fitur pencarian dan penyaringan produk berdasarkan nama, kode, dan kategori barang.
+4. Sistem menampilkan informasi harga jual dan jumlah stok setiap produk.
+5. Sistem menyediakan fitur penambahan barang ke keranjang transaksi melalui pemilihan produk serta pengaturan jumlah pembelian.
+6. Sistem memungkinkan Admin menambahkan lebih dari satu jenis barang ke dalam satu transaksi.
+7. Sistem menghitung subtotal setiap barang dan total pembayaran secara otomatis berdasarkan jumlah pembelian.
+8. Sistem menyediakan kode transaksi penjualan secara otomatis.
+9. Sistem mencatat informasi transaksi dan pembayaran, termasuk nominal pembayaran serta metode pembayaran.
+10. Sistem memvalidasi ketersediaan stok sebelum transaksi disimpan untuk mencegah penjualan melebihi jumlah stok.
+11. Sistem mengurangi jumlah stok barang berdasarkan jumlah barang yang terjual setelah transaksi berhasil disimpan.
+12. Sistem menyediakan detail transaksi penjualan beserta informasi barang yang dibeli dan riwayat pembayarannya.
+13. Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi dan periode transaksi.
+14. Sistem menyimpan riwayat perubahan transaksi yang dilakukan oleh pengguna.
+
 
 
 ## G. Pengelolaan Pembayaran
