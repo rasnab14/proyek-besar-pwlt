@@ -64,6 +64,8 @@
 25. Sistem menampilkan detail paket beserta daftar barang dan jumlah masing-masing barang di dalamnya.
 26. Sistem menghubungkan data Paket Penyewaan dengan data barang penyusunnya sehingga perubahan data barang dapat diperhitungkan dalam pengelolaan stok dan ketersediaan.
 27. Sistem mempertahankan informasi komposisi dan harga paket yang telah digunakan dalam booking atau transaksi agar perubahan paket tidak mengubah catatan transaksi sebelumnya.
+28. Sistem menyediakan fitur unggah foto atau gambar produk pada formulir tambah dan ubah data barang untuk memberikan gambaran visual terhadap barang yang dikelola.
+29. Sistem menampilkan foto produk pada halaman Semua Barang dan Detail Barang sehingga Admin dan Pemilik dapat mengenali produk dengan lebih mudah.
 
 
 ### D. Pengelolaan Stok dan Ketersediaan (Revisi)
