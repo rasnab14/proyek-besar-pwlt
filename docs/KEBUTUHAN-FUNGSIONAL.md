@@ -10,7 +10,7 @@ A. Login dan Logout
 7.	Sistem menyediakan mekanisme pembuatan akun Owner pertama oleh pengembang pada saat konfigurasi awal sistem sebelum digunakan oleh perusahaan.
 
 B. Dashboard
-1. Dashboard Admin
+1) Dashboard Admin
 1.	Sistem menampilkan ringkasan jumlah booking yang perlu diproses.
 2.	Sistem menampilkan jadwal pengambilan barang pada hari berjalan.
 3.	Sistem menampilkan jadwal pengembalian barang pada hari berjalan.
@@ -19,7 +19,8 @@ B. Dashboard
 6.	Sistem menampilkan informasi transaksi terbaru.
 7.	Sistem menampilkan informasi pengeluaran terbaru.
 8.	Sistem menampilkan aktivitas operasional yang perlu ditindaklanjuti, seperti booking yang perlu diproses, jadwal pengambilan, pengembalian, dan barang yang belum siap digunakan.
-2. Dashboard Owner
+
+2) Dashboard Owner
 1.	Sistem menampilkan ringkasan pendapatan yang telah diterima.
 2.	Sistem menampilkan ringkasan pengeluaran yang telah dicatat.
 3.	Sistem menampilkan jumlah transaksi penyewaan dan penjualan.
