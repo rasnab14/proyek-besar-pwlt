@@ -9,7 +9,7 @@ npm install
 *(Perintah ini akan otomatis menginstall semua paket yang dibutuhkan, termasuk Next.js, React, Tailwind CSS, dan Supabase).*
 
 ### 2. Konfigurasi Environment Variable
-Buat file baru bernama `.env.local` di root folder proyek (bisa juga salin dari file `.env.example`), lalu isi dengan kredensial Supabase Anda:
+Buat file baru bernama `.env.local` di root folder proyek (contoh syntaxnya `.env.example`), lalu isi dengan kredensial Supabase Anda:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxxx.supabase.co
