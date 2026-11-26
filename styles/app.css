@@ -76,6 +76,8 @@ html {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -87,6 +89,34 @@ body {
   color: var(--k);
   font-size: 14px;
   line-height: 1.5;
+  overflow-x: hidden;
+  max-width: 100vw;
+  min-height: 100vh;
+}
+
+/* ─── 2.1 Layout Wrapper (App Shell) ─── */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 767px) {
+  .app-layout {
+    flex-direction: column;
+  }
 }
 
 /* Angka selalu tabular-nums untuk KPI dan tabel */
@@ -760,15 +790,213 @@ textarea.i {
   }
 }
 
-/* ─── 17. Responsif Mobile / Tablet (§3) ─── */
-@media (max-width: 760px) {
+/* ─── 17. Comprehensive Responsive System (§2 - Breakpoints) ─── */
+
+/* ─── Desktop Tier (1024px – 1439px) ─── */
+@media (max-width: 1439px) and (min-width: 1024px) {
   .main, .main-content {
-    padding: 20px 16px 40px;
+    padding: 28px 32px 48px;
+    gap: 22px;
   }
+  .g4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .g6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .head-hero {
+    padding: 24px 28px;
+  }
+}
+
+/* ─── Tablet Tier (768px – 1023px) ─── */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .main, .main-content {
+    padding: 24px 20px 40px;
+    gap: 20px;
+  }
+  .g4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .g3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .g32 {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .g6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .head {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .head-hero {
+    padding: 22px 24px;
+    gap: 16px;
+  }
+  .fg3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── Mobile Tier (< 768px) ─── */
+@media (max-width: 767px) {
+  .main, .main-content {
+    padding: 16px 14px 32px;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Grid Layouts Stack */
   .g2, .g3, .g4, .g32, .g6, .fg, .fg3 {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
   .span2 {
     grid-column: auto;
   }
+
+  /* Compact 2-col stat grid for mobile if desired */
+  .g4.kpi-mobile-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  /* Headers and Actions */
+  .head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  .head .acts, .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  .head .acts .btn, .hero-actions .btn {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  /* Hero Banner */
+  .head-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 16px;
+    gap: 16px;
+    border-radius: var(--r-card);
+  }
+  .hero-left {
+    width: 100%;
+  }
+  .hero-title, h1 {
+    font-size: 20px;
+    word-break: break-word;
+  }
+  .hero-sub, .sub {
+    font-size: 12.5px;
+  }
+
+  /* Cards & Sections */
+  .card {
+    border-radius: var(--r-md);
+  }
+  .ch {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pad {
+    padding: 14px 12px;
+  }
+
+  /* Tables inside cards */
+  .tbl-wrap {
+    margin: 0 -12px;
+    padding: 0 12px;
+    border-radius: 0;
+  }
+  .tbl th, .tbl td {
+    padding: 10px 12px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  /* KPI values */
+  .kpi-value, .kv {
+    font-size: 22px;
+  }
+
+  /* Modal */
+  .scrim {
+    padding: 16px;
+  }
+  .modal {
+    max-height: calc(100vh - 32px);
+    border-radius: var(--r-card);
+  }
+
+  /* Form Elements */
+  .fld, .ff {
+    width: 100%;
+    max-width: 100%;
+  }
+  .i {
+    height: 38px;
+    font-size: 13.5px;
+  }
+  .btn {
+    height: 38px;
+    font-size: 13px;
+    padding: 0 14px;
+  }
 }
+
+/* ─── Small Mobile Tier (< 480px) ─── */
+@media (max-width: 479px) {
+  .main, .main-content {
+    padding: 12px 10px 24px;
+    gap: 12px;
+  }
+  .head-hero {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .hero-title, h1 {
+    font-size: 18px;
+  }
+  .head-badge, .hero-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .pad {
+    padding: 12px 10px;
+  }
+  .ch {
+    padding: 10px 12px;
+  }
+  .tbl th, .tbl td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .kpi-value, .kv {
+    font-size: 20px;
+  }
+  .scrim {
+    padding: 8px;
+  }
+  .modal {
+    max-height: calc(100vh - 16px);
+  }
+}
+

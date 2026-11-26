@@ -148,7 +148,7 @@ export default function LoginPage() {
       )}
 
       {/* ── Login Card (Tailwind CSS) ── */}
-      <main className="relative z-20 w-full max-w-[390px] mx-4 my-6 bg-white rounded-2xl p-7 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-4 login-card-anim">
+      <main className="relative z-20 w-full max-w-[390px] mx-3 sm:mx-4 my-4 sm:my-6 bg-white rounded-2xl p-5 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-3.5 sm:gap-4 login-card-anim">
         {/* Brand / Logo */}
         <div className="flex flex-col items-center gap-1.5">
           <div className="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center shadow-md">

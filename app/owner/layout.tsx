@@ -6,9 +6,9 @@ export default function OwnerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
+    <div className="app-layout">
       <Sidebar role="owner" />
-      <div style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>{children}</div>
+      <div className="app-main">{children}</div>
     </div>
   );
 }

@@ -51,12 +51,26 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
 
   return (
     <nav className="side" aria-label="Menu utama">
-      {/* Brand Header */}
-      <div className="brand">
-        <div className="logo">S</div>
-        <div>
-          <div className="bn">SUMMIT</div>
-          <div className="bs">Rental &amp; Store</div>
+      <div className="side-header">
+        {/* Brand Header */}
+        <div className="brand">
+          <div className="logo">S</div>
+          <div>
+            <div className="bn">SUMMIT</div>
+            <div className="bs">Rental &amp; Store</div>
+          </div>
+        </div>
+
+        {/* User Profile Card */}
+        <div className="me">
+          <div className="a">{info.initial}</div>
+          <div className="me-info">
+            <b>{userName ?? info.name}</b>
+            <span>{info.label}</span>
+          </div>
+          <button type="button" className="out" onClick={handleLogout} aria-label="Keluar">
+            Keluar
+          </button>
         </div>
       </div>
 
@@ -67,7 +81,7 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
             return (
               <div className="gh" key={i}>
                 <Icon name={it.icon} />
-                {it.label}
+                <span>{it.label}</span>
               </div>
             );
           }
@@ -76,20 +90,10 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
           return (
             <Link key={i} href={it.href} className={cls} aria-current={on ? "page" : undefined}>
               {it.type === "link" && <Icon name={it.icon} />}
-              {it.label}
+              <span>{it.label}</span>
             </Link>
           );
         })}
-      </div>
-
-      {/* User Profile Card */}
-      <div className="me">
-        <div className="a">{info.initial}</div>
-        <div>
-          <b>{userName ?? info.name}</b>
-          <span>{info.label}</span>
-        </div>
-        <button type="button" className="out" onClick={handleLogout}>Keluar</button>
       </div>
     </nav>
   );
