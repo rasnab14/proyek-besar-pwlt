@@ -10,8 +10,18 @@ import "./sidebar.css";
 
 function Icon({ name }: { name: keyof typeof ICONS }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="side-icon">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="side-svg-icon"
+    >
       <path d={ICONS[name]} />
     </svg>
   );
@@ -30,34 +40,53 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
   const router = useRouter();
   const info = ROLE_INFO[role];
 
-  // State untuk hover-to-expand dan pin/click toggle pada tablet/desktop
+  // State ekspansi: hover di desktop atau pin manual (tablet/desktop)
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isExpanded = isHovered || isPinned;
 
-  // Mouse enter dengan pembatalan timer keluar
+  // 1. Hover Detection Delay (350ms): kursor harus menetap 350ms sebelum membuka
   const handleMouseEnter = () => {
+    // Batalkan timer keluar jika kursor kembali
     if (leaveTimerRef.current) {
       clearTimeout(leaveTimerRef.current);
       leaveTimerRef.current = null;
     }
-    setIsHovered(true);
+
+    // Jika belum terbuka dan belum ada antrean timer, mulai hitung 350ms
+    if (!isExpanded && !hoverTimerRef.current) {
+      hoverTimerRef.current = setTimeout(() => {
+        setIsHovered(true);
+        hoverTimerRef.current = null;
+      }, 350);
+    }
   };
 
-  // Mouse leave dengan toleransi jeda 120ms agar tidak terjadi flicker saat gerak kursor
+  // 2. Mouse Leave Delay (600ms): jeda sebelum menguncup agar tidak sensitif/flicker
   const handleMouseLeave = () => {
-    leaveTimerRef.current = setTimeout(() => {
-      setIsHovered(false);
-    }, 120);
+    // Batalkan timer hover jika kursor hanya numpang lewat
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+
+    // Tunggu 600ms sebelum menguncup
+    if (!leaveTimerRef.current && isHovered) {
+      leaveTimerRef.current = setTimeout(() => {
+        setIsHovered(false);
+        leaveTimerRef.current = null;
+      }, 600);
+    }
   };
 
   useEffect(() => {
     return () => {
-      if (leaveTimerRef.current) {
-        clearTimeout(leaveTimerRef.current);
-      }
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
     };
   }, []);
 
@@ -78,91 +107,120 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
     }
   };
 
-  // aktif jika path sama atau berada di bawahnya (mis. /admin/stok/detail)
+  // Rute aktif jika path sama persis atau berada di sub-pathnya
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav
+    <aside
       className={`side ${isExpanded ? "expanded" : "collapsed"}`}
-      aria-label="Menu utama"
+      aria-label="Menu navigasi utama"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="side-header">
-        {/* Brand Header */}
-        <div
-          className="brand"
-          onClick={() => setIsPinned(!isPinned)}
-          role="button"
-          tabIndex={0}
-          title={isPinned ? "Sidebar disematkan (klik untuk lepas)" : "Klik untuk sematkan sidebar"}
-        >
-          <div className="logo" aria-hidden="true">S</div>
-          <div className="brand-text">
-            <div className="bn">SUMMIT</div>
-            <div className="bs">Rental &amp; Store</div>
-          </div>
-          {/* Tablet & Desktop Pin Toggle Button */}
-          <button
-            type="button"
-            className="pin-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsPinned(!isPinned);
-            }}
-            title={isPinned ? "Lepaskan sematan sidebar" : "Sematkan sidebar agar tetap terbuka"}
-            aria-label={isPinned ? "Lepaskan sematan sidebar" : "Sematkan sidebar"}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {isPinned ? (
-                <path d="M18 6L6 18M6 6l12 12" />
-              ) : (
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-              )}
-            </svg>
-          </button>
+      {/* ── 1. Top Brand Logo & Title ── */}
+      <div
+        className="side-brand"
+        onClick={() => setIsPinned(!isPinned)}
+        role="button"
+        tabIndex={0}
+        title={isPinned ? "Sidebar disematkan (klik untuk lepas)" : "Klik untuk sematkan sidebar"}
+      >
+        <div className="side-logo-circle" aria-hidden="true">
+          S
+        </div>
+        <div className="side-brand-info">
+          <div className="side-brand-name">SUMMIT</div>
+          <div className="side-brand-sub">Rental &amp; Store</div>
         </div>
 
-        {/* User Profile Card */}
-        <div className="me">
-          <div className="a">{info.initial}</div>
-          <div className="me-info">
-            <b>{userName ?? info.name}</b>
-            <span>{info.label}</span>
-          </div>
-          <button type="button" className="out" onClick={handleLogout} aria-label="Keluar" title="Keluar dari akun">
-            Keluar
-          </button>
-        </div>
+        {/* Pin toggle control for Tablet & Desktop */}
+        <button
+          type="button"
+          className="side-pin-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsPinned(!isPinned);
+          }}
+          title={isPinned ? "Lepaskan sematan sidebar" : "Sematkan sidebar agar tetap terbuka"}
+          aria-label={isPinned ? "Lepaskan sematan sidebar" : "Sematkan sidebar"}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {isPinned ? (
+              <path d="M18 6L6 18M6 6l12 12" />
+            ) : (
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            )}
+          </svg>
+        </button>
       </div>
 
-      {/* Scrollable Navigation Menu List (.nvs per §4.12) */}
-      <div className="nvs">
+      {/* ── 2. Middle Scrollable Navigation List (All items visible & aligned) ── */}
+      <nav className="side-nav">
         {NAV[role].map((it, i) => {
           if (it.type === "group") {
             return (
-              <div className="gh" key={i} title={it.label}>
-                <Icon name={it.icon} />
-                <span className="nav-label">{it.label}</span>
+              <div className="side-group-heading" key={i} title={it.label}>
+                <div className="side-item-icon-box" aria-hidden="true">
+                  <Icon name={it.icon} />
+                </div>
+                <span className="side-label side-group-title">{it.label}</span>
               </div>
             );
           }
+
           const on = isActive(it.href);
-          const cls = "nv" + (it.type === "sub" ? " sub" : "") + (on ? " on" : "");
+          const isSub = it.type === "sub";
+          const linkCls = `side-nav-link ${isSub ? "is-sub" : ""} ${on ? "is-active" : ""}`;
+
           return (
             <Link
               key={i}
               href={it.href}
-              className={cls}
+              className={linkCls}
               aria-current={on ? "page" : undefined}
               title={it.label}
             >
-              {it.type === "link" && <Icon name={it.icon} />}
-              <span className="nav-label">{it.label}</span>
+              <div className="side-item-icon-box" aria-hidden="true">
+                {it.type === "link" ? (
+                  <Icon name={it.icon} />
+                ) : (
+                  <span className="side-sub-bullet" />
+                )}
+              </div>
+              <span className="side-label side-nav-title">{it.label}</span>
             </Link>
           );
         })}
+      </nav>
+
+      {/* ── 3. Bottom User Profile Card (Pinned at bottom) ── */}
+      <div className="side-profile">
+        <div className="side-profile-avatar" aria-hidden="true">
+          {info.initial}
+        </div>
+        <div className="side-profile-meta">
+          <b className="side-profile-name">{userName ?? info.name}</b>
+          <span className="side-profile-role">{info.label}</span>
+        </div>
+        <button
+          type="button"
+          className="side-logout-btn"
+          onClick={handleLogout}
+          aria-label="Keluar dari akun"
+          title="Keluar dari akun"
+        >
+          Keluar
+        </button>
       </div>
-    </nav>
+    </aside>
   );
 }

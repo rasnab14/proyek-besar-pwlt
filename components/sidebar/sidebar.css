@@ -1,83 +1,74 @@
 /* ==========================================================================
    components/sidebar/sidebar.css
-   Interactive Collapsible Sidebar (Desktop & Tablet: Hover/Click-to-Expand)
-   Strict adherence to Fluxa Design System & ATURAN-STYLING.md
+   Fluxa Responsive Collapsible Sidebar (Desktop & Tablet)
+   Timing & Easing strictly matching specifications:
+   - Hover Detection Delay: 350ms
+   - Sidebar Expansion: 500ms cubic-bezier(0.22, 1, 0.36, 1)
+   - Label Appearance: 250ms with 180ms delay
+   - Mouse Leave Delay: 600ms
+   - Sidebar Collapse: 450ms cubic-bezier(0.22, 1, 0.36, 1)
    ========================================================================== */
 
-/* ─── Base Sidebar Shell (Desktop & Tablet: >= 768px) ─── */
+/* ─── Base Sidebar Shell (Desktop & Tablet >= 768px) ─── */
 .side {
-  min-height: 100vh;
   height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
   position: sticky;
   top: 0;
-  align-self: flex-start;
+  left: 0;
   box-sizing: border-box;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 264 150'%3E%3Cpath d='M0 150V95l44-34 30 22 52-56 46 46 32-22 60 56v43Z' fill='white' fill-opacity='.04'/%3E%3Cpath d='M0 150V120l50-30 40 24 60-44 50 38 64-30v72Z' fill='white' fill-opacity='.05'/%3E%3Cpath d='M0 120l50-30 40 24 60-44 50 38 64-30' fill='none' stroke='%230EA5E9' stroke-opacity='.5' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat bottom/100% auto,
     radial-gradient(420px 300px at 0 100%, rgba(14, 165, 233, 0.22), transparent 70%),
-    var(--night);
+    #0D1117;
   color: var(--n400);
   display: flex;
   flex-direction: column;
-  gap: 2px;
   font-family: inherit;
   overflow-x: hidden;
   overflow-y: hidden;
-  z-index: 40;
+  z-index: 50;
   flex-shrink: 0;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.28);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  /* Smooth synchronized width expansion & contraction */
-  transition: width 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), padding 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  /* Smooth, deliberate expansion & collapse easing */
+  transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1), padding 500ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: width;
 }
 
-/* ─── Default Collapsed State (Desktop & Tablet >= 768px) ─── */
+/* ─── Desktop & Tablet Sizing (>= 768px) ─── */
 @media (min-width: 768px) {
   .side.collapsed {
-    width: 80px;
-    flex: 0 0 80px;
-    padding: 18px 10px 22px;
+    width: 78px;
+    flex: 0 0 78px;
+    padding: 18px 8px 20px;
   }
 
   .side.expanded {
-    width: 290px;
-    flex: 0 0 290px;
-    padding: 18px 14px 22px;
+    width: 300px;
+    flex: 0 0 300px;
+    padding: 18px 14px 20px;
   }
 }
 
-/* ─── Layout Ordering for Side Header ─── */
-.side-header {
-  display: contents;
-}
-
-.side .brand {
-  order: 1;
-}
-
-.side .nvs {
-  order: 2;
-}
-
-.side .me {
-  order: 3;
-}
-
-/* ─── Brand Logo & Name ─── */
-.side .brand {
+/* ==========================================================================
+   1. TOP BRAND SECTION
+   ========================================================================== */
+.side-brand {
   display: flex;
   align-items: center;
-  padding: 4px 6px 18px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #1F1F1F;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+  padding-bottom: 12px;
   flex-shrink: 0;
-  position: relative;
   user-select: none;
   cursor: pointer;
+  position: relative;
+  transition: padding 300ms ease;
 }
 
-.side .logo {
+.side-logo-circle {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -88,41 +79,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
-  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.side .brand:hover .logo {
-  transform: scale(1.05);
+.side-brand:hover .side-logo-circle {
+  transform: scale(1.06);
 }
 
-.side .brand-text {
+.side-brand-info {
   display: flex;
   flex-direction: column;
   margin-left: 12px;
   overflow: hidden;
   white-space: nowrap;
-  transition: opacity 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.side .bn {
+.side-brand-name {
   color: var(--w);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.18em;
   font-size: 15px;
   line-height: 1.2;
 }
 
-.side .bs {
+.side-brand-sub {
   font-size: 11px;
   color: var(--n400);
   margin-top: 2px;
   letter-spacing: 0.02em;
 }
 
-/* Tablet & Desktop Pin Button */
-.side .pin-btn {
+/* Pin Toggle Button */
+.side-pin-btn {
   margin-left: auto;
   width: 28px;
   height: 28px;
@@ -134,40 +124,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.18s var(--ease);
+  transition: all 0.2s var(--ease);
   flex-shrink: 0;
 }
 
-.side .pin-btn:hover {
+.side-pin-btn:hover {
   background: rgba(14, 165, 233, 0.2);
   color: #38BDF8;
   border-color: rgba(14, 165, 233, 0.4);
 }
 
-/* ─── Scrollable Menu List (.nvs) ─── */
-.side .nvs {
-  flex: 1 1 auto;
+/* ==========================================================================
+   2. MIDDLE SCROLLABLE NAVIGATION LIST
+   ========================================================================== */
+.side-nav {
+  flex: 1 1 0%;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin: 0 -4px;
-  padding: 0 4px;
+  padding-right: 2px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
-.side .nvs::-webkit-scrollbar {
+.side-nav::-webkit-scrollbar {
   width: 4px;
 }
-.side .nvs::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+.side-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
 
-/* ─── Nav Links (.nv) ─── */
-.side .nv {
+/* ─── Nav Links ─── */
+.side-nav-link {
   position: relative;
   display: flex;
   align-items: center;
@@ -176,129 +168,149 @@
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
-  transition: background 0.15s var(--ease), color 0.15s var(--ease), transform 0.15s var(--ease);
+  min-height: 42px;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
   white-space: nowrap;
 }
 
-.side .side-icon {
-  flex-shrink: 0;
-  transition: transform 0.15s var(--ease);
-}
-
-.side .nav-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: opacity 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.side .nv:hover {
+.side-nav-link:hover {
   background: #181E27;
   color: var(--w);
 }
 
-.side .nv.on {
+.side-nav-link.is-active {
   background: rgba(14, 165, 233, 0.16);
   color: var(--w);
   font-weight: 600;
 }
 
-.side .nv.on .side-icon {
+.side-nav-link.is-active .side-svg-icon {
   color: #38BDF8;
 }
 
-/* Active Indicator Line on Left Edge */
-.side .nv.on::before {
+/* Blue vertical line on left edge of active item */
+.side-nav-link.is-active::before {
   content: "";
   position: absolute;
-  top: 8px;
-  bottom: 8px;
+  top: 7px;
+  bottom: 7px;
   width: 3.5px;
   border-radius: 0 3px 3px 0;
   background: var(--acc);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
 }
 
-/* ─── Sub-Menu Links (.nv.sub) ─── */
-.side .nv.sub {
-  font-size: 13px;
-  border-radius: 0 var(--r-md) var(--r-md) 0;
+/* Icon Box: keeps icons centered and perfectly anchored */
+.side-item-icon-box {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.side .nv.sub:hover {
-  background: #181E27;
-  color: var(--w);
+.side-svg-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease);
 }
 
-.side .nv.sub.on {
-  border-left-color: var(--acc);
-  background: rgba(14, 165, 233, 0.12);
-  color: var(--w);
-  font-weight: 600;
+/* Sub-item bullet dot */
+.side-sub-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--n400);
+  opacity: 0.6;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease), opacity 0.2s var(--ease);
 }
 
-/* ─── Group Header (.gh) ─── */
-.side .gh {
+.side-nav-link:hover .side-sub-bullet {
+  background: var(--w);
+  opacity: 0.9;
+  transform: scale(1.2);
+}
+
+.side-nav-link.is-active .side-sub-bullet {
+  background: #38BDF8;
+  opacity: 1;
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(14, 165, 233, 0.7);
+}
+
+/* ─── Group Headings ─── */
+.side-group-heading {
   display: flex;
   align-items: center;
   color: var(--n200);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-top: 8px;
+  min-height: 36px;
+  margin-top: 6px;
   margin-bottom: 2px;
   user-select: none;
   white-space: nowrap;
 }
 
-.side .gh svg {
-  flex-shrink: 0;
+.side-group-heading .side-item-icon-box svg {
+  color: var(--n400);
+  opacity: 0.8;
 }
 
-/* ─── User Profile Card (.me) ─── */
-.side .me {
+/* ─── Nav Labels & Titles ─── */
+.side-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   3. BOTTOM USER PROFILE SECTION
+   ========================================================================== */
+.side-profile {
   margin-top: auto;
   border-radius: var(--r-lg);
   display: flex;
   align-items: center;
   position: relative;
-  z-index: 1;
   flex-shrink: 0;
-  transition: all 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: all 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.side .me .a {
+.side-profile-avatar {
   border-radius: 50%;
   background: var(--acc);
   color: var(--k);
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.45);
 }
 
-.side .me-info {
+.side-profile-meta {
   margin-left: 10px;
   overflow: hidden;
   white-space: nowrap;
-  transition: opacity 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-.side .me b {
-  display: block;
+.side-profile-name {
   color: var(--w);
   font-size: 13px;
   line-height: 1.2;
 }
 
-.side .me span {
-  font-size: 11.5px;
+.side-profile-role {
+  font-size: 11px;
   color: var(--n400);
 }
 
-.side .out {
+.side-logout-btn {
   margin-left: auto;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -309,157 +321,144 @@
   font-weight: 600;
   padding: 6px 10px;
   border-radius: 6px;
-  transition: all 0.15s var(--ease);
+  transition: all 0.2s var(--ease);
   flex-shrink: 0;
 }
 
-.side .out:hover {
+.side-logout-btn:hover {
   color: var(--w);
   background: var(--st-er);
   border-color: var(--st-er);
 }
 
 /* ==========================================================================
-   DESKTOP & TABLET: Specific Rules for Collapsed vs Expanded State
+   COLLAPSED VS EXPANDED RULES (DESKTOP & TABLET >= 768px)
    ========================================================================== */
 @media (min-width: 768px) {
-  /* ─── Collapsed State Rules ─── */
-  .side.collapsed .brand {
+  /* ─── Collapsed State ─── */
+  .side.collapsed .side-brand {
     justify-content: center;
-    padding: 6px 0 16px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  .side.collapsed .brand-text,
-  .side.collapsed .pin-btn {
+  .side.collapsed .side-brand-info,
+  .side.collapsed .side-pin-btn {
     display: none;
     opacity: 0;
   }
 
-  .side.collapsed .nv {
+  .side.collapsed .side-nav-link {
     justify-content: center;
-    padding: 10px 0;
-    gap: 0;
+    padding: 0;
   }
 
-  .side.collapsed .nv.on::before {
-    left: -10px;
+  .side.collapsed .side-nav-link.is-active::before {
+    left: -8px;
     width: 3.5px;
   }
 
-  .side.collapsed .nv.sub {
-    margin-left: 0;
-    border-left: none;
-    padding: 8px 0;
+  .side.collapsed .side-group-heading {
+    justify-content: center;
+    padding: 0;
   }
 
-  .side.collapsed .nav-label {
+  .side.collapsed .side-label {
     display: none;
     opacity: 0;
   }
 
-  .side.collapsed .gh {
+  .side.collapsed .side-profile {
     justify-content: center;
-    padding: 8px 0;
-    gap: 0;
-  }
-
-  .side.collapsed .gh .nav-label {
-    display: none;
-  }
-
-  .side.collapsed .me {
-    justify-content: center;
-    padding: 8px 0;
+    padding: 10px 0 4px;
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
-  .side.collapsed .me .a {
-    width: 36px;
-    height: 36px;
+  .side.collapsed .side-profile-avatar {
+    width: 38px;
+    height: 38px;
     font-size: 13px;
   }
 
-  .side.collapsed .me-info,
-  .side.collapsed .out {
+  .side.collapsed .side-profile-meta,
+  .side.collapsed .side-logout-btn {
     display: none;
     opacity: 0;
   }
 
-  /* ─── Expanded State Rules ─── */
-  .side.expanded .brand {
+  /* ─── Expanded State ─── */
+  .side.expanded .side-brand {
     justify-content: flex-start;
-    padding: 4px 6px 18px;
-    gap: 10px;
+    padding: 2px 4px 14px;
   }
 
-  .side.expanded .brand-text {
+  .side.expanded .side-brand-info {
     display: flex;
     opacity: 1;
+    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
   }
 
-  .side.expanded .pin-btn {
+  .side.expanded .side-pin-btn {
     display: flex;
   }
 
-  .side.expanded .nv {
+  .side.expanded .side-nav-link {
     justify-content: flex-start;
-    padding: 9px 12px;
-    gap: 12px;
+    padding: 0 10px 0 4px;
+    gap: 8px;
   }
 
-  .side.expanded .nv.on::before {
+  .side.expanded .side-nav-link.is-active::before {
     left: -14px;
     width: 3.5px;
   }
 
-  .side.expanded .nv.sub {
-    margin-left: 18px;
-    padding: 7px 12px 7px 18px;
-    border-left: 1px solid #262626;
+  .side.expanded .side-nav-link.is-sub {
+    margin-left: 12px;
   }
 
-  .side.expanded .nav-label {
+  .side.expanded .side-group-heading {
+    justify-content: flex-start;
+    padding: 0 10px 0 4px;
+    gap: 8px;
+  }
+
+  .side.expanded .side-label {
     display: inline-block;
     opacity: 1;
+    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
   }
 
-  .side.expanded .gh {
-    justify-content: flex-start;
-    padding: 8px 10px;
-    gap: 10px;
-  }
-
-  .side.expanded .gh .nav-label {
-    display: inline-block;
-  }
-
-  .side.expanded .me {
-    padding: 12px;
+  .side.expanded .side-profile {
+    padding: 12px 14px;
     background: #141B25;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   }
 
-  .side.expanded .me .a {
+  .side.expanded .side-profile-avatar {
     width: 34px;
     height: 34px;
     font-size: 12px;
   }
 
-  .side.expanded .me-info {
-    display: block;
+  .side.expanded .side-profile-meta {
+    display: flex;
     opacity: 1;
+    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
   }
 
-  .side.expanded .out {
+  .side.expanded .side-logout-btn {
     display: inline-block;
+    opacity: 1;
+    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
   }
 }
 
 /* ==========================================================================
-   MOBILE & SMALL MOBILE (< 768px) — Preserved from Previous Task
+   MOBILE & SMALL MOBILE (< 768px) — Strictly Preserved
    ========================================================================== */
 @media (max-width: 767px) {
   .side {
@@ -467,6 +466,7 @@
     flex: 0 0 auto !important;
     height: auto !important;
     min-height: auto !important;
+    max-height: none !important;
     position: sticky !important;
     top: 0 !important;
     z-index: 50 !important;
@@ -478,111 +478,82 @@
     transition: none !important;
   }
 
-  .side-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    gap: 12px !important;
+  .side-brand {
+    padding: 0 0 6px 0 !important;
     margin-bottom: 6px !important;
-    padding-bottom: 6px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  }
-
-  .side .brand {
-    order: 1 !important;
-    padding: 0 !important;
-    margin-bottom: 0 !important;
-    border-bottom: none !important;
-    gap: 8px !important;
     cursor: default !important;
   }
 
-  .side .logo {
+  .side-logo-circle {
     width: 32px !important;
     height: 32px !important;
     font-size: 16px !important;
   }
 
-  .side .bn {
+  .side-brand-name {
     font-size: 13px !important;
-    letter-spacing: 0.12em !important;
   }
 
-  .side .bs {
+  .side-brand-sub {
     display: none !important;
   }
 
-  .side .pin-btn {
+  .side-pin-btn {
     display: none !important;
   }
 
-  .side .me {
-    order: 2 !important;
+  /* In mobile, place profile next to brand or compact */
+  .side-profile {
     margin-top: 0 !important;
-    padding: 4px 8px !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    position: absolute !important;
+    right: 14px !important;
+    top: 10px !important;
+    padding: 2px 6px !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
-    gap: 8px !important;
+    gap: 6px !important;
   }
 
-  .side .me .a {
-    width: 26px !important;
-    height: 26px !important;
+  .side-profile-avatar {
+    width: 28px !important;
+    height: 28px !important;
     font-size: 10px !important;
   }
 
-  .side .me-info {
+  .side-profile-meta {
     display: none !important;
   }
 
-  @media (min-width: 480px) {
-    .side .me-info {
-      display: block !important;
-    }
-  }
-
-  .side .me b {
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-  }
-
-  .side .me span {
-    font-size: 9px !important;
-  }
-
-  .side .out {
+  .side-logout-btn {
     padding: 4px 8px !important;
     font-size: 11px !important;
     background: rgba(255, 255, 255, 0.08) !important;
     color: var(--w) !important;
-    display: inline-block !important;
   }
 
   /* Horizontal Scrolling Navbar on Mobile */
-  .side .nvs {
-    order: 3 !important;
+  .side-nav {
     flex-direction: row !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     white-space: nowrap !important;
     gap: 6px !important;
-    padding: 4px 2px 4px !important;
-    margin: 0 !important;
+    padding: 4px 2px !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
   }
 
-  .side .nvs::-webkit-scrollbar {
+  .side-nav::-webkit-scrollbar {
     display: none !important;
   }
 
-  .side .gh {
+  .side-group-heading {
     display: none !important;
   }
 
-  .side .nv {
+  .side-nav-link {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
@@ -593,45 +564,35 @@
     background: #181E27 !important;
     color: var(--n200) !important;
     flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    transform: none !important;
+    min-height: 32px !important;
   }
 
-  .side .nav-label {
+  .side-item-icon-box {
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .side-sub-bullet {
+    display: none !important;
+  }
+
+  .side-label {
     display: inline !important;
     opacity: 1 !important;
   }
 
-  .side .nv:hover {
-    background: #222936 !important;
-    color: var(--w) !important;
-    transform: none !important;
-  }
-
-  .side .nv.on {
+  .side-nav-link.is-active {
     background: var(--acc) !important;
     color: #0A0A0A !important;
     font-weight: 700 !important;
   }
 
-  .side .nv.on .side-icon {
+  .side-nav-link.is-active .side-svg-icon {
     color: #0A0A0A !important;
   }
 
-  .side .nv.on::before {
+  .side-nav-link.is-active::before {
     display: none !important;
-  }
-
-  .side .nv.sub {
-    margin-left: 0 !important;
-    border-left: none !important;
-    border-radius: 9999px !important;
-    padding: 6px 12px !important;
-  }
-
-  .side .nv.sub.on {
-    background: var(--acc) !important;
-    color: #0A0A0A !important;
   }
 }
 
@@ -643,9 +604,9 @@
   }
 }
 
-.side .nv:focus-visible,
-.side .out:focus-visible,
-.side .pin-btn:focus-visible {
+.side-nav-link:focus-visible,
+.side-logout-btn:focus-visible,
+.side-pin-btn:focus-visible {
   outline: 2px solid #38BDF8;
   outline-offset: 2px;
 }
