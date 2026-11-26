@@ -1,6 +1,6 @@
 /* ==========================================================================
    components/sidebar/sidebar.css
-   Fluxa Responsive Collapsible Sidebar (Desktop & Tablet)
+   Fluxa Responsive Collapsible Sidebar (Desktop & Tablet) with Nested Submenus
    Timing & Easing strictly matching specifications:
    - Hover Detection Delay: 350ms
    - Sidebar Expansion: 500ms cubic-bezier(0.22, 1, 0.36, 1)
@@ -134,23 +134,23 @@
   font-size: 11px;
   color: var(--n400);
   margin-top: 2px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* Pin Toggle Button */
 .side-pin-btn {
   margin-left: auto;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--n400);
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s var(--ease);
+  cursor: pointer;
+  transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -185,7 +185,7 @@
   border-radius: 4px;
 }
 
-/* ─── Nav Links ─── */
+/* ─── Direct Nav Links (Dashboard, Booking, dll.) ─── */
 .side-nav-link {
   position: relative;
   display: flex;
@@ -215,7 +215,7 @@
   color: #38BDF8;
 }
 
-/* Blue vertical line on left edge of active item */
+/* Active Indicator Line on Left Edge */
 .side-nav-link.is-active::before {
   content: "";
   position: absolute;
@@ -227,7 +227,161 @@
   box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
 }
 
-/* Icon Box: keeps icons centered and perfectly anchored */
+/* ─── Parent Menu Group & Button ─── */
+.side-parent-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.side-parent-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-md);
+  color: var(--n400);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  min-height: 42px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  position: relative;
+  white-space: nowrap;
+}
+
+.side-parent-btn:hover {
+  background: #181E27;
+  color: var(--w);
+}
+
+.side-parent-btn.is-active-parent {
+  color: var(--w);
+  font-weight: 600;
+}
+
+.side-parent-btn.is-active-parent .side-svg-icon {
+  color: #38BDF8;
+}
+
+.side-parent-btn.is-active-parent::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  width: 3.5px;
+  border-radius: 0 3px 3px 0;
+  background: var(--acc);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
+}
+
+/* Chevron Dropdown Indicator */
+.side-chevron-box {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--n400);
+  flex-shrink: 0;
+  padding-right: 2px;
+}
+
+.side-chevron {
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms ease;
+}
+
+.side-chevron.open {
+  transform: rotate(180deg);
+  color: var(--w);
+}
+
+/* ─── Submenu Container (Smooth Grid Accordion) ─── */
+.side-submenu-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 250ms ease;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.side-submenu-wrap.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* Submenu List with subtle vertical guide line */
+.side-submenu-list {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+  position: relative;
+  margin-left: 21px;
+  padding-left: 14px;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.12);
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+/* Child Menu Links */
+.side-sub-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: var(--r-md);
+  color: var(--n400);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+}
+
+.side-sub-link:hover {
+  background: #181E27;
+  color: var(--w);
+  transform: translateX(2px);
+}
+
+.side-sub-link.is-active {
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--w);
+  font-weight: 600;
+}
+
+/* Submenu Bullet Dot */
+.side-sub-bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--n400);
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: all 0.2s var(--ease);
+}
+
+.side-sub-link:hover .side-sub-bullet {
+  background: var(--w);
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.side-sub-link.is-active .side-sub-bullet {
+  background: #38BDF8;
+  opacity: 1;
+  transform: scale(1.3);
+  box-shadow: 0 0 6px rgba(14, 165, 233, 0.8);
+}
+
+/* ─── Icon Box (Centering Anchor) ─── */
 .side-item-icon-box {
   width: 42px;
   height: 42px;
@@ -240,50 +394,6 @@
 .side-svg-icon {
   flex-shrink: 0;
   transition: transform 0.2s var(--ease);
-}
-
-/* Sub-item bullet dot */
-.side-sub-bullet {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--n400);
-  opacity: 0.6;
-  transition: transform 0.2s var(--ease), background 0.2s var(--ease), opacity 0.2s var(--ease);
-}
-
-.side-nav-link:hover .side-sub-bullet {
-  background: var(--w);
-  opacity: 0.9;
-  transform: scale(1.2);
-}
-
-.side-nav-link.is-active .side-sub-bullet {
-  background: #38BDF8;
-  opacity: 1;
-  transform: scale(1.3);
-  box-shadow: 0 0 8px rgba(14, 165, 233, 0.7);
-}
-
-/* ─── Group Headings ─── */
-.side-group-heading {
-  display: flex;
-  align-items: center;
-  color: var(--n200);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  min-height: 36px;
-  margin-top: 6px;
-  margin-bottom: 2px;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.side-group-heading .side-item-icon-box svg {
-  color: var(--n400);
-  opacity: 0.8;
 }
 
 /* ─── Nav Labels & Titles ─── */
@@ -362,7 +472,7 @@
    COLLAPSED VS EXPANDED RULES (DESKTOP & TABLET >= 768px)
    ========================================================================== */
 @media (min-width: 768px) {
-  /* ─── Collapsed State ─── */
+  /* ─── Collapsed State (78px) ─── */
   .side.collapsed .side-brand {
     justify-content: center;
     padding-left: 0;
@@ -385,9 +495,23 @@
     width: 3.5px;
   }
 
-  .side.collapsed .side-group-heading {
+  .side.collapsed .side-parent-btn {
     justify-content: center;
     padding: 0;
+  }
+
+  .side.collapsed .side-parent-btn.is-active-parent::before {
+    left: -8px;
+    width: 3.5px;
+  }
+
+  .side.collapsed .side-chevron-box {
+    display: none;
+    opacity: 0;
+  }
+
+  .side.collapsed .side-submenu-wrap {
+    display: none !important;
   }
 
   .side.collapsed .side-label {
@@ -415,7 +539,7 @@
     opacity: 0;
   }
 
-  /* ─── Expanded State ─── */
+  /* ─── Expanded State (300px) ─── */
   .side.expanded .side-brand {
     justify-content: flex-start;
     padding: 2px 4px 14px;
@@ -442,14 +566,21 @@
     width: 3.5px;
   }
 
-  .side.expanded .side-nav-link.is-sub {
-    margin-left: 12px;
+  .side.expanded .side-parent-btn {
+    justify-content: flex-start;
+    padding: 0 8px 0 4px;
+    gap: 8px;
   }
 
-  .side.expanded .side-group-heading {
-    justify-content: flex-start;
-    padding: 0 10px 0 4px;
-    gap: 8px;
+  .side.expanded .side-parent-btn.is-active-parent::before {
+    left: -14px;
+    width: 3.5px;
+  }
+
+  .side.expanded .side-chevron-box {
+    display: flex;
+    opacity: 1;
+    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
   }
 
   .side.expanded .side-label {
@@ -485,7 +616,7 @@
 }
 
 /* ==========================================================================
-   MOBILE & SMALL MOBILE (< 768px) — Strictly Preserved
+   MOBILE & SMALL MOBILE (< 768px) — Preserved
    ========================================================================== */
 @media (max-width: 767px) {
   .side-spacer {
@@ -582,10 +713,6 @@
     display: none !important;
   }
 
-  .side-group-heading {
-    display: none !important;
-  }
-
   .side-nav-link {
     display: inline-flex !important;
     align-items: center !important;
@@ -600,13 +727,96 @@
     min-height: 32px !important;
   }
 
-  .side-item-icon-box {
+  .side-parent-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .side-parent-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    border-radius: 9999px !important;
+    background: #181E27 !important;
+    color: var(--n200) !important;
+    flex-shrink: 0 !important;
+    min-height: 32px !important;
+    border: none !important;
+  }
+
+  .side-parent-btn.is-active-parent {
+    background: var(--acc) !important;
+    color: #0A0A0A !important;
+    font-weight: 700 !important;
+  }
+
+  .side-parent-btn.is-active-parent .side-svg-icon {
+    color: #0A0A0A !important;
+  }
+
+  .side-parent-btn.is-active-parent::before {
+    display: none !important;
+  }
+
+  .side-parent-btn .side-chevron-box {
+    display: inline-flex !important;
     width: auto !important;
     height: auto !important;
+    padding: 0 !important;
+    margin-left: 2px !important;
+  }
+
+  .side-submenu-wrap {
+    display: inline-flex !important;
+    overflow: visible !important;
+  }
+
+  .side-submenu-wrap:not(.open) {
+    display: none !important;
+  }
+
+  .side-submenu-list {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 4px !important;
+    border-left: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .side-sub-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    border-radius: 9999px !important;
+    background: #222936 !important;
+    color: var(--n200) !important;
+    flex-shrink: 0 !important;
+    min-height: 30px !important;
+  }
+
+  .side-sub-link.is-active {
+    background: var(--acc) !important;
+    color: #0A0A0A !important;
+    font-weight: 700 !important;
   }
 
   .side-sub-bullet {
     display: none !important;
+  }
+
+  .side-item-icon-box {
+    width: auto !important;
+    height: auto !important;
   }
 
   .side-label {
@@ -638,6 +848,8 @@
 }
 
 .side-nav-link:focus-visible,
+.side-parent-btn:focus-visible,
+.side-sub-link:focus-visible,
 .side-logout-btn:focus-visible,
 .side-pin-btn:focus-visible {
   outline: 2px solid #38BDF8;

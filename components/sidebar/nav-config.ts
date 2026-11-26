@@ -1,12 +1,28 @@
 // components/sidebar/nav-config.ts
 export type Role = "admin" | "owner";
 
-export type NavItem =
-  | { type: "link"; label: string; href: string; icon: keyof typeof ICONS }
-  | { type: "group"; label: string; icon: keyof typeof ICONS }
-  | { type: "sub"; label: string; href: string };
+export type NavSubItem = {
+  label: string;
+  href: string;
+};
 
-// Path ikon 24x24 (stroke) — sama persis dengan desain
+export type NavItem =
+  | {
+      type: "link";
+      key: string;
+      label: string;
+      href: string;
+      icon: keyof typeof ICONS;
+    }
+  | {
+      type: "parent";
+      key: string;
+      label: string;
+      icon: keyof typeof ICONS;
+      children: NavSubItem[];
+    };
+
+// Path ikon 24x24 (stroke) — konsisten dengan desain sistem Fluxa
 export const ICONS = {
   dash: "M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z",
   cal: "M3 5h18v16H3zM3 10h18M8 3v4M16 3v4",
@@ -23,53 +39,72 @@ export const ICONS = {
   sh: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
 } as const;
 
-const L = (label: string, href: string, icon: keyof typeof ICONS): NavItem => ({ type: "link", label, href, icon });
-const G = (label: string, icon: keyof typeof ICONS): NavItem => ({ type: "group", label, icon });
-const S = (label: string, href: string): NavItem => ({ type: "sub", label, href });
+// Helper pembuat item
+const L = (key: string, label: string, href: string, icon: keyof typeof ICONS): NavItem => ({
+  type: "link",
+  key,
+  label,
+  href,
+  icon,
+});
 
-// Sesuaikan href dengan struktur folder app/ Anda
+const P = (key: string, label: string, icon: keyof typeof ICONS, children: NavSubItem[]): NavItem => ({
+  type: "parent",
+  key,
+  label,
+  icon,
+  children,
+});
+
+// Struktur Navigasi Berjenjang (Hierarchical Parent-Child Menu)
 export const NAV: Record<Role, NavItem[]> = {
   admin: [
-    L("Dashboard", "/admin/dashboard", "dash"),
-    L("Booking", "/admin/booking", "cal"),
-    G("Transaksi", "rec"),
-    S("Transaksi Penyewaan", "/admin/transaksi/sewa"),
-    S("Transaksi Penjualan", "/admin/transaksi/jual"),
-    G("Data Barang", "box"),
-    S("Semua Barang", "/admin/barang"),
-    S("Kategori Barang", "/admin/kategori"),
-    S("Paket Penyewaan", "/admin/paket"),
-    L("Stok dan Ketersediaan", "/admin/stok", "stok"),
-    L("Data Pelanggan", "/admin/pelanggan", "usr"),
-    L("Pengembalian", "/admin/pengembalian", "ret"),
-    L("Pengeluaran", "/admin/pengeluaran", "wal"),
-    L("Riwayat Aktivitas", "/admin/riwayat", "clk"),
-    L("Profil Akun", "/admin/profil", "me"),
+    L("dashboard", "Dashboard", "/admin/dashboard", "dash"),
+    L("booking", "Booking", "/admin/booking", "cal"),
+    P("transaksi", "Transaksi", "rec", [
+      { label: "Transaksi Penyewaan", href: "/admin/transaksi/sewa" },
+      { label: "Transaksi Penjualan", href: "/admin/transaksi/jual" },
+    ]),
+    P("barang", "Data Barang", "box", [
+      { label: "Semua Barang", href: "/admin/barang" },
+      { label: "Kategori Barang", href: "/admin/kategori" },
+      { label: "Paket Penyewaan", href: "/admin/paket" },
+    ]),
+    L("stok", "Stok dan Ketersediaan", "/admin/stok", "stok"),
+    L("pelanggan", "Data Pelanggan", "/admin/pelanggan", "usr"),
+    L("pengembalian", "Pengembalian", "/admin/pengembalian", "ret"),
+    L("pengeluaran", "Pengeluaran", "/admin/pengeluaran", "wal"),
+    L("riwayat", "Riwayat Aktivitas", "/admin/riwayat", "clk"),
+    L("profil", "Profil Akun", "/admin/profil", "me"),
   ],
   owner: [
-    L("Dashboard", "/owner/dashboard", "dash"),
-    L("Monitoring Booking", "/owner/booking", "cal"),
-    G("Monitoring Transaksi", "eye"),
-    S("Transaksi Penyewaan", "/owner/transaksi/sewa"),
-    S("Transaksi Penjualan", "/owner/transaksi/jual"),
-    G("Data Barang", "box"),
-    S("Semua Barang", "/owner/barang"),
-    S("Kategori Barang", "/owner/kategori"),
-    S("Paket Penyewaan", "/owner/paket"),
-    L("Stok dan Ketersediaan", "/owner/stok", "stok"),
-    L("Data Pelanggan", "/owner/pelanggan", "usr"),
-    L("Pengeluaran", "/owner/pengeluaran", "wal"),
-    G("Laporan", "chart"),
-    S("Laporan Keuangan", "/owner/laporan/keuangan"),
-    S("Laporan Penyewaan", "/owner/laporan/penyewaan"),
-    S("Laporan Penjualan", "/owner/laporan/penjualan"),
-    S("Laporan Stok", "/owner/laporan/stok"),
-    S("Laporan Pelanggan", "/owner/laporan/pelanggan"),
-    L("Riwayat Aktivitas", "/owner/riwayat", "clk"),
-    G("Kelola Pengguna", "sh"),
-    S("Daftar Pengguna", "/owner/pengguna"),
-    S("Hak Akses", "/owner/hak-akses"),
-    L("Profil Akun", "/owner/profil", "me"),
+    L("dashboard", "Dashboard", "/owner/dashboard", "dash"),
+    L("booking", "Monitoring Booking", "/owner/booking", "cal"),
+    P("transaksi", "Monitoring Transaksi", "eye", [
+      { label: "Transaksi Penyewaan", href: "/owner/transaksi/sewa" },
+      { label: "Transaksi Penjualan", href: "/owner/transaksi/jual" },
+    ]),
+    P("barang", "Data Barang", "box", [
+      { label: "Semua Barang", href: "/owner/barang" },
+      { label: "Kategori Barang", href: "/owner/kategori" },
+      { label: "Paket Penyewaan", href: "/owner/paket" },
+    ]),
+    L("stok", "Stok dan Ketersediaan", "/owner/stok", "stok"),
+    L("pelanggan", "Data Pelanggan", "/owner/pelanggan", "usr"),
+    L("pengeluaran", "Pengeluaran", "/owner/pengeluaran", "wal"),
+    P("laporan", "Laporan", "chart", [
+      { label: "Laporan Keuangan", href: "/owner/laporan/keuangan" },
+      { label: "Laporan Penyewaan", href: "/owner/laporan/penyewaan" },
+      { label: "Laporan Penjualan", href: "/owner/laporan/penjualan" },
+      { label: "Laporan Stok", href: "/owner/laporan/stok" },
+      { label: "Laporan Pelanggan", href: "/owner/laporan/pelanggan" },
+    ]),
+    L("riwayat", "Riwayat Aktivitas", "/owner/riwayat", "clk"),
+    P("pengguna", "Kelola Pengguna", "sh", [
+      { label: "Daftar Pengguna", href: "/owner/pengguna" },
+      { label: "Hak Akses", href: "/owner/hak-akses" },
+    ]),
+    L("profil", "Profil Akun", "/owner/profil", "me"),
   ],
 };
 
