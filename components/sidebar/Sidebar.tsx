@@ -111,12 +111,18 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <aside
-      className={`side ${isExpanded ? "expanded" : "collapsed"}`}
-      aria-label="Menu navigasi utama"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <>
+      {/* Spacer layout untuk fixed sidebar agar tidak menimpa konten utama secara dinamis */}
+      <div
+        className={`side-spacer ${isExpanded ? "expanded" : "collapsed"}`}
+        aria-hidden="true"
+      />
+      <aside
+        className={`side ${isExpanded ? "expanded" : "collapsed"}`}
+        aria-label="Menu navigasi utama"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
       {/* ── 1. Top Brand Logo & Title ── */}
       <div
         className="side-brand"
@@ -222,5 +228,6 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
         </button>
       </div>
     </aside>
+  </>
   );
 }

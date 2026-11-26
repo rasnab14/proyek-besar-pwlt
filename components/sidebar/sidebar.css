@@ -11,12 +11,13 @@
 
 /* ─── Base Sidebar Shell (Desktop & Tablet >= 768px) ─── */
 .side {
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
+  bottom: 0;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
   box-sizing: border-box;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 264 150'%3E%3Cpath d='M0 150V95l44-34 30 22 52-56 46 46 32-22 60 56v43Z' fill='white' fill-opacity='.04'/%3E%3Cpath d='M0 150V120l50-30 40 24 60-44 50 38 64-30v72Z' fill='white' fill-opacity='.05'/%3E%3Cpath d='M0 120l50-30 40 24 60-44 50 38 64-30' fill='none' stroke='%230EA5E9' stroke-opacity='.5' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat bottom/100% auto,
@@ -37,8 +38,33 @@
   will-change: width;
 }
 
+/* ─── Spacer for Fixed Sidebar in Flex Layout (Desktop & Tablet >= 768px) ─── */
+.side-spacer {
+  display: none;
+}
+
 /* ─── Desktop & Tablet Sizing (>= 768px) ─── */
 @media (min-width: 768px) {
+  .side-spacer {
+    display: block;
+    flex-shrink: 0;
+    height: 100dvh;
+    pointer-events: none;
+    visibility: hidden;
+    transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1), flex-basis 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width, flex-basis;
+  }
+
+  .side-spacer.collapsed {
+    width: 78px;
+    flex: 0 0 78px;
+  }
+
+  .side-spacer.expanded {
+    width: 300px;
+    flex: 0 0 300px;
+  }
+
   .side.collapsed {
     width: 78px;
     flex: 0 0 78px;
@@ -142,6 +168,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -461,6 +488,10 @@
    MOBILE & SMALL MOBILE (< 768px) — Strictly Preserved
    ========================================================================== */
 @media (max-width: 767px) {
+  .side-spacer {
+    display: none !important;
+  }
+
   .side {
     width: 100% !important;
     flex: 0 0 auto !important;
@@ -469,6 +500,8 @@
     max-height: none !important;
     position: sticky !important;
     top: 0 !important;
+    bottom: unset !important;
+    left: 0 !important;
     z-index: 50 !important;
     padding: 10px 14px 8px !important;
     background: #0D1117 !important;
