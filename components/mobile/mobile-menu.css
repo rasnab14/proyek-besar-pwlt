@@ -1,0 +1,112 @@
+/* ==========================================================================
+   components/mobile/mobile-menu.css
+   Dedicated Mobile Menu Full-Page Layout matching Fluxa Mobile Reference
+   ========================================================================== */
+
+.mob-menu-page {
+  flex: 1;
+  width: 100%;
+  min-height: calc(100dvh - 120px);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.mob-menu-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 24px;
+}
+
+/* ─── Top-level Menu Link Item ─── */
+.mob-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  text-decoration: none;
+  border-bottom: 1px solid #F1F5F9;
+  background: #ffffff;
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-menu-item:hover,
+.mob-menu-item:active {
+  background: #F8FAFC;
+}
+
+/* ─── Category Section Header (e.g. TRANSAKSI, DATA BARANG, LAPORAN) ─── */
+.mob-menu-category {
+  background: #F0F9FF;
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0284C7;
+  border-bottom: 1px solid #E0F2FE;
+  border-top: 1px solid #F1F5F9;
+  user-select: none;
+}
+
+/* ─── Submenu Child Link Item ─── */
+.mob-menu-subitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px 15px 44px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #1E293B;
+  text-decoration: none;
+  border-bottom: 1px solid #F8FAFC;
+  background: #ffffff;
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-menu-subitem:hover,
+.mob-menu-subitem:active {
+  background: #F8FAFC;
+}
+
+/* ─── Logout Button at bottom ─── */
+.mob-menu-logout {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  border: none;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #B91C1C;
+  cursor: pointer;
+  border-bottom: 1px solid #F1F5F9;
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+
+.mob-menu-logout:hover,
+.mob-menu-logout:active {
+  background: #FEF2F2;
+}
+
+/* ─── Desktop Fallback Container (>= 768px) ─── */
+@media (min-width: 768px) {
+  .mob-menu-page {
+    max-width: 580px;
+    margin: 32px auto;
+    border-radius: 14px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+}
