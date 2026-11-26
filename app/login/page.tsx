@@ -2,558 +2,315 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient, isSupabaseConfigured } from "@/utils/supabase/client";
+import "./login.css";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [autoFillBadge, setAutoFillBadge] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setSplashDone(true), 3550);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username || !password) {
-      setError(true);
+  // Handler auto-fill credential ketika tombol demo admin/owner diklik
+  const handleAutoFill = (role: "admin" | "owner") => {
+    setErrorMsg(null);
+    if (role === "admin") {
+      setUsername("admin@summit.local");
+      setPassword("admin12345");
+      setAutoFillBadge("Akun Admin otomatis terisi. Silakan klik tombol 'Masuk'");
     } else {
-      setError(false);
-      // TODO: integrate with Supabase auth
+      setUsername("owner@summit.local");
+      setPassword("owner12345");
+      setAutoFillBadge("Akun Owner otomatis terisi. Silakan klik tombol 'Masuk'");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+
+    const trimmedUser = username.trim();
+    if (!trimmedUser || !password) {
+      setErrorMsg("Username/email dan password wajib diisi.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // 1. Cek apakah koneksi Supabase telah terkonfigurasi di .env.local
+      if (isSupabaseConfigured()) {
+        const supabase = createClient();
+        if (supabase) {
+          const { data: authData, error: authError } =
+            await supabase.auth.signInWithPassword({
+              email: trimmedUser,
+              password: password,
+            });
+
+          if (authError) {
+            setErrorMsg(
+              authError.message === "Invalid login credentials"
+                ? "Email atau password yang kamu masukkan salah. Silakan periksa kembali."
+                : authError.message
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          if (authData.user) {
+            // Ambil role dari tabel public.profil
+            const { data: profile } = await supabase
+              .from("profil")
+              .select("role")
+              .eq("id", authData.user.id)
+              .maybeSingle();
+
+            const role = profile?.role || (trimmedUser.includes("owner") ? "owner" : "admin");
+
+            if (role === "owner") {
+              router.push("/owner/dashboard");
+            } else {
+              router.push("/admin/dashboard");
+            }
+            return;
+          }
+        }
+      }
+
+      // 2. Fallback mode (jika Supabase belum dihubungkan / offline testing)
+      await new Promise((res) => setTimeout(res, 400));
+      if (trimmedUser.toLowerCase().includes("owner")) {
+        router.push("/owner/dashboard");
+      } else {
+        router.push("/admin/dashboard");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat masuk.";
+      setErrorMsg(msg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      {/* Preload background image so splash starts with no flicker */}
-      <link rel="preload" as="image" href="/login-bg.jpg" />
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-900 font-sans">
+      {/* ── Background Photo (Cover) ── */}
+      <div className="fixed inset-0 z-0">
+        <Image
+          src="/login-bg.jpg"
+          alt="19 Summit Mountain Background"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      </div>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      {/* ── Dark Translucent Overlay ── */}
+      <div className="fixed inset-0 z-10 bg-slate-950/65 backdrop-blur-[1px]" />
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-          --k:      #0A0A0A;
-          --w:      #ffffff;
-          --night:  #0D1117;
-          --n50:    #FAFAFA;
-          --n100:   #F2F2F2;
-          --n400:   #A3A3A3;
-          --n600:   #525252;
-          --n800:   #262626;
-          --acc:    #0EA5E9;
-          --acc-h:  #0284C7;
-          --acc-s:  #E0F2FE;
-          --acc-t:  #0369A1;
-          --line:   #E5E5E5;
-          --ctl:    #D4D4D4;
-          --sh:     0 2px 4px rgba(10,10,10,.06);
-        }
-
-        /* ─── Root container — sets the shared bg-image variable ─── */
-        .login-root {
-          --login-bg-image: url('/login-bg.jpg');
-          position: relative;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          font-family: Inter, system-ui, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          overflow: hidden;
-        }
-
-        /* Photo background (page) */
-        .login-bg {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-        }
-
-        /* Dark overlay so card is readable */
-        .login-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 1;
-          background: rgba(8, 10, 18, 0.62);
-        }
-
-
-
-        /* ─── Login card ─── */
-        .login-card {
-          position: relative;
-          z-index: 10;
-          width: 100%;
-          max-width: 360px;
-          margin: 24px 16px;
-          background: #ffffff;
-          border-radius: 16px;
-          padding: 32px 28px 26px;
-          box-shadow: 0 20px 50px rgba(0,0,0,.42), 0 4px 14px rgba(0,0,0,.18);
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          animation: cardIn .7s 2.75s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-
-        /* ─── Card header (logo + brand) ─── */
-        .card-brand {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          animation: rise .6s 2.78s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-
-        .card-logo-ring {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: var(--k);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0,0,0,.30);
-        }
-
-        .card-brand-name {
-          font-weight: 700;
-          font-size: 14px;
-          letter-spacing: .18em;
-          color: var(--k);
-        }
-
-        .card-brand-sub {
-          font-size: 10.5px;
-          letter-spacing: .12em;
-          color: var(--n600);
-          text-transform: uppercase;
-          margin-top: -4px;
-        }
-
-        /* ─── Card title ─── */
-        .card-title {
-          text-align: center;
-          animation: rise .6s 2.84s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-
-        .card-title h1 {
-          font-size: 22px;
-          font-weight: 700;
-          letter-spacing: -.025em;
-          color: var(--k);
-        }
-
-        .card-title p {
-          font-size: 12.5px;
-          color: var(--n600);
-          margin-top: 4px;
-          line-height: 1.5;
-        }
-
-        /* ─── Form fields ─── */
-        .fc-field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          animation: rise .6s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-        .fc-field:nth-child(1) { animation-delay: 2.90s; }
-        .fc-field:nth-child(2) { animation-delay: 2.97s; }
-
-        .fc-field label {
-          font-size: 12.5px;
-          font-weight: 600;
-          color: var(--k);
-        }
-
-        .inp {
-          height: 40px;
-          width: 100%;
-          border: 1px solid var(--ctl);
-          border-radius: 9px;
-          padding: 0 12px;
-          font: 400 13.5px Inter, system-ui, sans-serif;
-          color: var(--k);
-          background: #fff;
-          outline: none;
-          transition: border-color .15s, box-shadow .15s;
-        }
-        .inp::placeholder { color: #A3A3A3; }
-        .inp:focus {
-          border-color: var(--acc-h);
-          box-shadow: 0 0 0 3px var(--acc-s);
-        }
-
-        /* Password wrapper */
-        .pw-wrap { position: relative; }
-        .pw-wrap .inp { padding-right: 68px; }
-        .pw-toggle {
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          border: 0;
-          background: none;
-          font: 600 12.5px Inter, system-ui, sans-serif;
-          color: var(--acc-t);
-          cursor: pointer;
-          padding: 4px 8px;
-        }
-        .pw-toggle:hover { text-decoration: underline; }
-
-        /* ─── Error note ─── */
-        .err-note {
-          padding: 11px 14px;
-          border-radius: 10px;
-          border-left: 3px solid #DC2626;
-          font-size: 13px;
-          line-height: 1.5;
-          background: #FDE7E7;
-          color: #991B1B;
-          animation: rise .4s cubic-bezier(.2,.7,.2,1) both;
-        }
-
-        /* ─── Buttons ─── */
-        .btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 40px;
-          width: 100%;
-          border-radius: 9px;
-          font: 600 13.5px Inter, system-ui, sans-serif;
-          cursor: pointer;
-          transition: background .15s, border-color .15s, transform .12s, box-shadow .2s;
-          text-decoration: none;
-        }
-        .btn:hover  { transform: translateY(-1px); }
-        .btn:active { transform: translateY(0) scale(.97); }
-
-        .btn-pri {
-          background: var(--k);
-          color: #fff;
-          border: 1px solid var(--k);
-          box-shadow: 0 4px 14px rgba(0,0,0,.28);
-          animation: rise .6s 3.04s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-        .btn-pri:hover { background: var(--n800); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
-
-        .btn-sec {
-          background: #fff;
-          color: var(--k);
-          border: 1px solid var(--ctl);
-          box-shadow: var(--sh);
-          animation: rise .6s 3.11s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-        .btn-sec:hover { background: var(--n50); border-color: #A3A3A3; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-
-        /* ─── Footer note ─── */
-        .card-note {
-          font-size: 11.5px;
-          color: var(--n600);
-          text-align: center;
-          line-height: 1.6;
-          animation: rise .6s 3.18s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-
-        /* ══════════════════════════════════════════
-           SPLASH SCREEN
-           ══════════════════════════════════════════ */
-        .splash {
-          position: fixed;
-          inset: 0;
-          z-index: 100;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 20px;
-          color: #fff;
-          pointer-events: none;
-          overflow: hidden;
-          /* Fade out instead of slide up */
-          animation: splashOut .9s 2.6s ease-out forwards;
-        }
-
-        /* ── Foto latar splash (sama persis dengan halaman) ── */
-        .sp-photo {
-          position: absolute;
-          inset: -4%;
-          background: var(--login-bg-image) center / cover no-repeat;
-          animation: photoIn 1.2s backwards, kenb 4.2s cubic-bezier(.2,.6,.2,1) forwards;
-        }
-
-        /* ── Overlay gelap + vignette ── */
-        .sp-shade {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(520px 380px at 50% 42%, rgba(13,17,23,.78), rgba(13,17,23,.35) 70%),
-            linear-gradient(180deg, rgba(13,17,23,.55), rgba(13,17,23,.80));
-        }
-
-        /* ── Bintang dekoratif ringan ── */
-        .sp-stars {
-          position: absolute;
-          inset: 0;
-          background-image:
-            radial-gradient(1px 1px at 15%  22%, rgba(255,255,255,.65) 0%, transparent 100%),
-            radial-gradient(1px 1px at 73%  10%, rgba(255,255,255,.55) 0%, transparent 100%),
-            radial-gradient(1px 1px at 42%  38%, rgba(255,255,255,.45) 0%, transparent 100%),
-            radial-gradient(1px 1px at 88%  30%, rgba(255,255,255,.60) 0%, transparent 100%),
-            radial-gradient(1px 1px at 60%  18%, rgba(255,255,255,.50) 0%, transparent 100%),
-            radial-gradient(1px 1px at 28%  55%, rgba(255,255,255,.35) 0%, transparent 100%),
-            radial-gradient(1px 1px at 80%  65%, rgba(255,255,255,.40) 0%, transparent 100%);
-          animation: fadein 1.4s .5s backwards;
-          pointer-events: none;
-        }
-
-        /* ── Konten splash (di atas foto) — z-index:2 ── */
-        .sp-logo {
-          position: relative;
-          z-index: 2;
-          width: 108px; height: 108px;
-          display: flex; align-items: center; justify-content: center;
-          animation: logoIn .9s .1s cubic-bezier(.2,.9,.3,1.25) backwards;
-        }
-        .sp-img-wrap {
-          width: 84px; height: 84px;
-          border-radius: 50%;
-          background: #fff;
-          display: flex; align-items: center; justify-content: center;
-          overflow: hidden;
-          animation: fillIn .7s .55s cubic-bezier(.2,.9,.3,1.25) backwards;
-        }
-        .sp-ring {
-          position: absolute; inset: 0;
-          width: 100%; height: 100%;
-          transform: rotate(-90deg);
-        }
-        .sp-ring circle {
-          stroke-dasharray: 352; stroke-dashoffset: 352;
-          animation: ringDraw 1.3s .3s cubic-bezier(.4,0,.2,1) forwards;
-        }
-        .sp-word {
-          position: relative; z-index: 2;
-          font-weight: 700; font-size: 24px;
-          letter-spacing: .3em; margin-right: -.3em;
-          animation: wordIn 1.3s .8s cubic-bezier(.2,.7,.2,1) backwards;
-        }
-        .sp-sub {
-          position: relative; z-index: 2;
-          font-size: 12px; color: rgba(255,255,255,.7);
-          letter-spacing: .14em; text-transform: uppercase;
-          animation: fadein .8s 1.5s backwards;
-        }
-        .sp-load {
-          position: relative; z-index: 2;
-          width: 132px; height: 3px; border-radius: 2px;
-          background: rgba(255,255,255,.18); overflow: hidden; margin-top: 8px;
-          animation: fadein .5s 1.1s backwards;
-        }
-        .sp-load::after {
-          content: ""; display: block; height: 100%;
-          background: #0EA5E9; border-radius: 2px; transform-origin: left;
-          animation: growx 1.5s 1.1s cubic-bezier(.4,0,.2,1) backwards;
-        }
-
-        /* ─── Keyframes ─── */
-        @keyframes rise {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: none; }
-        }
-        @keyframes cardIn {
-          from { opacity: 0; transform: translateY(28px) scale(.96); }
-          to   { opacity: 1; transform: none; }
-        }
-        @keyframes fadein  { from { opacity: 0; }              to { opacity: 1; } }
-        @keyframes growx   { from { transform: scaleX(0); }    to { transform: scaleX(1); } }
-
-        @keyframes logoIn {
-          from { opacity: 0; transform: scale(.3) rotate(-120deg); }
-          to   { opacity: 1; transform: none; }
-        }
-        @keyframes fillIn    { from { transform: scale(0); } to { transform: none; } }
-        @keyframes ringDraw  { to { stroke-dashoffset: 0; } }
-        @keyframes wordIn {
-          from { opacity: 0; letter-spacing: .9em; }
-          to   { opacity: 1; letter-spacing: .3em; }
-        }
-        @keyframes wave {
-          0%   { opacity: .7; transform: translate(-50%,-50%) scale(.4); }
-          100% { opacity: 0;  transform: translate(-50%,-50%) scale(1.5); }
-        }
-
-        /* Foto splash: fade in */
-        @keyframes photoIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Ken Burns: zoom out halus (mulai besar → normal) */
-        @keyframes kenb {
-          from { transform: scale(1.18); }
-          to   { transform: scale(1); }
-        }
-
-        /* splashOut → fade (bukan slide) untuk transisi mulus ke foto yang sama */
-        @keyframes splashOut {
-          0%   { opacity: 1; }
-          100% { opacity: 0; visibility: hidden; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation: none !important; transition: none !important; }
-        }
-        @media (max-width: 480px) {
-          .login-card { padding: 26px 18px 22px; margin: 12px 10px; }
-        }
-      `}</style>
-
-      {/* ══ Root — defines --login-bg-image ══ */}
-      <div className="login-root">
-
-        {/* ── Background photo (halaman) — same image as splash ── */}
-        <div className="login-bg">
-          <Image
-            src="/login-bg.jpg"
-            alt=""
-            fill
-            priority
-            style={{ objectFit: "cover", objectPosition: "center" }}
-          />
-        </div>
-
-        {/* ── Dark overlay ── */}
-        <div className="login-overlay" />
-
-
-
-        {/* ══ Splash screen ══ */}
-        <div className="splash">
-          {/* Foto latar — sama dengan halaman */}
+      {/* ── Splash Screen (Disappears after 3.5s) ── */}
+      {!splashDone && (
+        <div className="splash-screen">
           <div className="sp-photo" />
-          {/* Overlay gelap */}
           <div className="sp-shade" />
-          {/* Bintang dekoratif */}
           <div className="sp-stars" />
 
-          {/* Konten (z-index:2 via CSS) */}
           <div className="sp-logo">
-            <svg className="sp-ring" viewBox="0 0 120 120">
+            <svg className="sp-ring" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="56" fill="none" stroke="#0EA5E9" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
-            <div className="sp-img-wrap">
+            <div className="sp-img-wrap shadow-lg">
               <Image
                 src="/logo-19summit.jpg"
                 alt="19 Summit"
                 width={72}
                 height={72}
                 priority
-                style={{ objectFit: "contain" }}
+                className="object-contain"
               />
             </div>
           </div>
-          <div className="sp-word">19 SUMMIT</div>
-          <div className="sp-sub">Rental &amp; Store</div>
+          <div className="sp-word mt-2">19 SUMMIT</div>
+          <div className="sp-sub mt-1">Rental &amp; Store</div>
           <div className="sp-load" />
         </div>
+      )}
 
-        {/* ══ Login card ══ */}
-        <div className="login-card">
-
-          {/* Brand / logo */}
-          <div className="card-brand">
-            <div className="card-logo-ring">
-              <Image
-                src="/logo-19summit.jpg"
-                alt="19 Summit Logo"
-                width={38}
-                height={38}
-                style={{ objectFit: "contain", filter: "invert(1)" }}
-              />
-            </div>
-            <div className="card-brand-name">19 SUMMIT</div>
-            <div className="card-brand-sub">Rental &amp; Store</div>
+      {/* ── Login Card (Tailwind CSS) ── */}
+      <main className="relative z-20 w-full max-w-[390px] mx-4 my-6 bg-white rounded-2xl p-7 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-4 login-card-anim">
+        {/* Brand / Logo */}
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center shadow-md">
+            <Image
+              src="/logo-19summit.jpg"
+              alt="19 Summit Logo"
+              width={36}
+              height={36}
+              className="object-contain invert"
+            />
           </div>
-
-          {/* Title */}
-          <div className="card-title">
-            <h1>Masuk</h1>
-            <p>Gunakan akun yang diberikan oleh Owner.</p>
+          <div className="text-slate-950 font-bold text-base tracking-[0.2em] -mr-[0.2em]">
+            19 SUMMIT
           </div>
+          <div className="text-[11px] font-semibold text-slate-500 tracking-wider uppercase">
+            Rental &amp; Store
+          </div>
+        </div>
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            {/* Username */}
-            <div className="fc-field">
-              <label htmlFor="username">Username atau email</label>
-              <input
-                className="inp"
-                id="username"
-                type="text"
-                placeholder="contoh: admin01"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => { setUsername(e.target.value); setError(false); }}
-              />
-            </div>
-
-            {/* Password */}
-            <div className="fc-field">
-              <label htmlFor="password">Password</label>
-              <div className="pw-wrap">
-                <input
-                  className="inp"
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setError(false); }}
-                />
-                <button
-                  type="button"
-                  className="pw-toggle"
-                  aria-label="Tampilkan password"
-                  onClick={() => setShowPassword((v) => !v)}
-                >
-                  {showPassword ? "Sembunyikan" : "Lihat"}
-                </button>
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="err-note" role="alert">
-                Username atau password tidak sesuai. Periksa kembali data Anda.
-              </div>
-            )}
-
-            {/* Buttons */}
-            <button type="submit" className="btn btn-pri" style={{ marginTop: "4px" }}>
-              Masuk sebagai Admin
-            </button>
-
-            <button type="button" className="btn btn-sec">
-              Masuk sebagai Owner
-            </button>
-          </form>
-
-          {/* Footer note */}
-          <p className="card-note">
-            Sistem membedakan menu berdasarkan peran akun.{" "}
-            Lupa password? Hubungi Owner untuk pengaturan ulang.
+        {/* Card Title */}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Masuk</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Gunakan akun yang telah terdaftar di sistem.
           </p>
         </div>
-      </div>
-    </>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5 mt-1">
+          {/* Username Field */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="username" className="text-xs font-semibold text-slate-800">
+              Email atau Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              placeholder="contoh: admin@summit.local"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setErrorMsg(null);
+                setAutoFillBadge(null);
+              }}
+              className="h-10 w-full px-3.5 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 transition-all duration-150"
+            />
+          </div>
+
+          {/* Password Field */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="password" className="text-xs font-semibold text-slate-800">
+                Password
+              </label>
+            </div>
+            <div className="relative flex items-center">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrorMsg(null);
+                  setAutoFillBadge(null);
+                }}
+                className="h-10 w-full pl-3.5 pr-20 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 transition-all duration-150"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2 text-xs font-semibold text-slate-500 hover:text-slate-900 px-2 py-1 rounded transition-colors cursor-pointer"
+                aria-label="Tampilkan password"
+              >
+                {showPassword ? "Sembunyikan" : "Lihat"}
+              </button>
+            </div>
+          </div>
+
+          {/* Feedback Info / Autofill Note */}
+          {autoFillBadge && !errorMsg && (
+            <div className="p-2.5 rounded-lg border border-sky-200 bg-sky-50 text-sky-800 text-[11px] font-medium leading-relaxed flex items-center gap-1.5 animate-fadeIn">
+              <span className="text-sky-600 font-bold">✓</span>
+              <span>{autoFillBadge}</span>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {errorMsg && (
+            <div
+              className="p-3 rounded-lg border-l-4 border-red-500 bg-red-50 text-red-700 text-xs font-medium leading-relaxed"
+              role="alert"
+            >
+              {errorMsg}
+            </div>
+          )}
+
+          {/* Primary Submit Button: Masuk */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="mt-1 h-10 w-full rounded-lg bg-sky-600 hover:bg-sky-500 active:scale-[0.98] text-white text-sm font-semibold shadow-sm transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                <span>Memproses Masuk...</span>
+              </>
+            ) : (
+              <span>Masuk</span>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-200" />
+            <span className="flex-shrink mx-3 text-[11px] font-medium text-slate-400">
+              Pilihan Cepat Masuk
+            </span>
+            <div className="flex-grow border-t border-slate-200" />
+          </div>
+
+          {/* Quick-Fill Shortcut Buttons (Admin & Owner) */}
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => handleAutoFill("admin")}
+              className="h-9 w-full rounded-lg bg-slate-950 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-semibold shadow-sm transition-all duration-150 flex items-center justify-between px-3.5 cursor-pointer group"
+              title="Klik untuk otomatis mengisi username & password Admin"
+            >
+              <span>Masuk sebagai Admin</span>
+              <span className="text-[10px] text-slate-400 group-hover:text-slate-200 font-normal">
+                Isi otomatis ↵
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAutoFill("owner")}
+              className="h-9 w-full rounded-lg bg-white hover:bg-slate-50 active:scale-[0.98] border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold shadow-sm transition-all duration-150 flex items-center justify-between px-3.5 cursor-pointer group"
+              title="Klik untuk otomatis mengisi username & password Owner"
+            >
+              <span>Masuk sebagai Owner</span>
+              <span className="text-[10px] text-slate-500 group-hover:text-slate-700 font-normal">
+                Isi otomatis ↵
+              </span>
+            </button>
+          </div>
+        </form>
+
+        {/* Footer Note */}
+        <p className="text-[11px] text-slate-500 text-center leading-relaxed mt-0.5">
+          Sistem membedakan menu berdasarkan peran akun.{" "}
+          <span className="text-slate-600 font-medium">Lupa password?</span> Hubungi Owner untuk pengaturan ulang.
+        </p>
+      </main>
+    </div>
   );
 }
+

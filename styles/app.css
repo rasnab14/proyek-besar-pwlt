@@ -1,0 +1,774 @@
+/* ==========================================================================
+   Summit Rental & Store (19 Summit Adventure) — Design System & Tokens
+   Strict adherence to docs/ATURAN-STYLING.md
+   ========================================================================== */
+
+/* ─── 1. Design Tokens (:root) ─── */
+:root {
+  /* Warna Struktur & Netral */
+  --k: #0A0A0A;
+  --w: #ffffff;
+  --night: #0D1117;
+  --n50: #FAFAFA;
+  --n100: #F2F2F2;
+  --n200: #E5E5E5;
+  --n400: #A3A3A3;
+  --n600: #525252;
+  --n800: #262626;
+  --n900: #141414;
+
+  /* Biru Aksi & Identitas */
+  --acc: #0EA5E9;
+  --acc-h: #0284C7;
+  --acc-s: #E0F2FE;
+  --acc-t: #0369A1;
+  --sky2: #BAE6FD;
+
+  /* Latar & Garis */
+  --bg: #F3F8FB;
+  --line: #E7E7E7;
+  --ctl: #949494;
+
+  /* Status Pastel */
+  --grn-s: #DCFCE7;
+  --amb-s: #FEF3C7;
+
+  /* Status Warna Tegas */
+  --st-ok: #16A34A;
+  --st-ok-bg: #E6F6EC;
+  --st-ok-t: #166534;
+
+  --st-wn: #F59E0B;
+  --st-wn-bg: #FEF3D2;
+  --st-wn-t: #92400E;
+
+  --st-er: #DC2626;
+  --st-er-bg: #FDE7E7;
+  --st-er-t: #991B1B;
+
+  --st-in-t: #075985;
+  --st-nu-t: #404040;
+
+  /* Bayangan Standar */
+  --sh: 0 1px 2px rgba(10, 10, 10, 0.05), 0 1px 1px rgba(10, 10, 10, 0.03);
+  --sh-tab: 0 1px 3px rgba(10, 10, 10, 0.12);
+  --sh-modal: 0 24px 60px rgba(10, 10, 10, 0.35);
+
+  /* Radius Standar */
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-card: 14px;
+  --r-modal: 16px;
+  --r-hero: 20px;
+  --r-pill: 9999px;
+
+  /* Kurva Animasi */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ─── 2. Base & Typography ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(14, 165, 233, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--k);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Angka selalu tabular-nums untuk KPI dan tabel */
+.kv, .kl, .tbl td, .kpi-value, .stat-value, .rekap-val, .ranking-metric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── 3. Layout Kontainer Halaman ─── */
+.main, .main-content {
+  flex: 999 1 640px;
+  min-width: 0;
+  padding: 32px 40px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* Header Standar */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.head .acts {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.crumb {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--n600);
+  margin-bottom: 4px;
+}
+
+h1, .h1 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--k);
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--n600);
+  margin-top: 4px;
+}
+
+/* ─── 4. Grid System (Repeat minmax untuk cegah overflow) ─── */
+.g2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.g3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.g4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.g6 {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Utama + Samping (3fr 2fr) */
+.g32 {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+}
+
+.span2 {
+  grid-column: span 2;
+}
+
+/* ─── 5. Komponen: Tombol (.btn) ─── */
+.btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid #D4D4D4;
+  background: var(--w);
+  color: var(--k);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--sh);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.btn:hover {
+  background: var(--n50);
+  border-color: var(--ctl);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Varian Utama (Pri - 1 per area) */
+.btn.pri, .btn-pri {
+  background: var(--k);
+  color: var(--w);
+  border-color: var(--k);
+}
+
+.btn.pri:hover, .btn-pri:hover {
+  background: var(--n800);
+  border-color: var(--n800);
+}
+
+/* Varian Aksen Biru */
+.btn.acc, .btn-acc {
+  background: var(--acc);
+  color: var(--k);
+  border-color: var(--acc);
+}
+
+.btn.acc:hover, .btn-acc:hover {
+  background: #38BDF8;
+  border-color: #38BDF8;
+}
+
+/* Varian Bahaya / Hapus */
+.btn.dng, .btn-dng {
+  background: var(--w);
+  color: var(--st-er-t);
+  border-color: #FCA5A5;
+}
+
+.btn.dng:hover, .btn-dng:hover {
+  background: #FEF2F2;
+}
+
+/* Varian Kecil (Tabel / Baris) */
+.btn.sm, .btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: var(--r-sm);
+}
+
+/* Pill Link Button (Semua, Lihat Stok) */
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: var(--r-pill);
+  background: var(--acc-s);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: var(--acc-t);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s var(--ease);
+}
+
+.pill-link:hover {
+  background: #BAE6FD;
+  border-color: #7DD3FC;
+  transform: translateY(-1px);
+}
+
+/* Fokus Terlihat Standar Aksesibilitas (§5) */
+.btn:focus-visible, a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--acc-h);
+  outline-offset: 2px;
+}
+
+/* Disabled State */
+.btn:disabled, .btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── 6. Komponen: Input (.i) & Form (.fg) ─── */
+.i {
+  height: 42px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--ctl);
+  padding: 0 14px;
+  font-size: 14px;
+  background: var(--w);
+  color: var(--k);
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.i:focus {
+  outline: 0;
+  border-color: var(--acc-h);
+  box-shadow: 0 0 0 3px var(--acc-s);
+}
+
+textarea.i {
+  height: 92px;
+  padding: 11px 14px;
+  resize: vertical;
+}
+
+.lb {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--k);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.fg {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+}
+
+.fg3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 22px;
+}
+
+/* ─── 7. Komponen: Kartu (.card) ─── */
+.card, .content-card {
+  background: var(--w);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--sh);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card .ch, .card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card .ct, .card-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--k);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card .cs, .card-subtitle {
+  font-size: 12px;
+  color: var(--n600);
+  margin: 0;
+}
+
+.card .pad, .card-pad {
+  padding: 22px;
+}
+
+.card .pg {
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--n600);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ─── 8. Komponen: KPI Card (.kpi) ─── */
+.kpi {
+  background: var(--w);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--sh);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kpi .kl {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--n600);
+  margin-bottom: 8px;
+}
+
+.kpi .kv {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--k);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.kpi .kn {
+  font-size: 12px;
+  color: var(--n600);
+}
+
+/* KPI Dark Varian */
+.kpi.dark, .kpi-dark {
+  background: var(--night);
+  color: var(--w);
+  border-color: #1F2937;
+}
+
+.kpi.dark .kl, .kpi.dark .kn {
+  color: #94A3B8;
+}
+
+.kpi.dark .kv {
+  color: var(--w);
+}
+
+.kpi.dark::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--acc);
+}
+
+/* ─── 9. Komponen: Status Badge (.b) ─── */
+.b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.b::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.b.ok {
+  background: var(--st-ok-bg);
+  color: var(--st-ok-t);
+}
+
+.b.wn {
+  background: var(--st-wn-bg);
+  color: var(--st-wn-t);
+}
+
+.b.er {
+  background: var(--st-er-bg);
+  color: var(--st-er-t);
+}
+
+.b.in {
+  background: var(--acc-s);
+  color: var(--st-in-t);
+}
+
+.b.nu {
+  background: var(--n100);
+  color: var(--st-nu-t);
+}
+
+/* ─── 10. Komponen: Tabel (.tbl) ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-card);
+}
+
+.tbl {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tbl th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--n600);
+  background: var(--n50);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 16px;
+}
+
+.tbl td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--n100);
+  vertical-align: middle;
+  font-size: 13.5px;
+}
+
+.tbl tr:hover td {
+  background: var(--n50);
+}
+
+.tbl .tar {
+  text-align: right;
+}
+
+/* ─── 11. Komponen: Tab (.tabs) & Segmen (.seg) ─── */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--n100);
+  border-radius: var(--r-lg);
+  width: fit-content;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--n600);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s var(--ease);
+}
+
+.tab:hover {
+  color: var(--k);
+}
+
+.tab.on {
+  background: var(--w);
+  color: var(--k);
+  box-shadow: var(--sh-tab);
+}
+
+.seg {
+  padding: 3px;
+  background: var(--n100);
+  border-radius: var(--r-md);
+  display: inline-flex;
+  gap: 2px;
+}
+
+/* ─── 12. Komponen: Catatan (.note) ─── */
+.note {
+  display: flex;
+  gap: 10px;
+  padding: 13px 16px;
+  border-radius: var(--r-md);
+  border-left: 3px solid var(--acc);
+  background: var(--acc-s);
+  color: var(--st-in-t);
+  font-size: 13px;
+}
+
+.note.ok {
+  border-left-color: var(--st-ok);
+  background: var(--st-ok-bg);
+  color: var(--st-ok-t);
+}
+
+.note.wn {
+  border-left-color: var(--st-wn);
+  background: var(--st-wn-bg);
+  color: var(--st-wn-t);
+}
+
+.note.er {
+  border-left-color: var(--st-er);
+  background: var(--st-er-bg);
+  color: var(--st-er-t);
+}
+
+/* ─── 13. Komponen: Modal (.modal) ─── */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  z-index: 999;
+  animation: fadein 0.3s var(--ease);
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  background: var(--w);
+  border-radius: var(--r-modal);
+  box-shadow: var(--sh-modal);
+  overflow: hidden;
+  animation: pop 0.35s var(--ease);
+}
+
+/* ─── 14. Hero Dashboard (.head-hero) ─── */
+.head-hero {
+  background-color: var(--night);
+  background-image: radial-gradient(520px 260px at 100% 0, rgba(14, 165, 233, 0.38), transparent 65%);
+  border-radius: var(--r-hero);
+  padding: 30px 34px;
+  color: var(--w);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 25px rgba(13, 17, 23, 0.2);
+}
+
+.hero-left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hero-badge {
+  display: inline-block;
+  width: fit-content;
+  background: rgba(14, 165, 233, 0.2);
+  color: #7DD3FC;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--w);
+  margin: 0;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hero-ridge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── 15. Keyframe Animations (§6) ─── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes growy {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes growx {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes tick {
+  from { width: 0; }
+  to { width: 28px; }
+}
+
+@keyframes ping {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* Stagger animations for cards */
+.head-hero { animation: rise 0.5s var(--ease) both; }
+.g4 > *:nth-child(1) { animation: rise 0.5s 0.05s var(--ease) both; }
+.g4 > *:nth-child(2) { animation: rise 0.5s 0.10s var(--ease) both; }
+.g4 > *:nth-child(3) { animation: rise 0.5s 0.15s var(--ease) both; }
+.g4 > *:nth-child(4) { animation: rise 0.5s 0.20s var(--ease) both; }
+.g2 > *:nth-child(1) { animation: rise 0.55s 0.15s var(--ease) both; }
+.g2 > *:nth-child(2) { animation: rise 0.55s 0.22s var(--ease) both; }
+
+/* ─── 16. Accessibility: Reduced Motion Mandate (§6 & §7) ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ─── 17. Responsif Mobile / Tablet (§3) ─── */
+@media (max-width: 760px) {
+  .main, .main-content {
+    padding: 20px 16px 40px;
+  }
+  .g2, .g3, .g4, .g32, .g6, .fg, .fg3 {
+    grid-template-columns: 1fr;
+  }
+  .span2 {
+    grid-column: auto;
+  }
+}
