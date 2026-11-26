@@ -945,180 +945,320 @@
 
   /* Hero Section */
   .head-hero {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 18px 16px;
-    gap: 14px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 18px 20px 20px !important;
+    border-radius: 16px !important;
+    gap: 14px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background-color: #0D1117 !important;
+    background-image: radial-gradient(360px 160px at 100% 0, rgba(14, 165, 233, 0.3), transparent 70%) !important;
   }
   .hero-left {
-    width: 100%;
+    width: 100% !important;
+    gap: 2px !important;
+  }
+  .hero-badge, .hero-actions {
+    display: none !important;
   }
   .hero-title {
-    font-size: 22px;
-    line-height: 1.2;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
   }
   .hero-sub {
-    font-size: 13px;
-  }
-  .hero-actions {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .btn-hero-sec, .btn-hero-pri {
-    flex: 1 1 auto;
-    min-width: 120px;
-    height: 38px;
-    font-size: 12.5px;
+    font-size: 11.5px !important;
+    color: #94A3B8 !important;
+    margin-top: 4px !important;
   }
   .hero-ridge {
-    display: none;
+    display: block !important;
+    position: absolute !important;
+    right: -10px !important;
+    bottom: 0 !important;
+    width: 140px !important;
+    height: 70px !important;
+    opacity: 0.9 !important;
   }
 
-  /* KPI Grid */
+  /* ─── KPI Grid (Strictly 2 Columns on Mobile) ─── */
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
   .kpi-card {
-    padding: 14px 14px;
-    min-height: 90px;
+    padding: 14px 14px 12px !important;
+    min-height: 84px !important;
+    border-radius: 14px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #E2E8F0 !important;
   }
-  .kpi-value {
-    font-size: 20px;
+  .kpi-top {
+    margin-bottom: 2px !important;
   }
   .kpi-label {
-    font-size: 11.5px;
-  }
-  .kpi-pill {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
-
-  /* Two Column Sections */
-  .two-col-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  /* Card and Tables */
-  .dashboard-card {
-    border-radius: 12px;
-  }
-  .card-header {
-    padding: 14px 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .card-body {
-    padding: 16px 14px;
-  }
-  .table-wrap {
-    margin: 0 -14px;
-    padding: 0 14px;
-    border-radius: 0;
-  }
-  .table-custom {
-    min-width: 580px;
-  }
-  .table-custom th, .table-custom td {
-    padding: 10px 12px;
-    font-size: 12.5px;
-    white-space: nowrap;
-  }
-
-  /* Stock Status Section */
-  .stok-body {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-  .stok-circle-wrap {
-    margin: 0 auto;
-  }
-  .stok-stats-grid {
-    width: 100%;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  /* Modals */
-  .modal-overlay {
-    padding: 14px;
-  }
-  .modal-card {
-    border-radius: 12px;
-    max-height: calc(100vh - 28px);
-  }
-  .modal-header {
-    padding: 16px;
-  }
-  .modal-body {
-    padding: 16px;
-    gap: 12px;
-  }
-  .modal-footer {
-    padding: 12px 16px;
-    flex-wrap: wrap;
-  }
-  .modal-footer button {
-    flex: 1 1 auto;
-  }
-}
-
-/* Small Mobile (< 480px) */
-@media (max-width: 479px) {
-  .main-content {
-    padding: 12px 10px 24px;
-    gap: 12px;
-  }
-  .head-hero {
-    padding: 14px 12px;
-    border-radius: 12px;
-  }
-  .hero-title {
-    font-size: 19px;
-  }
-  .hero-badge {
-    font-size: 9.5px;
-    padding: 2px 8px;
-  }
-
-  /* 1-Column KPI on small screens to guarantee no truncation */
-  .kpi-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .kpi-card {
-    padding: 12px 14px;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    position: relative !important;
+    z-index: 2 !important;
   }
   .kpi-value {
-    font-size: 22px;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    margin: 4px 0 0 !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+  .kpi-icon-wrap, .kpi-desc, .kpi-bottom-row {
+    display: none !important;
   }
 
+  /* Card 1: Booking diproses (Dark navy gradient card) */
+  .kpi-card.kpi-dark {
+    background: linear-gradient(135deg, #0D1522 0%, #111E30 100%) !important;
+    border: 1px solid rgba(14, 165, 233, 0.22) !important;
+  }
+  .kpi-card.kpi-dark::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 14px;
+    width: 38px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: #0EA5E9;
+  }
+  .kpi-card.kpi-dark .kpi-label {
+    color: #94A3B8 !important;
+  }
+  .kpi-card.kpi-dark .kpi-value {
+    color: #ffffff !important;
+  }
+
+  /* Card 2: Pengambilan (Soft green quarter circle) */
+  .kpi-card:nth-child(2)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 0 14px 0 44px;
+    background: #DCFCE7;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Card 3: Pengembalian (Soft amber quarter circle) */
+  .kpi-card:nth-child(3)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 0 14px 0 44px;
+    background: #FEF3C7;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Card 4: Terlambat (Soft sky-blue quarter circle) */
+  .kpi-card:nth-child(4)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 0 14px 0 44px;
+    background: #BAE6FD;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* ─── Stock Status Section (Horizontal Scroll Chips) ─── */
+  .stok-body {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+  .donut-container {
+    display: none !important;
+  }
   .stok-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 6px;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 8px !important;
+    padding: 4px 2px 8px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    width: 100% !important;
   }
-  .card-header {
-    padding: 12px 12px;
+  .stat-pill {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 9999px !important;
+    min-width: auto !important;
+    flex-shrink: 0 !important;
+    font-size: 12px !important;
   }
-  .card-body {
-    padding: 12px 10px;
+  .stat-pill .stat-head {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
   }
-  .table-custom th, .table-custom td {
-    padding: 8px 10px;
-    font-size: 12px;
+  .stat-pill .stat-name {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+  .stat-pill .stat-value {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    margin-left: 2px !important;
   }
 
-  .modal-overlay {
-    padding: 8px;
+  /* ─── Two Column Sections (Vertical Stack on Mobile) ─── */
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
-  .modal-card {
-    max-height: calc(100vh - 16px);
+
+  .content-card {
+    border-radius: 14px !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
-  .modal-body {
-    padding: 12px;
+
+  .card-header {
+    padding: 0 2px 10px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    border-bottom: none !important;
+  }
+  .card-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+  }
+  .card-dot {
+    display: none !important;
+  }
+
+  .list-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* ─── Vertical Item Cards (Pengambilan & Pengembalian) ─── */
+  .list-item {
+    background: #ffffff !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    transition: transform 0.15s ease !important;
+  }
+  .list-item .avatar-circle {
+    display: none !important;
+  }
+  .list-item .item-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+  }
+  .list-item .item-title {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+  }
+  .list-item .item-sub {
+    font-size: 11.5px !important;
+    color: #64748B !important;
+  }
+  .list-item .item-end {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+  .list-item .item-time {
+    display: none !important;
+  }
+
+  .badge-amber, .badge-blue, .badge-green, .badge-red {
+    padding: 3px 8px !important;
+    border-radius: 9999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+
+  /* ─── Action Rows (Perlu Ditindaklanjuti & Keterlambatan) ─── */
+  .action-row {
+    background: #ffffff !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+  }
+  .action-row .item-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+  }
+  .action-row .item-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+  }
+  .action-row .item-sub {
+    font-size: 11.5px !important;
+    color: #64748B !important;
+  }
+  .btn-outline-sm {
+    border: 1px solid #CBD5E1 !important;
+    background: #ffffff !important;
+    color: #0F172A !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+  }
+  .btn-outline-sm:active {
+    background: #F1F5F9 !important;
+    transform: scale(0.96) !important;
   }
 }

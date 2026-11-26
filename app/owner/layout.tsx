@@ -1,4 +1,5 @@
 import Sidebar from "@/components/sidebar/Sidebar";
+import MobileNav from "@/components/mobile/MobileNav";
 
 export default function OwnerLayout({
   children,
@@ -7,6 +8,7 @@ export default function OwnerLayout({
 }) {
   return (
     <div className="app-layout">
+      <MobileNav role="owner" />
       <Sidebar role="owner" />
       <div className="app-main">{children}</div>
     </div>

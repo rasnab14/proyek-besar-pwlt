@@ -1,4 +1,5 @@
 import Sidebar from "@/components/sidebar/Sidebar";
+import MobileNav from "@/components/mobile/MobileNav";
 
 export default function AdminLayout({
   children,
@@ -7,6 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="app-layout">
+      <MobileNav role="admin" />
       <Sidebar role="admin" />
       <div className="app-main">{children}</div>
     </div>

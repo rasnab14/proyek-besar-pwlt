@@ -1131,11 +1131,11 @@
   }
 
   .kpi-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
   .kpi-card {
-    padding: 12px 14px;
+    padding: 12px 10px;
   }
   .kpi-value {
     font-size: 22px;
