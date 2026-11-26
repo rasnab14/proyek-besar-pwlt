@@ -1,0 +1,255 @@
+/* ==========================================================================
+   components/sidebar/sidebar.css
+   Strict adherence to docs/ATURAN-STYLING.md §4.12
+   ========================================================================== */
+
+.side {
+  width: 264px;
+  flex: 0 0 264px;
+  min-height: 100vh;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 264 150'%3E%3Cpath d='M0 150V95l44-34 30 22 52-56 46 46 32-22 60 56v43Z' fill='white' fill-opacity='.04'/%3E%3Cpath d='M0 150V120l50-30 40 24 60-44 50 38 64-30v72Z' fill='white' fill-opacity='.05'/%3E%3Cpath d='M0 120l50-30 40 24 60-44 50 38 64-30' fill='none' stroke='%230EA5E9' stroke-opacity='.5' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat bottom/100% auto,
+    radial-gradient(420px 300px at 0 100%, rgba(14, 165, 233, 0.22), transparent 70%),
+    var(--night);
+  color: var(--n400);
+  padding: 20px 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: inherit;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ─── Brand Logo & Name ─── */
+.side .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #1F1F1F;
+  flex-shrink: 0;
+}
+
+.side .logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--w);
+  color: var(--k);
+  font-weight: 800;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.side .bn {
+  color: var(--w);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 15px;
+}
+
+.side .bs {
+  font-size: 11px;
+  color: var(--n400);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Scrollable Menu List (.nvs) per §4.12 ─── */
+.side .nvs {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 -4px;
+  padding: 0 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.side .nvs::-webkit-scrollbar {
+  width: 4px;
+}
+.side .nvs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+/* ─── Nav Links (.nv) ─── */
+.side .nv {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  color: var(--n400);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.side .nv:hover {
+  background: #161616;
+  color: var(--w);
+  transform: translateX(3px);
+}
+
+.side .nv.on {
+  background: rgba(14, 165, 233, 0.16);
+  color: var(--w);
+  font-weight: 600;
+}
+
+.side .nv.on svg {
+  color: #38BDF8;
+}
+
+.side .nv.on::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--acc);
+}
+
+.side .nv svg {
+  flex: 0 0 auto;
+}
+
+/* ─── Sub-Menu Links (.nv.sub) ─── */
+.side .nv.sub {
+  margin-left: 21px;
+  padding: 7px 12px 7px 20px;
+  font-size: 13px;
+  border-left: 1px solid #262626;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+
+.side .nv.sub:hover {
+  background: #161616;
+  color: var(--w);
+  transform: translateX(3px);
+}
+
+.side .nv.sub.on {
+  border-left-color: var(--acc);
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--w);
+  font-weight: 600;
+}
+
+.side .nv.sub.on::before {
+  display: none;
+}
+
+/* ─── Group Header (.gh) ─── */
+.side .gh {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  color: var(--n200);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+  user-select: none;
+}
+
+/* ─── User Profile Card (.me) ─── */
+.side .me {
+  margin-top: auto;
+  padding: 12px;
+  background: #141B25;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.side .me .a {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--acc);
+  color: var(--k);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.side .me b {
+  display: block;
+  color: var(--w);
+  font-size: 13px;
+}
+
+.side .me span {
+  font-size: 12px;
+  color: var(--n400);
+}
+
+.side .out {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--n400);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: all 0.15s var(--ease);
+}
+
+.side .out:hover {
+  color: var(--w);
+  background: var(--n800);
+}
+
+/* ─── Keyframe Animations (§6) ─── */
+@keyframes sb-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sb-slide { from { transform: translateX(-10px); } to { transform: none; } }
+@keyframes sb-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+.side .brand { animation: sb-fade 0.6s var(--ease) both; }
+.side .nv, .side .gh { animation: sb-fade 0.5s var(--ease) both, sb-slide 0.5s var(--ease) both; }
+.side .nv.on::before { transform-origin: center; animation: sb-grow 0.5s 0.3s var(--ease) both; }
+
+/* ─── Accessibility (§7) ─── */
+@media (prefers-reduced-motion: reduce) {
+  .side * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.side .nv:focus-visible,
+.side .out:focus-visible {
+  outline: 2px solid #38BDF8;
+  outline-offset: 2px;
+}
