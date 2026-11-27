@@ -11,7 +11,7 @@ A. Login dan Logout
 
 B. Dashboard
 1) Dashboard Admin
-1.	Sistem menampilkan ringkasan jumlah booking yang perlu diproses (booking berstatus Selesai yang siap dilanjutkan ke Transaksi Penyewaan saat pengambilan barang), serta menampilkan jumlah booking Dibatalkan dan Hangus sebagai metrik pemantauan operasional.
+1.	Sistem menampilkan ringkasan jumlah booking yang perlu diproses (booking berstatus Selesai yang siap dilanjutkan ke Transaksi Penyewaan saat pengambilan barang), serta menampilkan jumlah booking Dibatalkan (termasuk yang dibatalkan karena tidak hadir/mengambil barang) sebagai metrik pemantauan operasional.
 2.	Sistem menampilkan jadwal pengambilan barang pada hari berjalan berdasarkan booking yang berstatus Selesai.
 3.	Sistem menampilkan jadwal pengembalian barang pada hari berjalan yang bersumber dari menu Pengembalian.
 4.	Sistem menampilkan informasi keterlambatan pengembalian dan sisa masa sewa secara real-time yang terintegrasi dengan fitur tracking masa sewa pada menu Pengembalian.
@@ -24,7 +24,7 @@ B. Dashboard
 1.	Sistem menampilkan ringkasan pendapatan yang telah diterima dari transaksi yang terealisasi dan pembayaran DP.
 2.	Sistem menampilkan ringkasan pengeluaran yang telah dicatat.
 3.	Sistem menampilkan jumlah transaksi penyewaan dan penjualan yang sedang berjalan maupun selesai.
-4.	Sistem menampilkan ringkasan booking aktif (berstatus Selesai) dan transaksi yang sedang berjalan, serta memantau statistik booking Dibatalkan dan Hangus secara terpisah tanpa memperhitungkannya sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
+4.	Sistem menampilkan ringkasan booking aktif (berstatus Selesai) dan transaksi yang sedang berjalan, serta memantau statistik booking Dibatalkan secara terpisah tanpa memperhitungkannya sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
 5.	Sistem menampilkan informasi barang yang sedang disewa, dikembalikan, rusak, atau dalam proses persiapan.
 6.	Sistem menampilkan grafik perbandingan pendapatan dan pengeluaran berdasarkan periode tertentu.
 7.	Sistem menampilkan informasi barang yang paling sering disewa.
@@ -132,6 +132,11 @@ D. Pengelolaan Stok dan Ketersediaan (Revisi)
 
 E. Pengelolaan Booking
 1.	Sistem menyediakan menu Booking bagi Admin dan Owner untuk mencatat dan mengelola pemesanan barang sewa bagi periode sewa yang direncanakan melalui operasi CRUD (Create: membuat booking baru, Read: melihat daftar dan detail booking, Update: mengubah data booking, Delete: menghapus atau membatalkan booking sesuai ketentuan sistem).
+Sistem menampilkan 4 (empat) kartu ringkasan metrik pemantauan booking pada bagian atas halaman Booking, meliputi:
+•	Selesai (Siap Transaksi): Jumlah booking berstatus Selesai yang mengamankan stok dan siap dilanjutkan ke Transaksi Penyewaan saat pengambilan barang fisik.
+•	Draft: Jumlah data booking yang sedang dibuat atau belum selesai dicatat oleh Admin.
+•	Dibatalkan: Jumlah booking yang tidak terealisasi menjadi transaksi sewa (baik karena pembatalan pelanggan maupun karena tidak hadir mengambil barang/no-show).
+•	Pengambilan Hari Ini: Jumlah booking berstatus Selesai yang memiliki jadwal pengambilan atau mulai sewa pada hari berjalan (Hari-H), guna memastikan kesiapan operasional serah terima barang fisik dan pelunasan sisa tagihan sewa di toko oleh Admin kasir.
 2.	Sistem memungkinkan Admin mencatat booking berdasarkan kesepakatan yang telah dilakukan dengan pelanggan melalui WhatsApp atau secara langsung.
 3.	Sebelum mencatat booking, Admin dapat memeriksa ketersediaan barang berdasarkan tanggal penyewaan yang diminta pelanggan.
 4.	Admin dapat berkoordinasi dengan bagian persiapan untuk memastikan kondisi fisik barang sebelum memberikan informasi kepada pelanggan.
@@ -142,23 +147,22 @@ E. Pengelolaan Booking
 9.	Sistem menampilkan informasi bahwa booking H-1 (selisih 1 hari kalender) dan booking Hari-H (selisih 0 hari kalender, Tanggal Booking sama dengan Tanggal Mulai Sewa) tidak diwajibkan membayar DP sesuai ketentuan perusahaan, di mana pembayaran penuh dapat diselesaikan saat pengambilan barang.
 10.	Sistem menyediakan fitur pencatatan pembayaran DP yang telah diterima dari pelanggan, meliputi nominal pembayaran, tanggal pembayaran, dan metode pembayaran.
 11.	Sistem menyediakan pilihan metode pembayaran DP, yaitu tunai, QRIS, dan transfer.
-12.	Sistem menyediakan status booking, meliputi:
+12.	Sistem menyediakan status booking yang terdiri dari 3 status resmi, meliputi:
 •	Draft: Data booking sedang dibuat atau belum selesai dicatat oleh Admin.
 •	Selesai: Admin dan Customer telah menyepakati pemesanan, pembayaran DP telah diterima sesuai ketentuan yang berlaku, dan booking telah tercatat secara resmi. Booking dengan status Selesai dapat diproses lebih lanjut melalui menu Transaksi.
-•	Dibatalkan: Booking dibatalkan oleh pihak yang memiliki kewenangan sesuai aturan sistem, dengan alasan pembatalan tercatat.
-•	Hangus: Kondisi booking berstatus Selesai yang tidak diambil oleh Customer sampai batas waktu atau batas akhir jam operasional toko pada tanggal pengambilan yang berlaku (misalnya hingga pukul 21.00 WIB tanpa konfirmasi).
+•	Dibatalkan: Booking yang tidak terealisasi menjadi transaksi sewa, baik atas permohonan pembatalan dari pelanggan, pembatalan oleh pihak berwenang karena alasan tertentu, maupun akibat pelanggan tidak datang mengambil barang fisik hingga batas waktu pengambilan yang disepakati (no-show). Setiap pembatalan wajib menyertakan alasan pembatalan yang tercatat secara jelas dalam sistem.
 
 Booking yang telah memenuhi kesepakatan dan pembayaran DP tidak perlu melalui status Dikonfirmasi. Status booking langsung berubah dari Draft menjadi Selesai.
 
 Status Selesai pada Booking menunjukkan bahwa proses pemesanan telah selesai, bukan berarti proses penyewaan atau transaksi telah selesai. Proses pengambilan barang, pencatatan jaminan, pelunasan, dan serah terima tetap dilakukan melalui menu Transaksi.
 
-Ketentuan Khusus Booking Dibatalkan dan Hangus:
-•	Booking yang berstatus Dibatalkan maupun Hangus TIDAK BOLEH dilanjutkan ke menu Transaksi Penyewaan.
-•	Booking yang Dibatalkan atau Hangus harus tetap tersimpan dalam sistem sebagai riwayat (audit trail) dan arsip historis, bukan dihapus dari database maupun laporan.
-•	Booking Dibatalkan dan Hangus tersinkronisasi dengan Dashboard Admin, Dashboard Owner, Laporan Booking, Laporan Keuangan/Pendapatan, serta laporan lain yang berkaitan.
-•	Booking Dibatalkan dan Hangus TIDAK BOLEH dihitung sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
+Ketentuan Khusus Booking Dibatalkan:
+•	Booking yang berstatus Dibatalkan TIDAK BOLEH dilanjutkan ke menu Transaksi Penyewaan.
+•	Booking yang Dibatalkan harus tetap tersimpan dalam sistem sebagai riwayat (audit trail) dan arsip historis, bukan dihapus dari database maupun laporan.
+•	Booking Dibatalkan tersinkronisasi dengan Dashboard Admin, Dashboard Owner, Laporan Booking, Laporan Keuangan/Pendapatan, serta laporan lain yang berkaitan.
+•	Booking Dibatalkan TIDAK BOLEH dihitung sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
 •	Apabila booking tersebut memiliki pembayaran DP, sistem harus tetap menyimpan riwayat pembayaran dan menampilkan status pembayaran sesuai ketentuan yang berlaku; nominal DP tersebut dicatat sebagai dana hangus (penerimaan terkait booking yang tidak dikembalikan) sesuai regulasi perusahaan, tanpa mengubah aturan DP atau kebijakan refund yang berlaku.
-•	Booking yang Dibatalkan atau Hangus tidak boleh lagi mengalokasikan stok untuk periode sewa yang direncanakan, sehingga alokasi stok langsung dilepaskan dan unit fisik barang dapat tersedia kembali apabila tidak sedang digunakan oleh booking atau transaksi lain.
+•	Booking yang Dibatalkan tidak boleh lagi mengalokasikan stok untuk periode sewa yang direncanakan, sehingga alokasi stok langsung dilepaskan dan unit fisik barang dapat tersedia kembali apabila tidak sedang digunakan oleh booking atau transaksi lain.
 13.	Sistem membatasi kewenangan aksi pada menu Booking hanya untuk pengelolaan data booking (CRUD):
 •	Menu Booking TIDAK menyediakan tombol aksi langsung "Proses Sewa". Seluruh inisiasi transaksi penyewaan, pengambilan barang, pencatatan jaminan fisik, dan pelunasan sisa tagihan sewa dilakukan secara eksklusif melalui menu Transaksi Penyewaan.
 •	Pelunasan pembayaran sisa tagihan sewa tidak diproses pada menu Booking, melainkan dilakukan secara eksklusif melalui menu Transaksi Penyewaan saat pengambilan barang.
@@ -175,7 +179,7 @@ Ketentuan Khusus Booking Dibatalkan dan Hangus:
 22.	Sistem melepaskan alokasi stok dari booking yang telah dibatalkan agar barang dapat diperhitungkan kembali dalam ketersediaan pada periode terkait.
 23.	Sistem menyimpan riwayat pembatalan booking beserta alasan, pengguna yang melakukan pembatalan, waktu pembatalan, dan informasi DP yang diterima.
 24.	Booking yang berstatus Selesai akan diperhitungkan dalam proses pemeriksaan ketersediaan barang untuk periode penyewaan terkait.
-25.	Menu Booking TIDAK menyediakan tombol aksi "Proses Sewa". Transaksi Penyewaan diinisiasi dan diproses secara terpisah melalui menu Transaksi Penyewaan, di mana Admin memilih booking yang telah berstatus Selesai (atau transaksi langsung di toko). Booking yang berstatus Draft, Dibatalkan, atau Hangus TIDAK DAPAT dipilih atau diproses menjadi Transaksi Penyewaan. Ketika booking berstatus Selesai dipilih di menu Transaksi Penyewaan, seluruh data booking (pelanggan, barang atau paket, Tanggal Booking, Tanggal Mulai Sewa, Durasi Sewa, Tanggal Selesai Sewa, dan pembayaran DP yang telah diterima) otomatis terhubung ke transaksi tanpa perlu memasukkan ulang data. Pada menu Transaksi Penyewaan tersebut, Admin mencatat tanggal dan waktu pengambilan aktual saat serah terima fisik, menuliskan Jenis Identitas Jaminan secara manual (tanpa nomor jaminan), dan memproses pelunasan sisa tagihan sewa.
+25.	Menu Booking TIDAK menyediakan tombol aksi "Proses Sewa". Transaksi Penyewaan diinisiasi dan diproses secara terpisah melalui menu Transaksi Penyewaan, di mana Admin memilih booking yang telah berstatus Selesai (atau transaksi langsung di toko). Booking yang berstatus Draft atau Dibatalkan TIDAK DAPAT dipilih atau diproses menjadi Transaksi Penyewaan. Ketika booking berstatus Selesai dipilih di menu Transaksi Penyewaan, seluruh data booking (pelanggan, barang atau paket, Tanggal Booking, Tanggal Mulai Sewa, Durasi Sewa, Tanggal Selesai Sewa, dan pembayaran DP yang telah diterima) otomatis terhubung ke transaksi tanpa perlu memasukkan ulang data. Pada menu Transaksi Penyewaan tersebut, Admin mencatat tanggal dan waktu pengambilan aktual saat serah terima fisik, menuliskan Jenis Identitas Jaminan secara manual (tanpa nomor jaminan), dan memproses pelunasan sisa tagihan sewa.
 26.	Sistem menyediakan pilihan penyewaan barang secara satuan maupun melalui Paket Penyewaan.
 27.	Sistem menampilkan daftar Paket Penyewaan beserta informasi harga dan barang penyusunnya ketika Admin mencatat booking.
 28.	Sistem memungkinkan Admin memilih Paket Penyewaan dan menentukan jumlah paket yang dipesan pelanggan.
@@ -207,8 +211,8 @@ Ketentuan Khusus Booking Dibatalkan dan Hangus:
 •	Informasi booking yang ditampilkan pada Admin dan Owner mengacu pada data yang sama (kode booking, pelanggan, barang/paket, Tanggal Booking, Tanggal Mulai Sewa, Durasi Sewa, Tanggal Selesai Sewa, total biaya, status booking, dan pembayaran DP).
 •	Perubahan data booking yang dilakukan oleh pihak yang memiliki kewenangan (seperti pembatalan booking atau perubahan rincian) langsung tercermin pada tampilan pihak lainnya sesuai hak akses masing-masing.
 •	Admin dan Owner menggunakan aturan perhitungan ketersediaan stok yang sama berdasarkan periode booking yang telah dialokasikan, sehingga booking yang telah mengamankan stok pada periode tertentu mencegah barang tersebut dipesan melebihi sisa unit yang tersedia di kedua belah pihak.
-•	Status booking (Draft, Selesai, Dibatalkan, Hangus) konsisten antara Admin dan Owner.
-•	Booking Dibatalkan dan Hangus tercermin dalam Dashboard dan laporan Owner tanpa dihitung sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
+•	Status booking (Draft, Selesai, Dibatalkan) konsisten antara Admin dan Owner.
+•	Booking Dibatalkan tercermin dalam Dashboard dan laporan Owner tanpa dihitung sebagai transaksi penyewaan aktif atau pendapatan sewa yang terealisasi.
 36.	Sistem menyediakan sinkronisasi ketersediaan stok dinamis dan keranjang pemesanan pada katalog booking:
 •	Pengurangan Stok Dinamis Saat Dipilih: Saat Admin memilih atau menambahkan barang atau paket ke dalam keranjang booking, jumlah ketersediaan unit pada kartu barang di katalog langsung berkurang secara responsif tanpa perlu memuat ulang halaman (refresh) sesuai dengan jumlah unit yang masuk ke dalam keranjang.
 •	Pemulihan Stok Saat Item Dikurangi atau Dihapus: Ketika Admin mengurangi kuantitas atau menghapus item dari keranjang booking, jumlah ketersediaan barang pada kartu katalog terkait langsung bertambah kembali secara akurat.
@@ -237,7 +241,7 @@ F. Pengelolaan Transaksi
 1.	Sistem menyediakan submenu Transaksi Penyewaan untuk mencatat dan mengelola transaksi penyewaan barang.
 2.	Sistem mendukung transaksi penyewaan yang berasal dari booking maupun transaksi langsung tanpa booking:
 •	Transaksi Penyewaan yang berasal dari pemesanan hanya dapat dibuat dari booking yang berstatus Selesai.
-•	Booking yang berstatus Draft, Dibatalkan, atau Hangus TIDAK BOLEH dipilih atau diproses menjadi Transaksi Penyewaan.
+•	Booking yang berstatus Draft atau Dibatalkan TIDAK BOLEH dipilih atau diproses menjadi Transaksi Penyewaan.
 •	Proses pemrosesan booking ke Transaksi Penyewaan dilakukan langsung dari menu Transaksi Penyewaan dengan memilih data booking berstatus Selesai yang tersedia (bukan melalui tombol aksi "Proses Sewa" pada menu Booking).
 •	Data booking otomatis terisi secara lengkap ke dalam transaksi, termasuk data Customer, produk atau paket, jumlah unit, periode sewa, nominal DP yang telah dibayar, dan rincian biaya, sehingga Admin tidak perlu memasukkan ulang data yang sudah tersedia.
 3.	Sistem menyediakan pemilihan data pelanggan dan barang yang akan disewa.
@@ -428,7 +432,7 @@ L. Pengelolaan Laporan
 11.	Sistem menyediakan penyaringan laporan berdasarkan rentang tanggal atau periode tertentu.
 12.	Sistem menyediakan fitur pencetakan dan pengunduhan laporan keuangan.
 13.	Sistem membatasi akses Laporan Keuangan hanya kepada Owner sesuai dengan hak akses yang ditetapkan.
-14.	Sistem tidak memperhitungkan booking yang Dibatalkan atau Hangus sebagai pendapatan sewa yang terealisasi; apabila terdapat penerimaan DP pada booking yang Dibatalkan atau Hangus, penerimaan tersebut dicatat secara terpisah sebagai penerimaan dana hangus (pendapatan lain-lain non-sewa) dan tidak dihitung ke dalam omzet sewa aktif.
+14.	Sistem tidak memperhitungkan booking yang Dibatalkan sebagai pendapatan sewa yang terealisasi; apabila terdapat penerimaan DP pada booking yang Dibatalkan, penerimaan tersebut dicatat secara terpisah sebagai penerimaan dana hangus (pendapatan lain-lain non-sewa) dan tidak dihitung ke dalam omzet sewa aktif.
 
 2) Laporan Penyewaan
 1.	Sistem menampilkan rekapitulasi transaksi penyewaan berdasarkan periode tertentu.
@@ -448,7 +452,7 @@ L. Pengelolaan Laporan
 15.	Sistem menampilkan daftar Paket Penyewaan yang pernah disewa berdasarkan periode tertentu.
 16.	Sistem menampilkan Paket Penyewaan yang paling sering disewa.
 17.	Sistem menampilkan jumlah penyewaan dan pendapatan berdasarkan masing-masing Paket Penyewaan.
-18.	Sistem tidak memperhitungkan booking yang Dibatalkan atau Hangus sebagai transaksi penyewaan aktif, namun menyajikan statistik booking (Selesai, Dibatalkan, dan Hangus) secara terpisah untuk keperluan analisis konversi dan performa operasional.
+18.	Sistem tidak memperhitungkan booking yang Dibatalkan sebagai transaksi penyewaan aktif, namun menyajikan statistik booking (Selesai dan Dibatalkan) secara terpisah untuk keperluan analisis konversi dan performa operasional.
 
 3) Laporan Penjualan
 1.	Sistem menampilkan rekapitulasi transaksi penjualan berdasarkan periode tertentu.
@@ -559,20 +563,20 @@ Setiap menu dalam sistem saling terintegrasi berdasarkan alur data bisnis operas
 • Menu Tujuan / Penerima Pembaruan: Menu Booking (pemeriksaan ketersediaan stok periode sewa), Transaksi Penyewaan (alokasi unit fisik saat serah terima), Pengembalian (pemeriksaan kondisi pasca-sewa), Dashboard Admin & Owner, serta Laporan Stok.
 • Dampak Status & Sinkronisasi:
   - Booking berstatus Selesai mengunci alokasi ketersediaan stok pada rentang Tanggal Mulai Sewa hingga Tanggal Selesai Sewa.
-  - Booking yang Dibatalkan atau Hangus langsung melepaskan alokasi stok untuk periode tersebut sehingga unit fisik kembali tersedia bagi pemesanan lain.
+  - Booking yang Dibatalkan langsung melepaskan alokasi stok untuk periode tersebut sehingga unit fisik kembali tersedia bagi pemesanan lain.
   - Serah terima barang di Transaksi Penyewaan mengubah kondisi fisik unit menjadi Disewa.
   - Pengembalian barang di menu Pengembalian mengubah kondisi fisik unit menjadi Dicuci, Persiapan, atau Perawatan; sistem melarang unit otomatis berubah menjadi Tersedia sebelum pemeriksaan fisik tuntas.
 • Hak Akses: Admin (kelola operasional stok, penambahan unit, dan pembaruan kondisi), Owner (monitoring stok, kelola paket sewa, dan laporan stok).
 
 3) Menu Booking
 • Data yang Digunakan: Data Pelanggan, Katalog Barang & Paket, Tanggal Booking, Tanggal Mulai Sewa, dan Durasi Sewa.
-• Data yang Dibuat / Diubah: Kode booking otomatis (BK-xxxx), Tanggal Selesai Sewa (otomatis = Tanggal Mulai Sewa + Durasi Sewa), total biaya sewa, DP wajib (25% jika selisih hari >= 2 hari, 0% jika <= 1 hari), nominal DP disepakati, pembayaran DP diterima riil, dan status booking (Draft, Selesai, Dibatalkan, Hangus).
+• Data yang Dibuat / Diubah: Kode booking otomatis (BK-xxxx), Tanggal Selesai Sewa (otomatis = Tanggal Mulai Sewa + Durasi Sewa), total biaya sewa, DP wajib (25% jika selisih hari >= 2 hari, 0% jika <= 1 hari), nominal DP disepakati, pembayaran DP diterima riil, status booking (Draft, Selesai, Dibatalkan), serta ringkasan metrik pemantauan operasional (Selesai, Draft, Dibatalkan, dan Pengambilan Hari Ini).
 • Menu Sumber Data: Formulir Catat Booking di menu Booking.
 • Menu Tujuan / Penerima Pembaruan: Menu Transaksi Penyewaan (khusus booking berstatus Selesai), Dashboard Admin, Dashboard Owner, Laporan Keuangan (pencatatan DP / dana hangus), dan Riwayat Aktivitas.
 • Dampak Status & Sinkronisasi:
   - Draft: Booking belum final, tidak mengalokasikan stok dan tidak dapat diproses ke transaksi.
   - Selesai: Kesepakatan dan DP telah diterima; alokasi stok diamankan pada periode sewa; data siap diteruskan ke Transaksi Penyewaan.
-  - Dibatalkan / Hangus: DILARANG diproses ke Transaksi Penyewaan; alokasi stok periode sewa langsung dilepaskan; riwayat pembayaran DP dicatat sebagai dana hangus (penerimaan terkait); tetap tersimpan sebagai riwayat dan tidak dihitung sebagai transaksi sewa aktif atau pendapatan sewa terealisasi.
+  - Dibatalkan: DILARANG diproses ke Transaksi Penyewaan; alokasi stok periode sewa langsung dilepaskan; riwayat pembayaran DP dicatat sebagai dana yang tidak dikembalikan (penerimaan terkait booking); tetap tersimpan sebagai riwayat dan tidak dihitung sebagai transaksi sewa aktif atau pendapatan sewa terealisasi.
 • Hak Akses: Admin (CRUD operasional booking), Owner (monitoring data booking real-time, laporan, dan pembatalan berwenang).
 
 4) Menu Transaksi Penyewaan
@@ -620,7 +624,7 @@ Setiap menu dalam sistem saling terintegrasi berdasarkan alur data bisnis operas
 • Dampak Status & Sinkronisasi:
   - Dashboard Admin menampilkan antrean tugas operasional (booking perlu diproses, jadwal pengambilan, jadwal pengembalian hari ini, keterlambatan sewa, stok belum siap).
   - Dashboard Owner menampilkan indikator keuangan (pendapatan kas riil, pengeluaran, laba bersih, transaksi aktif, perbandingan pendapatan, produk terlaris).
-  - Booking Dibatalkan dan Hangus ditampilkan sebagai metrik pemantauan terpisah dan tidak masuk ke dalam pendapatan terealisasi.
+  - Booking Dibatalkan ditampilkan sebagai metrik pemantauan terpisah dan tidak masuk ke dalam pendapatan terealisasi.
 • Hak Akses: Admin (Dashboard Admin), Owner (Dashboard Owner).
 
 9) Menu Laporan (Owner)
@@ -633,6 +637,6 @@ Setiap menu dalam sistem saling terintegrasi berdasarkan alur data bisnis operas
 2. Matriks Sinkronisasi Admin dan Owner
 Untuk menjamin integritas data dan mencegah ketidakkonsistenan antar-peran, sistem menetapkan prinsip sinkronisasi berikut:
 1. Satu Sumber Kebenaran Data (Single Source of Truth): Seluruh modul operasional Admin dan modul pemantauan/laporan Owner membaca dan menulis pada basis data terpusat yang sama.
-2. Konsistensi Status Real-Time: Perubahan status data (misalnya booking berubah menjadi Selesai, Dibatalkan, atau Hangus; transaksi menjadi Sudah Diambil; atau pengembalian menjadi Terlambat) secara langsung tercermin pada tampilan Admin maupun Owner tanpa jeda (zero inconsistency).
+2. Konsistensi Status Real-Time: Perubahan status data (misalnya booking berubah menjadi Selesai atau Dibatalkan; transaksi menjadi Sudah Diambil; atau pengembalian menjadi Terlambat) secara langsung tercermin pada tampilan Admin maupun Owner tanpa jeda (zero inconsistency).
 3. Pencegahan Duplikasi Data: Sistem melarang pembuatan data ganda atau rekaman bayangan (shadow records) untuk keperluan User (Admin) maupun Owner. Data pelanggan, produk, transaksi, dan pembayaran bersifat tunggal.
 4. Pemisahan Hak Akses yang Tegas: Sinkronisasi data tidak menyamakan wewenang aksi. Admin berfokus penuh pada alur eksekusi operasional harian, sedangkan Owner berfokus pada pengawasan kinerja, penetapan kebijakan, pengelolaan akun pengguna, dan audit laporan bisnis.

@@ -4,7 +4,7 @@
  * Strict adherence to docs/KEBUTUHAN-FUNGSIONAL.md §E & ALUR-NAVIGASI.md
  */
 
-export type BookingStatus = "draft" | "selesai" | "dibatalkan" | "hangus" | "dikonfirmasi";
+export type BookingStatus = "draft" | "selesai" | "dibatalkan";
 
 export type DPStatus = "lunas" | "belum" | "tidak_perlu" | "hangus";
 

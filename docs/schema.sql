@@ -13,7 +13,7 @@ CREATE TYPE status_akun               AS ENUM ('aktif','nonaktif');
 CREATE TYPE jenis_barang              AS ENUM ('sewa','jual');
 CREATE TYPE kondisi_unit              AS ENUM ('tersedia','disewa','dicuci','persiapan','rusak','perawatan');
 CREATE TYPE jenis_mutasi_stok         AS ENUM ('tambah','kurang','penyesuaian','terjual');
-CREATE TYPE status_booking            AS ENUM ('draft','selesai','dibatalkan','hangus');
+CREATE TYPE status_booking            AS ENUM ('draft','selesai','dibatalkan');
 CREATE TYPE status_pembayaran_booking AS ENUM ('belum_dibayar','dp_sebagian','dp_lunas','lunas');
 CREATE TYPE tipe_item                 AS ENUM ('barang','paket');
 CREATE TYPE status_sewa               AS ENUM ('aktif','selesai','batal');
@@ -43,7 +43,7 @@ INSERT INTO pengaturan(kunci,nilai,catatan) VALUES
  ('dp_persen','25','DP booking, persen dari total sewa'),
  ('dp_minimal_hari','2','DP wajib jika booking minimal H-2 sebelum tanggal mulai sewa'),
  ('jam_buka','"08:00"','Jam operasional toko (WIB)'),
- ('jam_tutup','"21:00"','Batas pengembalian harian (WIB); lewat jam ini dianggap terlambat / hangus');
+ ('jam_tutup','"21:00"','Batas operasional toko & pengembalian harian (WIB); lewat jam ini dianggap terlambat');
 
 -- ---------- PENGGUNA & HAK AKSES ----------
 CREATE TABLE pengguna (
@@ -85,7 +85,7 @@ CREATE TABLE pengguna_izin (
 CREATE TABLE riwayat_aktivitas (
   id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   pengguna_id  bigint REFERENCES pengguna(id),
-  jenis        text NOT NULL,       -- login, logout, tambah, ubah, hapus, batal, hangus, ubah_status, ubah_kondisi
+  jenis        text NOT NULL,       -- login, logout, tambah, ubah, hapus, batal, ubah_status, ubah_kondisi
   entitas      text NOT NULL,       -- nama tabel/objek, mis. booking, transaksi_sewa, unit_barang
   entitas_id   text,
   data_sebelum jsonb,
@@ -246,7 +246,7 @@ CREATE TRIGGER trg_paket_isi_sewa BEFORE INSERT OR UPDATE ON paket_isi
   FOR EACH ROW EXECUTE FUNCTION hanya_barang_sewa();
 
 -- ---------- BOOKING ----------
--- KF E.12 & E.34: status langsung Draft -> Selesai (atau Dibatalkan / Hangus);
+-- KF E.12 & E.34: status langsung Draft -> Selesai (atau Dibatalkan jika tidak diambil/dibatalkan);
 -- tgl_booking adalah tanggal kesepakatan; tidak ada input tgl_pengambilan aktual di booking.
 CREATE TABLE booking (
   id                    bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -265,12 +265,11 @@ CREATE TABLE booking (
   dp_dibayar            bigint NOT NULL DEFAULT 0 CHECK (dp_dibayar >= 0),
   status_pembayaran     status_pembayaran_booking NOT NULL DEFAULT 'belum_dibayar',
   catatan               text,
-  dp_hangus             boolean NOT NULL DEFAULT false,       -- true jika dibatalkan/hangus dan ada DP masuk
+  dp_hangus             boolean NOT NULL DEFAULT false,       -- true jika dibatalkan dan ada DP masuk (non-refundable)
   dp_hangus_nominal     bigint NOT NULL DEFAULT 0 CHECK (dp_hangus_nominal >= 0),
   dibatalkan_pada       timestamptz,
   dibatalkan_oleh       bigint REFERENCES pengguna(id),
   alasan_batal          text,
-  hangus_pada           timestamptz,
   dihapus_pada          timestamptz,                          -- hapus lunak (hanya Draft)
   alasan_hapus          text,
   dibuat_oleh           bigint REFERENCES pengguna(id),
@@ -279,7 +278,6 @@ CREATE TABLE booking (
   CONSTRAINT ck_booking_periode   CHECK (tgl_selesai > tgl_mulai),
   CONSTRAINT ck_booking_tgl_mulai CHECK ((tgl_mulai AT TIME ZONE 'Asia/Jakarta')::date >= tgl_booking),
   CONSTRAINT ck_booking_batal     CHECK (status <> 'dibatalkan' OR (alasan_batal IS NOT NULL AND dibatalkan_oleh IS NOT NULL AND dibatalkan_pada IS NOT NULL)),
-  CONSTRAINT ck_booking_hangus    CHECK (status <> 'hangus' OR hangus_pada IS NOT NULL),
   CONSTRAINT ck_booking_hapus     CHECK (dihapus_pada IS NULL OR (status = 'draft' AND alasan_hapus IS NOT NULL))
 );
 CREATE INDEX ix_booking_pelanggan ON booking(pelanggan_id);
@@ -647,7 +645,7 @@ SELECT t.id, t.kode, p.nama AS pelanggan, t.tgl_booking, t.tgl_mulai, t.durasi_h
 FROM transaksi_sewa t JOIN pelanggan p ON p.id = t.pelanggan_id;
 
 -- Penerimaan uang aktual (untuk Laporan Keuangan): pembayaran diterima, terpisah dari tagihan.
--- DP dari booking yang dibatalkan/hangus tetap tercatat satu kali sebagai sumber 'dp_hangus' (non-sewa).
+-- DP dari booking yang dibatalkan tetap tercatat satu kali sebagai sumber 'dp_hangus' (non-sewa).
 CREATE VIEW v_penerimaan AS
 SELECT (p.waktu AT TIME ZONE 'Asia/Jakarta')::date AS tanggal,
        p.jenis,
@@ -656,7 +654,7 @@ SELECT (p.waktu AT TIME ZONE 'Asia/Jakarta')::date AS tanggal,
        COALESCE(p.sewa_id, p.booking_id, p.jual_id) AS referensi_id,
        CASE
          WHEN p.jual_id IS NOT NULL THEN 'jual'
-         WHEN b.id IS NOT NULL AND b.status IN ('dibatalkan','hangus') THEN 'dp_hangus'
+         WHEN b.id IS NOT NULL AND b.status = 'dibatalkan' THEN 'dp_hangus'
          WHEN p.sewa_id IS NOT NULL THEN 'sewa'
          ELSE 'booking'
        END AS sumber

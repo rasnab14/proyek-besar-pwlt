@@ -85,10 +85,46 @@ export function BookingCancellationDialog({
             <label className="form-label">
               Alasan Pembatalan <span className="req">*</span>
             </label>
+            {/* Quick Reason Templates */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+              <button
+                type="button"
+                className="btn xs"
+                style={{ fontSize: "11px", padding: "3px 8px", background: "#F1F5F9", color: "#334155" }}
+                onClick={() => {
+                  setAlasan("Pelanggan tidak datang mengambil barang fisik hingga batas waktu pengambilan (No-Show).");
+                  if (error) setError("");
+                }}
+              >
+                + Tidak Datang (No-Show)
+              </button>
+              <button
+                type="button"
+                className="btn xs"
+                style={{ fontSize: "11px", padding: "3px 8px", background: "#F1F5F9", color: "#334155" }}
+                onClick={() => {
+                  setAlasan("Permintaan pembatalan sepihak dari pelanggan.");
+                  if (error) setError("");
+                }}
+              >
+                + Batal dari Pelanggan
+              </button>
+              <button
+                type="button"
+                className="btn xs"
+                style={{ fontSize: "11px", padding: "3px 8px", background: "#F1F5F9", color: "#334155" }}
+                onClick={() => {
+                  setAlasan("Kendala cuaca ekstrem / kondisi darurat di lokasi pendakian.");
+                  if (error) setError("");
+                }}
+              >
+                + Cuaca Ekstrem
+              </button>
+            </div>
             <textarea
               rows={3}
               className="form-textarea"
-              placeholder="Jelaskan alasan pembatalan (misal: kondisi cuaca badai di Merbabu, pelanggan membatalkan rencana, dll)..."
+              placeholder="Tuliskan atau pilih alasan pembatalan..."
               value={alasan}
               onChange={(e) => {
                 setAlasan(e.target.value);
