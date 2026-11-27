@@ -69,6 +69,7 @@ function BookingFormInner() {
   // ─── Submission & Validation States ───
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [isSuccessDraft, setIsSuccessDraft] = useState(false);
+  const [isConfirmBookingOpen, setIsConfirmBookingOpen] = useState(false);
   const [toastError, setToastError] = useState<string | null>(null);
 
   // ─── Load Existing Draft Data on Mount if editId is provided (§1, §2, §4) ───
@@ -157,10 +158,15 @@ function BookingFormInner() {
     return calculateEndDate(tanggalMulaiSewa, durasiHari);
   }, [tanggalMulaiSewa, durasiHari]);
 
-  // Base stock ketersediaan per rentang tanggal pemesanan
+  // Base stock ketersediaan per rentang tanggal pemesanan (mengecualikan booking yang sedang diubah agar tidak double-counted)
   const baseProducts = useMemo(() => {
-    return calculatePeriodBaseStock(MOCK_PRODUCTS, tanggalMulaiSewa, tanggalSelesaiSewa);
-  }, [tanggalMulaiSewa, tanggalSelesaiSewa]);
+    return calculatePeriodBaseStock(
+      MOCK_PRODUCTS,
+      tanggalMulaiSewa,
+      tanggalSelesaiSewa,
+      editId || undefined
+    );
+  }, [tanggalMulaiSewa, tanggalSelesaiSewa, editId]);
 
   // Ketersediaan dinamis real-time (base stock dikurangi item & paket di dalam keranjang)
   const { dynamicProducts, remainingSingleStockMap, remainingPackageStockMap } = useMemo(() => {
@@ -369,8 +375,8 @@ function BookingFormInner() {
     setIsSuccessOpen(true);
   };
 
-  // ─── Selesaikan Booking (§6 & §8) ───
-  const handleCreateBooking = () => {
+  // ─── Selesaikan Booking (§6 & §8 dengan Konfirmasi) ───
+  const handleOpenBookingConfirmation = () => {
     if (dateError) {
       showToast(dateError);
       return;
@@ -388,6 +394,11 @@ function BookingFormInner() {
       return;
     }
 
+    setIsConfirmBookingOpen(true);
+  };
+
+  const handleExecuteCreateBooking = () => {
+    setIsConfirmBookingOpen(false);
     const finishedRecord = buildBookingRecord("selesai");
     saveOrUpdateBooking(finishedRecord);
 
@@ -470,13 +481,79 @@ function BookingFormInner() {
               onDpDiterimaSekarangChange={setDpDiterimaSekarang}
               metodePembayaran={metodePembayaran}
               onMetodePembayaranChange={setMetodePembayaran}
-              onSubmitBooking={handleCreateBooking}
+              onSubmitBooking={handleOpenBookingConfirmation}
               onSaveDraft={handleSaveDraft}
               isDraftEdit={Boolean(existingDraft)}
             />
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog before Finalizing Booking */}
+      {isConfirmBookingOpen && selectedCustomer && (
+        <div className="modal-overlay" onClick={() => setIsConfirmBookingOpen(false)}>
+          <div
+            className="modal-container"
+            style={{ maxWidth: "480px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#E0F2FE", color: "#0284C7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="modal-title" style={{ fontSize: "16px" }}>Simpan Booking {createdBookingCode}?</h3>
+                  <div style={{ fontSize: "12px", color: "var(--n600)" }}>{selectedCustomer.nama}</div>
+                </div>
+              </div>
+              <button type="button" className="modal-close-btn" onClick={() => setIsConfirmBookingOpen(false)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: "14px 20px" }}>
+              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", padding: "10px 14px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12.5px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>Sewa:</span>
+                  <span style={{ fontWeight: 600, color: "#0F172A" }}>{durasiHari} Hari ({tanggalMulaiSewa} s.d {tanggalSelesaiSewa})</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>Barang:</span>
+                  <span style={{ fontWeight: 600, color: "#0F172A" }}>{cart.length} item</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E2E8F0", paddingTop: "6px" }}>
+                  <span style={{ color: "#64748B" }}>Total Sewa:</span>
+                  <span style={{ fontWeight: 700, color: "#0284C7" }}>Rp {totalBiaya.toLocaleString("id-ID")}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>DP ({metodePembayaran.toUpperCase()}):</span>
+                  <span style={{ fontWeight: 700, color: "#166534" }}>Rp {dpDiterimaSekarang.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ padding: "10px 20px" }}>
+              <button
+                type="button"
+                className="btn sm"
+                onClick={() => setIsConfirmBookingOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn pri sm"
+                onClick={handleExecuteCreateBooking}
+              >
+                Ya, Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Success Modal Confirmation */}
       <BookingSuccessModal

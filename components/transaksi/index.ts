@@ -11,3 +11,4 @@ export * from "./SelectBookingModal";
 export * from "./DirectRentalModal";
 export * from "./SewaDetailModal";
 export * from "./PrintReceiptModal";
+export * from "./HandoverModal";

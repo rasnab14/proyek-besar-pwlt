@@ -10,6 +10,7 @@ import {
   INITIAL_BOOKINGS,
   getStoredBookings,
   saveOrUpdateBooking,
+  deleteBookingFromStore,
   BookingPageHeader,
   BookingSummaryCards,
   BookingSearchFilters,
@@ -50,6 +51,7 @@ export default function AdminBookingPage() {
   const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [cancellingBooking, setCancellingBooking] = useState<BookingRecord | null>(null);
+  const [deletingBooking, setDeletingBooking] = useState<BookingRecord | null>(null);
 
   // ─── Toast Feedback ───
   const [toast, setToast] = useState<{ message: string; type: "success" | "warning" | "danger" } | null>(null);
@@ -182,6 +184,14 @@ export default function AdminBookingPage() {
     showToast(`Booking berhasil dibatalkan. DP dicatat sebagai hangus sesuai SOP.`, "danger");
   };
 
+  const handleConfirmDelete = () => {
+    if (!deletingBooking) return;
+    deleteBookingFromStore(deletingBooking.id);
+    setBookings((prev) => prev.filter((b) => b.id !== deletingBooking.id));
+    showToast(`Data booking ${deletingBooking.kode} berhasil dihapus.`, "success");
+    setDeletingBooking(null);
+  };
+
   return (
     <div className="main">
       <div className="booking-page-container">
@@ -225,6 +235,7 @@ export default function AdminBookingPage() {
                 bookings={paginatedBookings}
                 onViewDetail={handleOpenDetail}
                 onEditBooking={handleOpenEdit}
+                onDeleteBooking={(b) => setDeletingBooking(b)}
                 onCancelBooking={handleStartCancel}
               />
               <BookingPagination
@@ -261,6 +272,62 @@ export default function AdminBookingPage() {
         onClose={() => setCancellingBooking(null)}
         onConfirmCancel={handleConfirmCancel}
       />
+
+      {/* 3. Delete Confirmation Dialog */}
+      {deletingBooking && (
+        <div className="modal-overlay" onClick={() => setDeletingBooking(null)}>
+          <div
+            className="modal-container"
+            style={{ maxWidth: "460px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="modal-title" style={{ fontSize: "16px" }}>Hapus Data Booking</h3>
+                  <div style={{ fontSize: "12px", color: "var(--n600)" }}>{deletingBooking.kode}</div>
+                </div>
+              </div>
+              <button type="button" className="modal-close-btn" onClick={() => setDeletingBooking(null)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: "16px 20px" }}>
+              <p style={{ margin: "0 0 10px 0", fontSize: "13.5px", color: "#334155" }}>
+                Hapus booking <b>{deletingBooking.kode}</b> ({deletingBooking.pelanggan.nama})?
+              </p>
+              <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "6px", padding: "8px 12px", fontSize: "12px", color: "#991B1B" }}>
+                Alokasi stok barang yang dipesan akan otomatis dilepaskan.
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ padding: "12px 20px" }}>
+              <button
+                type="button"
+                className="btn sm"
+                onClick={() => setDeletingBooking(null)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn sm dng"
+                onClick={handleConfirmDelete}
+                style={{ background: "#DC2626", color: "#FFFFFF", border: "none" }}
+              >
+                Ya, Hapus Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Toast Feedback ─── */}
       {toast && (

@@ -18,7 +18,7 @@
  */
 
 import { CatalogProduct, CartItem } from "./types";
-import { INITIAL_BOOKINGS } from "@/components/booking/mockData";
+import { getStoredBookings } from "@/components/booking/bookingStore";
 
 export interface PackageComponentRequirement {
   productId: string;
@@ -60,21 +60,36 @@ function isDateOverlap(
 /**
  * Menghitung base stock (stok dasar tersedia di toko pada rentang tanggal sewa)
  * sebelum dikurangi oleh item yang sedang dimasukkan ke dalam keranjang saat ini.
+ * 
+ * Aturan Bisnis & Rekonsiliasi:
+ * 1. Menggunakan data dinamis dari storage (getStoredBookings), bukan mock data statis.
+ * 2. Booking Dihapus: Otomatis tidak ada dalam storage sehingga alokasi stok kembali 100%.
+ * 3. Booking Dibatalkan: Status 'dibatalkan' tidak mengunci stok (stok dilepaskan).
+ * 4. Booking Diubah: Mendukung parameter excludeBookingId agar stok lama booking yang sedang
+ *    disunting tidak terhitung ganda terhadap keranjang yang baru.
  */
 export function calculatePeriodBaseStock(
   products: CatalogProduct[],
   tanggalMulaiSewa: string,
-  tanggalSelesaiSewa: string
+  tanggalSelesaiSewa: string,
+  excludeBookingId?: string
 ): CatalogProduct[] {
   // 1. Hitung alokasi dari booking lain yang berstatus 'selesai' dan bertumpang tindih
   const bookedUnitsMap: Record<string, number> = {};
+  const activeBookings = getStoredBookings();
 
   if (tanggalMulaiSewa && tanggalSelesaiSewa) {
-    INITIAL_BOOKINGS.forEach((b) => {
-      // Hanya booking berstatus 'selesai' yang mengunci stok
+    activeBookings.forEach((b) => {
+      // Lewati booking yang sedang disunting agar unit lamanya tidak terhitung ganda
+      if (excludeBookingId && (b.id === excludeBookingId || b.kode === excludeBookingId)) {
+        return;
+      }
+
+      // HANYA booking berstatus 'selesai' yang mengunci stok pada periode overlap
+      // Booking yang dibatalkan / draft TIDAK MENGUNCI STOK
       if (b.status === "selesai") {
-        const bStart = b.tanggalPengambilan;
-        const bEnd = b.tanggalPengembalian;
+        const bStart = b.tanggalPengambilan || b.tanggalMulaiSewa || "";
+        const bEnd = b.tanggalPengembalian || b.tanggalSelesaiSewa || "";
 
         if (isDateOverlap(tanggalMulaiSewa, tanggalSelesaiSewa, bStart, bEnd)) {
           b.items.forEach((item) => {

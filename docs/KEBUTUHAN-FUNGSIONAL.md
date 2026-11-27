@@ -164,6 +164,13 @@ Ketentuan Khusus Booking Dibatalkan:
 •	Apabila booking tersebut memiliki pembayaran DP, sistem harus tetap menyimpan riwayat pembayaran dan menampilkan status pembayaran sesuai ketentuan yang berlaku; nominal DP tersebut dicatat sebagai dana hangus (penerimaan terkait booking yang tidak dikembalikan) sesuai regulasi perusahaan, tanpa mengubah aturan DP atau kebijakan refund yang berlaku.
 •	Booking yang Dibatalkan tidak boleh lagi mengalokasikan stok untuk periode sewa yang direncanakan, sehingga alokasi stok langsung dilepaskan dan unit fisik barang dapat tersedia kembali apabila tidak sedang digunakan oleh booking atau transaksi lain.
 13.	Sistem membatasi kewenangan aksi pada menu Booking hanya untuk pengelolaan data booking (CRUD):
+•	Struktur Kolom AKSI Tabel Booking: Menyediakan 3 tombol aksi utama pada setiap baris data booking, yaitu Detail, Ubah, dan Hapus.
+•	Detail: Menampilkan jendela pop-up Detail Booking yang memuat rincian lengkap pemesanan. Tindakan 'Ubah Data' tidak diletakkan di dalam pop-up Detail, melainkan diposisikan langsung di luar pada kolom AKSI tabel utama agar alur kerja operasional lebih cepat dan efisien.
+•	Ubah (Booking Diubah): Mengarahkan Admin kembali ke formulir Catat Booking (`/admin/booking/baru?id=[id]`) dengan seluruh data reservasi dan item keranjang belanja terisi kembali (pre-filled). Sistem menyesuaikan data booking, tanggal penyewaan, durasi, produk, jumlah produk, total harga, serta ketersediaan stok sesuai perubahan terbaru. Sistem menerapkan rekonsiliasi stok di mana alokasi lama booking yang sedang disunting dikecualikan dari perhitungan base stock agar tidak terhitung ganda (double-counting), sehingga penambahan atau pengurangan item pada keranjang merefleksikan ketersediaan stok fisik secara presisi tanpa bertambah atau berkurang secara tidak semestinya.
+•	Hapus (Booking Dihapus): Menyediakan aksi penghapusan data booking dengan dialog konfirmasi terlebih dahulu. Jika salah satu booking dihapus, booking tersebut TIDAK BOLEH otomatis dialihkan atau dibuat menjadi transaksi penyewaan. Stok produk yang sebelumnya telah dialokasikan untuk booking tersebut harus dikembalikan secara otomatis dan langsung tersedia bagi pelanggan lain pada periode tersebut.
+•	Pembatalan Booking (Booking Dibatalkan): Jika booking dibatalkan (melalui aksi Batalkan Booking dengan alasan wajib), booking tersebut TIDAK BOLEH masuk ke menu Transaksi Penyewaan dan TIDAK BOLEH dianggap sebagai transaksi penyewaan aktif maupun omzet sewa yang terealisasi. Seluruh stok yang sebelumnya dialokasikan langsung dilepaskan kembali ke inventaris. Data pembatalan tetap tersimpan utuh dan ditampilkan pada Laporan Owner (`/owner/laporan/penyewaan`) sebagai riwayat audit trail booking yang dibatalkan beserta alasan, pelaku pembatalan, dan nominal DP hangus.
+•	Konversi Menjadi Transaksi Penyewaan: Booking HANYA BOLEH dikonversi menjadi transaksi penyewaan apabila proses penyewaan benar-benar dilanjutkan secara sadar oleh Admin di menu Transaksi Penyewaan (melalui tombol 'Dari booking' / modal pemilihan booking berstatus Selesai, pencatatan jaminan fisik, dan pelunasan sisa tagihan di kasir). Sistem mencegah konversi otomatis pada booking yang dihapus atau dibatalkan, serta mencegah konversi ganda atas booking yang telah diproses menjadi transaksi sewa.
+•	Konfirmasi Penyelesaian Pesanan Booking: Saat tombol 'Selesaikan Booking' ditekan pada formulir pencatatan booking, sistem menampilkan dialog konfirmasi ringkasan pemesanan (nama pelanggan, periode sewa, jumlah item, total biaya, dan DP diterima) sebelum data resmi disimpan ke sistem.
 •	Menu Booking TIDAK menyediakan tombol aksi langsung "Proses Sewa". Seluruh inisiasi transaksi penyewaan, pengambilan barang, pencatatan jaminan fisik, dan pelunasan sisa tagihan sewa dilakukan secara eksklusif melalui menu Transaksi Penyewaan.
 •	Pelunasan pembayaran sisa tagihan sewa tidak diproses pada menu Booking, melainkan dilakukan secara eksklusif melalui menu Transaksi Penyewaan saat pengambilan barang.
 •	Proses pengambilan barang, pencatatan jaminan fisik (di mana Jenis Identitas Jaminan ditulis secara manual tanpa memerlukan nomor identitas jaminan), dan serah terima fisik barang tidak dilakukan pada menu Booking, melainkan ditangani secara eksklusif pada menu Transaksi Penyewaan.
@@ -257,7 +264,12 @@ F. Pengelolaan Transaksi
 •	Status Transaksi: Menggunakan indikator status yang tegas, yaitu Belum Lunas (masih terdapat sisa tagihan yang harus dilunasi saat serah terima) dan Lunas (seluruh biaya sewa telah tuntas Rp 0 sisa), tanpa kolom pembayaran terpisah yang redundan pada tabel transaksi. Pemantauan keterlambatan, denda, dan kondisi fisik pengembalian unit dikelola khusus pada menu Pengembalian.
 11.	Sistem menyediakan detail transaksi penyewaan beserta informasi jaminan, rincian barang, dan riwayat pembayarannya.
 12.	Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi, pelanggan, periode transaksi, dan status transaksi.
-13.	Sistem menyediakan tindakan untuk memproses pengambilan barang oleh pelanggan setelah data transaksi penyewaan dicatat.
+13.	Sistem menyediakan Formulir Serah Terima Barang pada menu Transaksi Penyewaan yang dapat diakses melalui tombol 'Serah Terima' pada tabel transaksi maupun modal detail transaksi ketika status pengambilan masih 'Belum Diambil':
+•	Rincian Serah Terima: Formulir menampilkan informasi pelanggan, jadwal sewa, batas pengembalian, dan daftar barang atau paket yang diserahkan kepada pelanggan.
+•	Pencatatan Jaminan Fisik Wajib: Menyediakan input jenis identitas jaminan fisik (misal: KTP Asli atas nama penyewa atau SIM A) yang ditulis manual tanpa pencatatan nomor identitas.
+•	Pelunasan Sisa Tagihan di Kasir: Menghitung sisa tagihan sewa secara otomatis (Total Biaya Sewa dikurangi DP yang telah dibayar pada booking asal). Jika terdapat sisa tagihan, formulir menyediakan input nominal uang diterima, kalkulasi kembalian, dan pilihan metode pelunasan (Tunai, QRIS, Transfer).
+•	Dialog Konfirmasi Ringkas & Jelas: Saat tombol konfirmasi ditekan, sistem menampilkan dialog konfirmasi ringkas ('Serahkan Barang [Kode]?') yang memuat jaminan fisik dan nominal pelunasan secara padat dan jelas sebelum data diperbarui.
+•	Pembaruan Status Otomatis: Setelah serah terima dikonfirmasi, status pengambilan otomatis berubah menjadi 'Sudah Diambil', status pembayaran menjadi 'Lunas', sisa tagihan menjadi Rp 0, dan kondisi unit fisik barang diperbarui menjadi 'Disewa'.
 14.	Sistem menyediakan informasi status pengambilan barang, yaitu Belum Diambil dan Sudah Diambil.
 15.	Sistem mencatat tanggal dan waktu pengambilan barang ketika barang benar-benar diserahkan kepada pelanggan.
 16.	Sistem memperbarui kondisi fisik unit barang menjadi Disewa setelah proses pengambilan barang dikonfirmasi oleh Admin.
@@ -290,6 +302,7 @@ F. Pengelolaan Transaksi
 •	Struktur Layout Formulir:
 	- Kolom Kiri (65%): Memuat Kartu Informasi Pelanggan & Jadwal Sewa (pilihan pelanggan terdaftar atau tambah baru, tanggal sewa Hari-H, durasi sewa, serta tanggal selesai sewa otomatis s.d. 21.00 WIB) dan Kartu Katalog Barang & Paket (dipisahkan ke dalam dua tab: Barang Satuan dan Paket Penyewaan, dilengkapi pencarian dan filter kategori).
 	- Kolom Kanan (35% - Sticky Panel): Memuat Keranjang Transaksi Sewa (dengan stepper kuantitas dan kalkulasi subtotal dinamis terhadap durasi sewa) serta Kartu Pembayaran Kasir Walk-In (input manual Jenis Identitas Jaminan Fisik saat serah terima barang diletakkan tepat di atas pilihan metode pembayaran tunai/QRIS/transfer, input uang diterima, kalkulasi kembalian, indikator status Lunas dan Sudah Diambil, serta tombol Selesaikan & Serahkan Barang tanpa tombol simpan draft).
+	- Konfirmasi Transaksi Sewa Langsung: Saat tombol Selesaikan & Serahkan Barang ditekan, sistem memunculkan dialog konfirmasi untuk memastikan jaminan fisik telah diterima dan pembayaran lunas 100% di kasir sebelum transaksi disimpan dan unit fisik diserahkan.
 32.	Setelah pembayaran pelunasan dicatat, sistem menampilkan konfirmasi Transaksi Berhasil yang memuat rincian transaksi, status pembayaran Lunas, status pengambilan Sudah Diambil, serta menyediakan tindakan untuk mencetak bukti (pop-up struk 58mm/80mm/A4), membuat transaksi baru, dan kembali ke menu Transaksi Penyewaan.
 33.	Sistem menyediakan tombol kembali ke menu Transaksi Penyewaan pada halaman formulir Transaksi Langsung dan konfirmasi transaksi berhasil.
 34.	Sistem menyediakan fitur Cetak Bukti/Struk pada halaman detail transaksi penyewaan dan halaman transaksi berhasil. Fitur ini menampilkan jendela pop-up di tengah layar yang memuat pilihan ukuran kertas (58 mm, 80 mm, atau A4), pilihan informasi yang ditampilkan (nama kasir, rincian pembayaran, serta syarat dan ketentuan), dan jumlah salinan, serta menyediakan tindakan cetak dan unduh PDF. Struk menampilkan status Belum Lunas beserta sisa tagihan apabila transaksi belum dilunasi.
@@ -307,22 +320,30 @@ F. Pengelolaan Transaksi
 •	Bukti Transaksi yang Diterbitkan: Catat Booking mencetak 'Bukti Booking / Reservasi' yang memuat info nominal DP dan sisa tagihan yang harus dilunasi nanti saat serah terima barang; Transaksi Langsung mencetak 'Struk Bukti Sewa & Serah Terima' dengan status Lunas penuh.
 
 2) Transaksi Penjualan
-1.	Sistem menyediakan submenu Transaksi Penjualan untuk mencatat transaksi penjualan barang.
-2.	Sistem menampilkan daftar produk berjenis Barang Jual yang dapat dipilih oleh Admin untuk dimasukkan ke dalam keranjang transaksi.
-3.	Sistem menyediakan fitur pencarian dan penyaringan produk berdasarkan nama, kode, dan kategori barang.
-4.	Sistem menampilkan informasi harga jual dan jumlah stok setiap produk.
-5.	Sistem menyediakan fitur penambahan barang ke keranjang transaksi melalui pemilihan produk serta pengaturan jumlah pembelian.
-6.	Sistem memungkinkan Admin menambahkan lebih dari satu jenis barang ke dalam satu transaksi.
-7.	Sistem menghitung subtotal setiap barang dan total pembayaran secara otomatis berdasarkan jumlah pembelian.
-8.	Sistem menyediakan kode transaksi penjualan secara otomatis.
-9.	Sistem mencatat informasi transaksi dan pembayaran, termasuk nominal pembayaran serta metode pembayaran.
-10.	Sistem memvalidasi ketersediaan stok sebelum transaksi disimpan untuk mencegah penjualan melebihi jumlah stok.
-11.	Sistem mengurangi jumlah stok barang berdasarkan jumlah barang yang terjual setelah transaksi berhasil disimpan.
-12.	Sistem menyediakan detail transaksi penjualan beserta informasi barang yang dibeli dan riwayat pembayarannya.
-13.	Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi dan periode transaksi.
-14.	Sistem menyimpan riwayat perubahan transaksi yang dilakukan oleh pengguna.
-15.	Sistem menyediakan fitur Cetak Bukti/Struk pada halaman detail transaksi penjualan dan halaman transaksi berhasil, berupa jendela pop-up di tengah layar yang memuat pilihan ukuran kertas (58 mm, 80 mm, atau A4), pilihan informasi yang ditampilkan, dan jumlah salinan, serta menyediakan tindakan cetak dan unduh PDF.
-16.	Sistem menyediakan halaman Detail Transaksi Penjualan yang memuat kode transaksi, pelanggan, rincian barang yang dibeli beserta jumlah dan harga, total, nominal pembayaran, dan kembalian.
+1.	Sistem menyediakan submenu Transaksi Penjualan untuk mencatat transaksi penjualan barang retail perlengkapan outdoor dan bahan habis pakai.
+2.	Sistem menetapkan bahwa setiap transaksi penjualan barang di kasir wajib diselesaikan pembayarannya saat itu juga (cash-and-carry), sehingga setiap transaksi yang berhasil diproses secara otomatis berstatus 'Selesai' (Lunas 100%) tanpa menyisakan status belum lunas.
+3.	Sistem menampilkan 3 Kartu Ringkasan (KPI) pada menu Transaksi Penjualan:
+•	Transaksi Bulan Ini: Jumlah seluruh transaksi penjualan pada bulan berjalan.
+•	Total Penjualan: Akumulasi nominal pendapatan kotor dari transaksi penjualan retail.
+•	Transaksi Selesai: Jumlah transaksi penjualan yang telah lunas dan tuntas diserahkan kepada pembeli (menggantikan kartu 'Belum Lunas').
+4.	Sistem menyediakan tabel daftar transaksi penjualan dengan struktur kolom yang terfokus: KODE, TANGGAL, PELANGGAN, BARANG, TOTAL, STATUS (menampilkan status Selesai dengan dot hijau beserta metode bayar Tunai/QRIS/Transfer), dan AKSI (memuat aksi Detail, Ubah, dan Hapus).
+5.	Sistem menyediakan pengelolaan tindakan transaksi yang fleksibel pada setiap baris transaksi penjualan:
+•	Read (Lihat Detail & Cetak Struk): Menampilkan jendela pop-up Detail Transaksi Penjualan yang memuat kode transaksi, waktu, kasir, pelanggan, rincian barang yang dibeli (nama, SKU, kategori, jumlah, harga satuan, dan subtotal), subtotal, diskon manual, total pembayaran, uang diterima, kembalian, serta tombol terintegrasi untuk mencetak struk (58 mm, 80 mm, atau A4). Fitur cetak struk disediakan langsung di dalam modal detail transaksi agar kolom AKSI pada tabel utama tetap ringkas, bersih, dan rapi.
+•	Update (Ubah Pesanan): Apabila terjadi kesalahan input pesanan (barang belanjaan, kuantitas, pelanggan, atau pembayaran), kasir dapat menekan tombol 'Ubah' pada tabel. Sistem secara otomatis mengarahkan kasir kembali ke halaman formulir Transaksi Penjualan (`/admin/transaksi/jual/baru?edit=[id/kode]`) dengan data keranjang belanja dan rincian transaksi sebelumnya terisi kembali (pre-filled). Saat disimpan, sistem secara otomatis menghitung selisih stok barang (memulihkan stok lama dan memotong stok baru) secara akurat.
+•	Delete (Hapus Transaksi): Memungkinkan Admin menghapus transaksi penjualan yang salah input dengan dialog konfirmasi, di mana sistem secara otomatis memulihkan (mengembalikan) jumlah stok seluruh barang yang bersangkutan ke inventaris retail toko.
+6.	Ketika tombol "+ Transaksi penjualan" diklik, sistem membuka formulir Transaksi Penjualan pada halaman khusus (`/admin/transaksi/jual/baru`) dengan layout 2-kolom terintegrasi:
+•	Kolom Kiri (65%):
+	- Kartu Informasi Penjualan: Memuat kode transaksi otomatis (misal: TJ-0129), pemilihan pelanggan (pencarian pelanggan terdaftar atau opsi Pelanggan Umum untuk walk-in tanpa identitas), tanggal transaksi, dan nama kasir.
+	- Kartu Katalog Barang Jual: Memuat pencarian nama barang atau SKU, filter pil kategori (Semua, Gas, Aksesoris, Pakaian, Perlengkapan, Alas Kaki), filter ketersediaan stok (Semua stok dan Stok ada), pengurutan (Nama A-Z, Nama Z-A, Harga Terendah/Tertinggi), kartu produk berlatar pastel dengan indikator ketersediaan stok real-time, serta navigasi paginasi.
+•	Kolom Kanan (35% - Sticky Panel):
+	- Kartu Keranjang Penjualan: Memuat daftar produk yang dipilih beserta stepper kuantitas (+/-), tombol hapus, kalkulasi subtotal per barang, dan total tagihan belanja.
+	- Kartu Pembayaran: Memuat input diskon manual (Rp), input nominal uang diterima di kasir, pilihan metode pembayaran (Tunai, QRIS, Transfer), kalkulasi uang kembalian secara otomatis, indikator status Selesai (Lunas), serta tombol aksi "Proses pembayaran".
+	- Konfirmasi Pembayaran Kasir: Saat tombol "Proses pembayaran" atau "Simpan Perubahan Transaksi" ditekan, sistem menampilkan dialog konfirmasi ringkasan penjualan (total tagihan, metode pembayaran, uang diterima, dan kembalian) sebelum stok fisik dipotong dan transaksi disimpan.
+7.	Sistem memvalidasi ketersediaan stok sebelum transaksi disimpan untuk mencegah penjualan melebihi jumlah stok fisik yang ada di toko.
+8.	Sistem mengurangi jumlah stok barang secara otomatis dan real-time berdasarkan jumlah barang yang terjual setelah pembayaran berhasil diproses.
+9.	Setelah proses pembayaran berhasil, sistem menampilkan jendela pop-up konfirmasi Transaksi Berhasil yang memuat rincian transaksi, tombol Cetak Struk (pilihan ukuran kertas 58 mm, 80 mm, atau A4), tombol kembali ke tabel penjualan, serta tombol transaksi baru.
+10.	Sistem menyediakan pencarian dan penyaringan transaksi penjualan berdasarkan kode transaksi, nama pelanggan, status transaksi, metode pembayaran, dan rentang tanggal transaksi.
+11.	Sistem menjamin sinkronisasi data transaksi penjualan antara Admin dan Owner: Owner dapat memantau seluruh daftar transaksi penjualan retail, detail barang, dan pendapatan penjualan pada menu Monitoring Transaksi dan Laporan Penjualan secara konsisten tanpa izin untuk mengubah atau menghapus data transaksi.
 G. Pengelolaan Pembayaran
 1.	Sistem menyediakan fitur pencatatan pembayaran pada detail Transaksi Penyewaan dan Transaksi Penjualan.
 2.	Sistem menghubungkan setiap pembayaran dengan transaksi terkait.
@@ -473,7 +494,7 @@ L. Pengelolaan Laporan
 15.	Sistem menampilkan daftar Paket Penyewaan yang pernah disewa berdasarkan periode tertentu.
 16.	Sistem menampilkan Paket Penyewaan yang paling sering disewa.
 17.	Sistem menampilkan jumlah penyewaan dan pendapatan berdasarkan masing-masing Paket Penyewaan.
-18.	Sistem tidak memperhitungkan booking yang Dibatalkan sebagai transaksi penyewaan aktif, namun menyajikan statistik booking (Selesai dan Dibatalkan) secara terpisah untuk keperluan analisis konversi dan performa operasional.
+18.	Sistem tidak memperhitungkan booking yang Dibatalkan sebagai transaksi penyewaan aktif maupun pendapatan sewa yang terealisasi, namun menyajikan tab dan bagian khusus 'Riwayat Booking Dibatalkan' pada Laporan Penyewaan Owner (`/owner/laporan/penyewaan`) yang memuat data kode booking, nama dan kontak pelanggan, tanggal pembatalan, alasan pembatalan wajib, pelaku pembatalan, serta rekapitulasi dana DP hangus untuk keperluan audit trail, analisis konversi, dan pemantauan performa operasional.
 
 3) Laporan Penjualan
 1.	Sistem menampilkan rekapitulasi transaksi penjualan berdasarkan periode tertentu.
@@ -551,6 +572,7 @@ N. Pengelolaan Pengguna dan Hak Akses
 14.	Sistem mencatat riwayat perubahan akun dan hak akses pengguna, termasuk pengguna yang melakukan perubahan dan waktu perubahan.
 15.	Sistem menyediakan mekanisme penonaktifan akun agar pengguna yang sudah tidak memiliki kewenangan tidak dapat masuk ke dalam sistem.
 16.	Sistem menyediakan akun Owner awal yang dibuat melalui proses konfigurasi awal sistem dan dapat digunakan untuk mengelola akun pengguna lainnya.
+17.	Sistem menyediakan dialog konfirmasi keluar akun (logout) saat pengguna menekan tombol Keluar baik pada kartu profil desktop sidebar yang diperluas, tombol ikon logout di bagian bawah sidebar mode kuncup/collapsed (lebar kompak 62px dengan pembatas garis), maupun navigasi mobile, untuk mencegah sesi berakhir secara tidak sengaja di tengah operasional kasir.
 
 O. Profil Akun
 1.	Sistem menyediakan menu Profil Akun bagi setiap pengguna yang telah login.

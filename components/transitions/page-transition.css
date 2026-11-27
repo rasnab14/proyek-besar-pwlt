@@ -1,0 +1,55 @@
+/* ==========================================================================
+   components/transitions/page-transition.css
+   Seamless, professional page transition animations
+   - Smooth fade-in and subtle vertical motion (opacity: 0 -> 1, translateY: 8px -> 0)
+   - Duration: 240ms with refined cubic-bezier(0.16, 1, 0.3, 1)
+   - Hardware-accelerated with will-change
+   - Shared layout persistence (Sidebar & Nav remain completely rock-solid)
+   - Full accessibility with prefers-reduced-motion support
+   ========================================================================== */
+
+.page-transition-content {
+  width: 100%;
+  min-height: 100%;
+  animation: pageFadeSlideIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes pageFadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle staggered glide for hero banner on enter */
+.page-transition-content .head-hero {
+  animation: heroSubtleEntrance 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes heroSubtleEntrance {
+  0% {
+    opacity: 0.65;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* User reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-content,
+  .page-transition-content .head-hero {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

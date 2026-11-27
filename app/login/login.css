@@ -125,6 +125,13 @@
 /* Card entry animation */
 .login-card-anim {
   animation: cardRise 0.7s 2.75s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1), transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Card smooth exit animation upon successful login */
+.login-card-exit {
+  opacity: 0 !important;
+  transform: translateY(-8px) scale(0.98) !important;
 }
 
 @keyframes photoIn { from { opacity: 0; } to { opacity: 1; } }

@@ -61,6 +61,7 @@ function DirectRentalFormInner() {
   // ─── Dialog Sukses & Feedback ───
   const [successTx, setSuccessTx] = useState<TransaksiSewaRecord | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [isConfirmSewaOpen, setIsConfirmSewaOpen] = useState(false);
   const [toastError, setToastError] = useState<string | null>(null);
 
   // Auto generate Next Code on mount
@@ -209,7 +210,7 @@ function DirectRentalFormInner() {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // ─── Submit Transaksi Langsung ───
+  // ─── Submit Transaksi Langsung (dengan Konfirmasi) ───
   const handleSubmitTransaksiLangsung = () => {
     if (!selectedCustomer) {
       showToast("Pilih data pelanggan terlebih dahulu.");
@@ -223,6 +224,13 @@ function DirectRentalFormInner() {
       showToast("Wajib mengisi jenis identitas jaminan fisik (misal: KTP Asli atas nama penyewa atau SIM A).");
       return;
     }
+
+    setIsConfirmSewaOpen(true);
+  };
+
+  const executeProcessTransaksiLangsung = () => {
+    setIsConfirmSewaOpen(false);
+    if (!selectedCustomer) return;
 
     try {
       const mappedItems: SewaItem[] = cart.map((it) => ({
@@ -629,6 +637,74 @@ function DirectRentalFormInner() {
           setIsNewCustModalOpen(false);
         }}
       />
+
+      {/* Modal Konfirmasi Sewa Langsung */}
+      {isConfirmSewaOpen && selectedCustomer && (
+        <div className="tx-modal-overlay" onClick={() => setIsConfirmSewaOpen(false)}>
+          <div
+            className="tx-modal-container"
+            style={{ maxWidth: "480px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="tx-modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#E0F2FE", color: "#0284C7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="tx-modal-title" style={{ fontSize: "16px" }}>Serahkan Barang {trxKode}?</h3>
+                  <div style={{ fontSize: "12px", color: "var(--n600)" }}>{selectedCustomer.nama}</div>
+                </div>
+              </div>
+              <button type="button" className="tx-modal-close" onClick={() => setIsConfirmSewaOpen(false)}>✕</button>
+            </div>
+
+            <div style={{ padding: "14px 20px" }}>
+              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", padding: "10px 14px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12.5px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>Jaminan Fisik:</span>
+                  <span style={{ fontWeight: 600, color: "#1E40AF" }}>{jaminanFisik}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>Durasi Sewa:</span>
+                  <span style={{ fontWeight: 600, color: "#0F172A" }}>{durasiHari} hari (s/d {tanggalSelesaiSewa})</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "#64748B" }}>Barang:</span>
+                  <span style={{ fontWeight: 600, color: "#0F172A" }}>{cart.length} item</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E2E8F0", paddingTop: "6px" }}>
+                  <span style={{ color: "#64748B" }}>Total Lunas:</span>
+                  <span style={{ fontWeight: 700, color: "#166534" }}>{formatRupiah(totalBiaya)} ({metodePembayaran.toUpperCase()})</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="tx-modal-footer" style={{ padding: "10px 20px" }}>
+              <button
+                type="button"
+                className="tx-btn-secondary"
+                style={{ padding: "7px 14px", fontSize: "12.5px" }}
+                onClick={() => setIsConfirmSewaOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="tx-btn-primary"
+                style={{ padding: "7px 14px", fontSize: "12.5px" }}
+                onClick={executeProcessTransaksiLangsung}
+              >
+                Ya, Serahkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Transaksi Berhasil & Cetak Struk */}
       {successTx && (

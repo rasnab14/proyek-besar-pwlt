@@ -62,6 +62,7 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
   // State ekspansi: hover di desktop atau pin manual (tablet/desktop)
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -301,26 +302,141 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
           })}
         </nav>
 
-        {/* ── 3. Bottom User Profile Card (Pinned at bottom) ── */}
-        <div className="side-profile">
-          <div className="side-profile-avatar" aria-hidden="true">
-            {info.initial}
+        {/* ── 3. Bottom User Profile & Collapsed Logout Section ── */}
+        <div className="side-bottom-section">
+          {/* Collapsed Mode Logout (Divider + Red Logout Icon matching reference) */}
+          <div className="side-collapsed-logout-wrap">
+            <div className="side-collapsed-divider" />
+            <button
+              type="button"
+              className="side-collapsed-logout-btn"
+              onClick={() => setIsLogoutConfirmOpen(true)}
+              title="Keluar dari akun"
+              aria-label="Keluar dari akun"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
-          <div className="side-profile-meta">
-            <b className="side-profile-name">{userName ?? info.name}</b>
-            <span className="side-profile-role">{info.label}</span>
+
+          {/* Expanded Mode Profile Card */}
+          <div className="side-profile">
+            <div className="side-profile-avatar" aria-hidden="true">
+              {info.initial}
+            </div>
+            <div className="side-profile-meta">
+              <b className="side-profile-name">{userName ?? info.name}</b>
+              <span className="side-profile-role">{info.label}</span>
+            </div>
+            <button
+              type="button"
+              className="side-logout-btn"
+              onClick={() => setIsLogoutConfirmOpen(true)}
+              aria-label="Keluar dari akun"
+              title="Keluar dari akun"
+            >
+              Keluar
+            </button>
           </div>
-          <button
-            type="button"
-            className="side-logout-btn"
-            onClick={handleLogout}
-            aria-label="Keluar dari akun"
-            title="Keluar dari akun"
-          >
-            Keluar
-          </button>
         </div>
       </aside>
+
+      {/* Modal Konfirmasi Logout */}
+      {isLogoutConfirmOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            padding: "16px",
+          }}
+          onClick={() => setIsLogoutConfirmOpen(false)}
+        >
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "420px",
+              width: "100%",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#0F172A" }}>Keluar dari Akun?</h3>
+                <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "#64748B" }}>Sesi akun akan diakhiri.</p>
+              </div>
+            </div>
+            <p style={{ margin: "0 0 20px 0", fontSize: "13.5px", color: "#334155" }}>
+              Apakah Anda yakin ingin keluar dari sistem?
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => setIsLogoutConfirmOpen(false)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "1px solid #CBD5E1",
+                  background: "#F8FAFC",
+                  color: "#334155",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "#DC2626",
+                  color: "#FFFFFF",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

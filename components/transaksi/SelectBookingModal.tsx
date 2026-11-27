@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { getStoredBookings } from "@/components/booking/bookingStore";
 import { BookingRecord } from "@/components/booking/types";
 import { MetodePembayaran, TransaksiSewaRecord } from "./types";
-import { createTransaksiFromBooking } from "./sewaStore";
+import { createTransaksiFromBooking, getStoredTransaksiSewa } from "./sewaStore";
 
 interface SelectBookingModalProps {
   isOpen: boolean;
@@ -22,9 +22,23 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
 
   useEffect(() => {
     if (isOpen) {
-      // Sesuai §F.1.2: Transaksi penyewaan hanya dapat dibuat dari booking berstatus 'Selesai'
+      // Sesuai §F.1.2: Transaksi penyewaan hanya dapat dibuat dari booking berstatus 'Selesai' yang belum dikonversi
+      // Booking yang dihapus atau 'dibatalkan' DILARANG diproses menjadi transaksi sewa
       const allBookings = getStoredBookings();
-      const readyBookings = allBookings.filter((b) => b.status === "selesai");
+      const existingTx = getStoredTransaksiSewa();
+      const convertedBookingIds = new Set(
+        existingTx
+          .filter((t) => t.bookingId || t.bookingKode)
+          .flatMap((t) => [t.bookingId, t.bookingKode].filter(Boolean) as string[])
+      );
+
+      const readyBookings = allBookings.filter(
+        (b) =>
+          b.status === "selesai" &&
+          !convertedBookingIds.has(b.id) &&
+          !convertedBookingIds.has(b.kode)
+      );
+
       setAvailableBookings(readyBookings);
       if (readyBookings.length > 0) {
         setSelectedBookingId(readyBookings[0].id);

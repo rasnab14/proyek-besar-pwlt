@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const [autoFillBadge, setAutoFillBadge] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,12 +78,12 @@ export default function LoginPage() {
               .maybeSingle();
 
             const role = profile?.role || (trimmedUser.includes("owner") ? "owner" : "admin");
+            const target = role === "owner" ? "/owner/dashboard" : "/admin/dashboard";
 
-            if (role === "owner") {
-              router.push("/owner/dashboard");
-            } else {
-              router.push("/admin/dashboard");
-            }
+            setIsExiting(true);
+            setTimeout(() => {
+              router.push(target);
+            }, 240);
             return;
           }
         }
@@ -90,11 +91,14 @@ export default function LoginPage() {
 
       // 2. Fallback mode (jika Supabase belum dihubungkan / offline testing)
       await new Promise((res) => setTimeout(res, 400));
-      if (trimmedUser.toLowerCase().includes("owner")) {
-        router.push("/owner/dashboard");
-      } else {
-        router.push("/admin/dashboard");
-      }
+      const target = trimmedUser.toLowerCase().includes("owner")
+        ? "/owner/dashboard"
+        : "/admin/dashboard";
+
+      setIsExiting(true);
+      setTimeout(() => {
+        router.push(target);
+      }, 240);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat masuk.";
       setErrorMsg(msg);
@@ -148,7 +152,7 @@ export default function LoginPage() {
       )}
 
       {/* ── Login Card (Tailwind CSS) ── */}
-      <main className="relative z-20 w-full max-w-[390px] mx-3 sm:mx-4 my-4 sm:my-6 bg-white rounded-2xl p-5 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-3.5 sm:gap-4 login-card-anim">
+      <main className={`relative z-20 w-full max-w-[390px] mx-3 sm:mx-4 my-4 sm:my-6 bg-white rounded-2xl p-5 sm:p-8 shadow-2xl border border-slate-100 flex flex-col gap-3.5 sm:gap-4 login-card-anim ${isExiting ? "login-card-exit" : ""}`}>
         {/* Brand / Logo */}
         <div className="flex flex-col items-center gap-1.5">
           <div className="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center shadow-md">
