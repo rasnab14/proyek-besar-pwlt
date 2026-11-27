@@ -128,40 +128,18 @@ export default function MobileNav({ role, userName }: Props) {
               </svg>
             </button>
           ) : (
-            <button
-              type="button"
-              className="mob-hamburger-btn"
-              onClick={handleOpenMenu}
-              aria-label="Buka menu navigasi"
-              title="Buka menu"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
+            <div className="mob-brand-logo-wrap" aria-hidden="true">
+              <img
+                src="/logo-19summit.jpg"
+                alt="19 Summit"
+                className="mob-brand-logo"
+                width={30}
+                height={30}
+              />
+            </div>
           )}
 
-          <div className="mob-brand-wrap">
-            <img
-              src="/logo-19summit.jpg"
-              alt="19 Summit"
-              className="mob-brand-logo"
-              width={28}
-              height={28}
-            />
-            <h1 className="mob-header-title">{currentTitle}</h1>
-          </div>
+          <h1 className="mob-header-title">{currentTitle}</h1>
         </div>
 
         <Link
