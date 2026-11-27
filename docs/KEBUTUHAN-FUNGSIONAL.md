@@ -242,7 +242,7 @@ F. Pengelolaan Transaksi
 2.	Sistem mendukung transaksi penyewaan yang berasal dari booking maupun transaksi langsung tanpa booking:
 •	Transaksi Penyewaan yang berasal dari pemesanan hanya dapat dibuat dari booking yang berstatus Selesai.
 •	Booking yang berstatus Draft atau Dibatalkan TIDAK BOLEH dipilih atau diproses menjadi Transaksi Penyewaan.
-•	Proses pemrosesan booking ke Transaksi Penyewaan dilakukan langsung dari menu Transaksi Penyewaan dengan memilih data booking berstatus Selesai yang tersedia (bukan melalui tombol aksi "Proses Sewa" pada menu Booking).
+•	Pada menu Transaksi Penyewaan, tombol aksi "Dari booking" mengarahkan pengguna secara langsung ke menu Booking (`/admin/booking`) untuk meninjau dan mengelola data reservasi booking.
 •	Data booking otomatis terisi secara lengkap ke dalam transaksi, termasuk data Customer, produk atau paket, jumlah unit, periode sewa, nominal DP yang telah dibayar, dan rincian biaya, sehingga Admin tidak perlu memasukkan ulang data yang sudah tersedia.
 3.	Sistem menyediakan pemilihan data pelanggan dan barang yang akan disewa.
 4.	Sistem menampilkan informasi ketersediaan barang berdasarkan periode penyewaan.
@@ -251,7 +251,10 @@ F. Pengelolaan Transaksi
 7.	Sistem menyediakan informasi tanggal dan waktu mulai penyewaan, tanggal dan waktu selesai penyewaan, tanggal pengambilan, serta tanggal pengembalian barang.
 8.	Sistem menyediakan pencatatan jenis identitas jaminan fisik (seperti KTP, SIM, atau KTM) yang ditulis secara manual oleh Admin tanpa memerlukan pencatatan nomor identitas jaminan, pada saat proses serah terima atau pengambilan fisik barang sewa di menu Transaksi Penyewaan (jaminan tidak dicatat pada formulir tambah pelanggan dan tidak dicatat pada menu Booking).
 9.	Sistem menyediakan kode transaksi penyewaan secara otomatis dan memastikan transaksi penyewaan tetap memiliki relasi (linking/foreign key) dengan booking asal agar riwayat pemesanan hingga transaksi dapat ditelusuri secara utuh.
-10.	Sistem menyediakan informasi status transaksi, status pembayaran, dan status pengambilan barang secara terpisah.
+10.	Sistem menampilkan ringkasan informasi operasional pada menu Transaksi Penyewaan yang terfokus:
+•	4 Kartu Ringkasan (KPI): Sedang Disewa (transaksi aktif di pelanggan), Belum Diambil (transaksi yang menunggu serah terima barang), Belum Lunas (transaksi dengan sisa tagihan beserta total nominalnya), dan Sudah Lunas (transaksi yang seluruh tagihan sewanya telah lunas Rp 0 sisa). Status keterlambatan dan perhitungan denda dikelola secara eksklusif pada menu Pengembalian.
+•	Status Pengambilan: Belum Diambil (barang fisik masih di toko) dan Sudah Diambil (barang fisik telah diserahterimakan ke pelanggan).
+•	Status Transaksi: Menggunakan indikator status yang tegas, yaitu Belum Lunas (masih terdapat sisa tagihan yang harus dilunasi saat serah terima) dan Lunas (seluruh biaya sewa telah tuntas Rp 0 sisa), tanpa kolom pembayaran terpisah yang redundan pada tabel transaksi. Pemantauan keterlambatan, denda, dan kondisi fisik pengembalian unit dikelola khusus pada menu Pengembalian.
 11.	Sistem menyediakan detail transaksi penyewaan beserta informasi jaminan, rincian barang, dan riwayat pembayarannya.
 12.	Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi, pelanggan, periode transaksi, dan status transaksi.
 13.	Sistem menyediakan tindakan untuk memproses pengambilan barang oleh pelanggan setelah data transaksi penyewaan dicatat.
@@ -265,7 +268,9 @@ F. Pengelolaan Transaksi
 •	Sistem tidak menambahkan proses pembayaran DP baru apabila DP sudah dicatat pada menu Booking.
 •	Sistem menghitung sisa pembayaran secara otomatis: Sisa Pembayaran = Total Biaya Sewa dikurangi seluruh pembayaran yang sudah diterima, termasuk DP yang sudah tercatat pada booking asal.
 20.	Sistem menyediakan pilihan metode pembayaran pelunasan, yaitu tunai, QRIS, dan transfer.
-21.	Sistem menyediakan informasi status pembayaran, yaitu Belum Dibayar, Belum Lunas, dan Lunas.
+21.	Sistem menyediakan informasi status pembayaran yang tegas, yaitu Belum Lunas dan Lunas:
+•	Belum Lunas: Diterapkan apabila masih terdapat sisa tagihan sewa yang belum dilunasi oleh pelanggan (termasuk booking yang baru membayar DP atau booking tanpa DP yang belum melunasi saat serah terima).
+•	Lunas: Diterapkan secara otomatis apabila seluruh tagihan sewa telah dibayar penuh saat serah terima barang atau pada transaksi langsung.
 22.	Sistem memperbarui status pembayaran secara otomatis menjadi Lunas apabila seluruh tagihan telah dibayarkan.
 23.	Sistem menyimpan riwayat pembayaran DP dan pelunasan beserta tanggal, nominal, metode pembayaran, dan pengguna yang mencatat.
 24.	Sistem menyimpan riwayat perubahan transaksi yang dilakukan oleh pengguna.
@@ -275,15 +280,31 @@ F. Pengelolaan Transaksi
 28.	Sistem mengintegrasikan rincian Paket Penyewaan dari booking yang dilanjutkan menjadi transaksi penyewaan tanpa perlu memasukkan ulang data paket dan barang penyusunnya.
 29.	Sistem mengalokasikan stok setiap barang penyusun paket berdasarkan jumlah paket yang disewa.
 30.	Sistem mencatat barang penyusun paket yang benar-benar diserahkan kepada pelanggan sebagai bagian dari transaksi penyewaan.
-31.	Sistem memisahkan katalog pada halaman Transaksi Penyewaan ke dalam dua tab, yaitu Barang Satuan dan Paket, dengan keranjang yang digunakan bersama sehingga satu transaksi dapat memuat barang satuan sekaligus paket. Ketersediaan paket dihitung dari ketersediaan barang penyusunnya.
-32.	Setelah pembayaran pelunasan dicatat, sistem menampilkan halaman Pelunasan Berhasil yang memuat rincian transaksi, riwayat pembayaran (DP dan pelunasan), dan status pembayaran Lunas, serta menyediakan tindakan untuk mencetak bukti, melihat detail transaksi, dan kembali ke menu Transaksi Penyewaan.
-33.	Sistem menyediakan tombol kembali ke menu Transaksi Penyewaan pada halaman transaksi penyewaan langsung yang telah berhasil disimpan.
+31.	Sistem menyediakan formulir tersendiri untuk Transaksi Penyewaan Langsung (Walk-In) pada halaman khusus (`/admin/transaksi/sewa/baru`) dengan konsep layout 2-kolom terintegrasi (serupa dengan konsep formulir Catat Booking):
+•	Ketentuan Operasional Transaksi Langsung (Walk-In di Toko):
+	1. Pelanggan datang langsung ke toko hari itu juga (walk-in) dan langsung membawa barang sewa pulang.
+	2. Wajib dicatat: Tersedia input manual jenis identitas jaminan fisik (misal: KTP Asli atas nama penyewa atau SIM A) tanpa pencatatan nomor identitas.
+	3. Tanpa DP: Karena langsung disewa hari itu (Hari-H), transaksi wajib langsung bayar LUNAS 100% di kasir saat serah terima barang.
+	4. Metode pembayaran untuk Pelunasan Total Sewa di kasir diselesaikan saat itu juga (pilihan: Tunai, QRIS, Transfer).
+	5. Transaksi yang berhasil disimpan langsung menghasilkan transaksi sewa dengan status: Sudah Diambil dan Lunas.
+•	Struktur Layout Formulir:
+	- Kolom Kiri (65%): Memuat Kartu Informasi Pelanggan & Jadwal Sewa (pilihan pelanggan terdaftar atau tambah baru, tanggal sewa Hari-H, durasi sewa, serta tanggal selesai sewa otomatis s.d. 21.00 WIB) dan Kartu Katalog Barang & Paket (dipisahkan ke dalam dua tab: Barang Satuan dan Paket Penyewaan, dilengkapi pencarian dan filter kategori).
+	- Kolom Kanan (35% - Sticky Panel): Memuat Keranjang Transaksi Sewa (dengan stepper kuantitas dan kalkulasi subtotal dinamis terhadap durasi sewa) serta Kartu Pembayaran Kasir Walk-In (input manual Jenis Identitas Jaminan Fisik saat serah terima barang diletakkan tepat di atas pilihan metode pembayaran tunai/QRIS/transfer, input uang diterima, kalkulasi kembalian, indikator status Lunas dan Sudah Diambil, serta tombol Selesaikan & Serahkan Barang tanpa tombol simpan draft).
+32.	Setelah pembayaran pelunasan dicatat, sistem menampilkan konfirmasi Transaksi Berhasil yang memuat rincian transaksi, status pembayaran Lunas, status pengambilan Sudah Diambil, serta menyediakan tindakan untuk mencetak bukti (pop-up struk 58mm/80mm/A4), membuat transaksi baru, dan kembali ke menu Transaksi Penyewaan.
+33.	Sistem menyediakan tombol kembali ke menu Transaksi Penyewaan pada halaman formulir Transaksi Langsung dan konfirmasi transaksi berhasil.
 34.	Sistem menyediakan fitur Cetak Bukti/Struk pada halaman detail transaksi penyewaan dan halaman transaksi berhasil. Fitur ini menampilkan jendela pop-up di tengah layar yang memuat pilihan ukuran kertas (58 mm, 80 mm, atau A4), pilihan informasi yang ditampilkan (nama kasir, rincian pembayaran, serta syarat dan ketentuan), dan jumlah salinan, serta menyediakan tindakan cetak dan unduh PDF. Struk menampilkan status Belum Lunas beserta sisa tagihan apabila transaksi belum dilunasi.
 35.	Sistem menjamin sinkronisasi data transaksi penyewaan antara Admin dan Owner:
 •	Booking yang dilanjutkan menjadi Transaksi Penyewaan tetap terhubung secara utuh dengan booking asal tanpa perlu memasukkan ulang data pelanggan, barang atau paket, periode sewa, total harga, dan pembayaran DP yang telah diterima.
 •	Data transaksi penyewaan, status pengambilan barang, pencatatan jaminan, dan pembayaran pelunasan tercatat pada satu sumber data yang sama dan dapat dipantau oleh Owner melalui menu Monitoring Transaksi dan Laporan sesuai hak aksesnya tanpa mengubah data operasional secara langsung.
 •	Perubahan informasi pembayaran yang dilakukan melalui menu Transaksi Penyewaan langsung tercermin pada pemantauan dan laporan keuangan Owner secara konsisten.
 36.	Menu Transaksi Penyewaan TIDAK BOLEH digunakan untuk menyelesaikan proses pengembalian barang. Proses pengembalian barang, pencatatan kondisi fisik barang setelah sewa, dan penentuan keterlambatan hanya dan wajib dilakukan melalui menu Pengembalian.
+37.	Perbedaan Kebutuhan Fungsional antara Formulir Catat Booking dan Formulir Transaksi Langsung:
+•	Tujuan & Waktu Transaksi: Catat Booking digunakan untuk pemesanan/reservasi barang di masa depan (H-2 atau lebih awal); Transaksi Langsung digunakan untuk pelanggan datang langsung ke toko (walk-in) pada hari H.
+•	Status Pengambilan Awal: Catat Booking menghasilkan status 'Belum Diambil' (barang masih tersimpan di gudang toko hingga pelanggan datang mengambil); Transaksi Langsung menghasilkan status 'Sudah Diambil' secara instan karena serah terima fisik unit barang dilakukan langsung saat transaksi disimpan di kasir.
+•	Pencatatan Jaminan Fisik: Formulir Catat Booking TIDAK memuat field jaminan fisik karena barang belum diambil; Formulir Transaksi Langsung WAJIB mencatat Jenis Identitas Jaminan Fisik (KTP, SIM, KTM ditulis manual tanpa nomor jaminan) karena serah terima unit barang dilakukan saat itu juga di kasir toko.
+•	Ketentuan Pembayaran & DP: Catat Booking menerapkan aturan uang muka (DP minimal 25% untuk pemesanan H-2 atau lebih) dengan status Belum Lunas; Transaksi Langsung mewajibkan pembayaran penuh 100% di kasir saat serah terima sehingga status transaksi langsung menjadi 'Lunas' tanpa sisa tagihan.
+•	Dukungan Status Draft: Catat Booking mendukung penyimpanan sebagai 'Draft' yang dapat disunting kembali kapan saja melalui fitur 'Lanjutkan Booking Draft'; Transaksi Langsung TIDAK memiliki status Draft, melainkan langsung tersimpan secara definitif dan langsung mengalokasikan stok unit menjadi 'Disewa'.
+•	Bukti Transaksi yang Diterbitkan: Catat Booking mencetak 'Bukti Booking / Reservasi' yang memuat info nominal DP dan sisa tagihan yang harus dilunasi nanti saat serah terima barang; Transaksi Langsung mencetak 'Struk Bukti Sewa & Serah Terima' dengan status Lunas penuh.
 
 2) Transaksi Penjualan
 1.	Sistem menyediakan submenu Transaksi Penjualan untuk mencatat transaksi penjualan barang.

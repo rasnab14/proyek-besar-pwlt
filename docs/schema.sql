@@ -19,7 +19,7 @@ CREATE TYPE tipe_item                 AS ENUM ('barang','paket');
 CREATE TYPE status_sewa               AS ENUM ('aktif','selesai','batal');
 CREATE TYPE status_pengambilan        AS ENUM ('belum_diambil','sudah_diambil');
 CREATE TYPE status_pengembalian       AS ENUM ('belum_dikembalikan','sebagian','seluruhnya');
-CREATE TYPE status_pembayaran         AS ENUM ('belum_dibayar','belum_lunas','lunas');
+CREATE TYPE status_pembayaran         AS ENUM ('belum_lunas','lunas');
 CREATE TYPE metode_bayar              AS ENUM ('tunai','qris','transfer');
 CREATE TYPE jenis_pembayaran          AS ENUM ('dp','pelunasan','biaya_tambahan','penjualan');
 CREATE TYPE jenis_biaya_tambahan      AS ENUM ('denda_keterlambatan','kerusakan','kehilangan');
@@ -314,7 +314,7 @@ CREATE TABLE transaksi_sewa (
   status                    status_sewa NOT NULL DEFAULT 'aktif',
   status_pengambilan        status_pengambilan  NOT NULL DEFAULT 'belum_diambil',
   status_pengembalian       status_pengembalian NOT NULL DEFAULT 'belum_dikembalikan',
-  status_pembayaran         status_pembayaran   NOT NULL DEFAULT 'belum_dibayar',
+  status_pembayaran         status_pembayaran   NOT NULL DEFAULT 'belum_lunas',
   tgl_booking               date,
   tgl_mulai                 timestamptz NOT NULL,
   durasi_hari               int NOT NULL CHECK (durasi_hari >= 1),
