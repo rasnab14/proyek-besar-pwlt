@@ -12,6 +12,7 @@ interface BookingDataTableProps {
   bookings: BookingRecord[];
   onViewDetail: (booking: BookingRecord) => void;
   onEditBooking?: (booking: BookingRecord) => void;
+  onDeleteBooking?: (booking: BookingRecord) => void;
   onConfirmBooking?: (booking: BookingRecord) => void;
   onCancelBooking?: (booking: BookingRecord) => void;
   onProcessRental?: (booking: BookingRecord) => void;
@@ -22,6 +23,7 @@ export function BookingDataTable({
   bookings,
   onViewDetail,
   onEditBooking,
+  onDeleteBooking,
   onCancelBooking,
   onProcessRental,
 }: BookingDataTableProps) {
@@ -158,42 +160,82 @@ export function BookingDataTable({
                 <td className="tar">
                   <div className="table-actions" style={{ justifyContent: "flex-end" }}>
                     {role === "admin" ? (
-                      <>
-                        {/* Admin Action logic: Lanjutkan (Draft) & Detail */}
-                        {booking.status === "draft" && (
-                          <Link
-                            href={`/admin/booking/baru?id=${booking.id}`}
-                            className="btn pri sm"
-                            title="Lanjutkan lengkapi data booking menggunakan form Catat Booking"
-                          >
-                            Lanjutkan
-                          </Link>
-                        )}
-
-                        {/* Always provide Detail button */}
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        {/* 1. Detail */}
                         <button
                           type="button"
                           onClick={() => onViewDetail(booking)}
-                          className="btn sm"
+                          style={{
+                            background: "#F8FAFC",
+                            border: "1px solid #CBD5E1",
+                            borderRadius: "6px",
+                            padding: "5px 9px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "#334155",
+                            cursor: "pointer",
+                          }}
                           title="Lihat rincian lengkap booking"
                         >
                           Detail
                         </button>
-                      </>
+
+                        {/* 2. Ubah */}
+                        <button
+                          type="button"
+                          onClick={() => onEditBooking?.(booking)}
+                          style={{
+                            background: "#FEF3C7",
+                            border: "1px solid #FDE68A",
+                            borderRadius: "6px",
+                            padding: "5px 9px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "#92400E",
+                            cursor: "pointer",
+                          }}
+                          title="Ubah data pesanan booking"
+                        >
+                          Ubah
+                        </button>
+
+                        {/* 3. Hapus */}
+                        <button
+                          type="button"
+                          onClick={() => onDeleteBooking?.(booking)}
+                          style={{
+                            background: "#FEE2E2",
+                            border: "1px solid #FECACA",
+                            borderRadius: "6px",
+                            padding: "5px 9px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "#DC2626",
+                            cursor: "pointer",
+                          }}
+                          title="Hapus data booking (dengan konfirmasi)"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     ) : (
-                      /* Owner Action: Hanya tombol Lihat */
+                      /* Owner Action: Hanya tombol Detail */
                       <button
                         type="button"
                         onClick={() => onViewDetail(booking)}
-                        className="btn sm"
                         style={{
-                          background: "var(--n50)",
-                          borderColor: "var(--line)",
-                          color: "var(--k)",
+                          background: "#F8FAFC",
+                          border: "1px solid #CBD5E1",
+                          borderRadius: "6px",
+                          padding: "5px 9px",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "#334155",
+                          cursor: "pointer",
                         }}
                         title="Lihat detail monitoring booking"
                       >
-                        Lihat
+                        Detail
                       </button>
                     )}
                   </div>

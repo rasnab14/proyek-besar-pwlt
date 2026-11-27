@@ -357,29 +357,16 @@ export function BookingDetailModal({
               )}
 
               {booking.status === "selesai" && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onCancelBooking?.(booking);
-                    }}
-                    className="btn sm dng"
-                    title="Batalkan booking dengan alasan"
-                  >
-                    Batalkan Booking
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onEditBooking?.(booking);
-                    }}
-                    className="btn sm"
-                    title="Ubah data booking jika ada perubahan"
-                  >
-                    Ubah Data
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCancelBooking?.(booking);
+                  }}
+                  className="btn sm dng"
+                  title="Batalkan booking dengan alasan"
+                >
+                  Batalkan Booking
+                </button>
               )}
             </>
           )}

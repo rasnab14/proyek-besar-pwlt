@@ -16,6 +16,7 @@ import {
   DirectRentalModal,
   SewaDetailModal,
   PrintReceiptModal,
+  HandoverModal,
 } from "@/components/transaksi";
 
 export default function AdminTransaksiSewaPage() {
@@ -33,6 +34,7 @@ export default function AdminTransaksiSewaPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [receiptRecord, setReceiptRecord] = useState<TransaksiSewaRecord | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [handoverRecord, setHandoverRecord] = useState<TransaksiSewaRecord | null>(null);
 
   // Sync data with storage
   const reloadData = () => {
@@ -84,36 +86,7 @@ export default function AdminTransaksiSewaPage() {
   };
 
   const handleProcessHandover = (r: TransaksiSewaRecord) => {
-    const jaminan = prompt(
-      `Masukkan jaminan fisik yang diserahkan pelanggan (${r.pelanggan.nama}):`,
-      r.jaminanFisik || "KTP Asli"
-    );
-    if (!jaminan) return;
-
-    const now = new Date();
-    const nowStr = now.toISOString().replace("T", " ").substring(0, 16);
-
-    const updated: TransaksiSewaRecord = {
-      ...r,
-      jaminanFisik: jaminan,
-      statusPengambilan: "sudah_diambil",
-      status: "lunas",
-      statusPembayaran: "lunas",
-      sisaTagihan: 0,
-      waktuPengambilanAktual: nowStr,
-      riwayat: [
-        ...(r.riwayat || []),
-        {
-          waktu: nowStr,
-          user: "Admin Toko",
-          aksi: "Serah Terima & Pelunasan Kasir Selesai",
-          catatan: `Barang diserahkan. Jaminan: ${jaminan}. Status lunas.`,
-        },
-      ],
-    };
-
-    saveOrUpdateTransaksiSewa(updated);
-    reloadData();
+    setHandoverRecord(r);
   };
 
   return (
@@ -180,6 +153,17 @@ export default function AdminTransaksiSewaPage() {
         record={receiptRecord}
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
+      />
+
+      {/* Formulir Serah Terima & Pelunasan Sewa */}
+      <HandoverModal
+        isOpen={Boolean(handoverRecord)}
+        record={handoverRecord}
+        onClose={() => setHandoverRecord(null)}
+        onSuccess={(updated) => {
+          reloadData();
+          handleOpenReceipt(updated);
+        }}
       />
     </div>
   );

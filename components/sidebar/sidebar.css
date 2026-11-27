@@ -56,8 +56,8 @@
   }
 
   .side-spacer.collapsed {
-    width: 78px;
-    flex: 0 0 78px;
+    width: 62px;
+    flex: 0 0 62px;
   }
 
   .side-spacer.expanded {
@@ -66,9 +66,15 @@
   }
 
   .side.collapsed {
-    width: 78px;
-    flex: 0 0 78px;
-    padding: 18px 8px 20px;
+    width: 62px;
+    flex: 0 0 62px;
+    padding: 16px 6px 16px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .side.collapsed::-webkit-scrollbar {
+    display: none;
   }
 
   .side.expanded {
@@ -413,8 +419,53 @@
 }
 
 /* ==========================================================================
-   3. BOTTOM USER PROFILE SECTION
+   3. BOTTOM USER PROFILE & COLLAPSED LOGOUT SECTION
    ========================================================================== */
+.side-bottom-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.side-collapsed-logout-wrap {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.side-collapsed-divider {
+  width: 32px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 6px auto 8px;
+}
+
+.side-collapsed-logout-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #F87171;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 0;
+}
+
+.side-collapsed-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+  transform: scale(1.05);
+}
+
 .side-profile {
   margin-top: auto;
   border-radius: var(--r-lg);
@@ -481,11 +532,19 @@
    COLLAPSED VS EXPANDED RULES (DESKTOP & TABLET >= 768px)
    ========================================================================== */
 @media (min-width: 768px) {
-  /* ─── Collapsed State (78px) ─── */
+  /* ─── Collapsed State (62px - Slim & Compact) ─── */
   .side.collapsed .side-brand {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .side.collapsed .side-logo-circle {
+    width: 38px;
+    height: 38px;
+    padding: 2px;
   }
 
   .side.collapsed .side-brand-info,
@@ -494,24 +553,38 @@
     opacity: 0;
   }
 
+  .side.collapsed .side-nav {
+    flex: 0 0 auto;
+    overflow-y: visible;
+    gap: 8px;
+    padding-right: 0;
+  }
+
   .side.collapsed .side-nav-link {
     justify-content: center;
     padding: 0;
+    min-height: 38px;
   }
 
   .side.collapsed .side-nav-link.is-active::before {
-    left: -8px;
-    width: 3.5px;
+    left: -6px;
+    width: 3px;
   }
 
   .side.collapsed .side-parent-btn {
     justify-content: center;
     padding: 0;
+    min-height: 38px;
   }
 
   .side.collapsed .side-parent-btn.is-active-parent::before {
-    left: -8px;
-    width: 3.5px;
+    left: -6px;
+    width: 3px;
+  }
+
+  .side.collapsed .side-item-icon-box {
+    width: 38px;
+    height: 38px;
   }
 
   .side.collapsed .side-chevron-box {
@@ -529,26 +602,43 @@
   }
 
   .side.collapsed .side-profile {
-    justify-content: center;
-    padding: 10px 0 4px;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    display: none !important;
   }
 
-  .side.collapsed .side-profile-avatar {
-    width: 38px;
-    height: 38px;
-    font-size: 13px;
+  .side.collapsed .side-bottom-section {
+    margin-top: 14px;
+    margin-bottom: 8px;
+    flex: 0 0 auto;
   }
 
-  .side.collapsed .side-profile-meta,
-  .side.collapsed .side-logout-btn {
-    display: none;
-    opacity: 0;
+  .side.collapsed .side-collapsed-logout-wrap {
+    display: flex;
+  }
+
+  .side.collapsed .side-collapsed-divider {
+    width: 32px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 auto 10px;
   }
 
   /* ─── Expanded State (300px) ─── */
+  .side.expanded .side-nav {
+    flex: 1 1 0%;
+    gap: 4px;
+  }
+
+  .side.expanded .side-bottom-section {
+    margin-top: auto;
+  }
+
+  .side.expanded .side-collapsed-logout-wrap {
+    display: none !important;
+  }
+
+  .side.expanded .side-profile {
+    display: flex;
+  }
   .side.expanded .side-brand {
     justify-content: flex-start;
     padding: 2px 4px 14px;
