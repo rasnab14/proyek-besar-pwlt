@@ -184,10 +184,16 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
           title={isPinned ? "Sidebar disematkan (klik untuk lepas)" : "Klik untuk sematkan sidebar"}
         >
           <div className="side-logo-circle" aria-hidden="true">
-            S
+            <img
+              src="/logo-19summit.jpg"
+              alt="19 Summit Logo"
+              className="side-logo-img"
+              width={42}
+              height={42}
+            />
           </div>
           <div className="side-brand-info">
-            <div className="side-brand-name">SUMMIT</div>
+            <div className="side-brand-name">19 SUMMIT</div>
             <div className="side-brand-sub">Rental &amp; Store</div>
           </div>
 

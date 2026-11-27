@@ -31,6 +31,21 @@ export default function MobileMenuPage({ role }: Props) {
 
   return (
     <div className="mob-menu-page">
+      <div className="mob-menu-brand-header">
+        <div className="mob-menu-logo-circle">
+          <img
+            src="/logo-19summit.jpg"
+            alt="19 Summit"
+            className="mob-menu-logo-img"
+            width={40}
+            height={40}
+          />
+        </div>
+        <div>
+          <div className="mob-menu-brand-name">19 SUMMIT</div>
+          <div className="mob-menu-brand-sub">Rental &amp; Store Outdoor</div>
+        </div>
+      </div>
       <nav className="mob-menu-list" aria-label="Daftar Menu Lengkap">
         {navItems.map((item) => {
           if (item.type === "link") {

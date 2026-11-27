@@ -152,7 +152,16 @@ export default function MobileNav({ role, userName }: Props) {
             </button>
           )}
 
-          <h1 className="mob-header-title">{currentTitle}</h1>
+          <div className="mob-brand-wrap">
+            <img
+              src="/logo-19summit.jpg"
+              alt="19 Summit"
+              className="mob-brand-logo"
+              width={28}
+              height={28}
+            />
+            <h1 className="mob-header-title">{currentTitle}</h1>
+          </div>
         </div>
 
         <Link
