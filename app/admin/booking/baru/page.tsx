@@ -1,83 +1,222 @@
 // app/admin/booking/baru/page.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import "@/components/booking/booking.css";
+import "@/components/booking/create/booking-create.css";
 import {
+  CustomerData,
+  CatalogProduct,
+  CartItem,
+  PaymentMethod,
+  MOCK_CUSTOMERS,
+  MOCK_PRODUCTS,
+  BookingInformationCard,
+  ProductCatalogCard,
+  BookingCartCard,
+  BookingPaymentCard,
+  BookingSuccessModal,
+  getTodayString,
+  addDays,
+  calculateEndDate,
+  calculateHDiffBetween,
+} from "@/components/booking/create";
+import {
+  calculatePeriodBaseStock,
+  calculateDynamicCatalogWithCart,
+} from "@/components/booking/create/stockService";
+import {
+  getBookingByIdOrCode,
+  saveOrUpdateBooking,
   BookingRecord,
   BookingItem,
-  CatalogItem,
-  DPMethod,
-  CATALOG_ITEMS,
 } from "@/components/booking";
-import { formatRupiah, formatTanggal } from "@/lib/format";
 
-export default function AdminBookingBaruPage() {
-  const router = useRouter();
+// Deterministic default dates for safe SSR hydration matching
+const DEFAULT_BOOKING_DATE = "2026-11-27";
+const DEFAULT_RENTAL_START = "2026-11-30";
 
-  // Form States
-  const [nama, setNama] = useState("");
-  const [telepon, setTelepon] = useState("");
-  const [noIdentitas, setNoIdentitas] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [catatan, setCatatan] = useState("");
+function BookingFormInner() {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id") || searchParams.get("edit");
 
-  const [tanggalPengambilan, setTanggalPengambilan] = useState("2026-11-28");
-  const [jamPengambilan, setJamPengambilan] = useState("09:00 WIB");
-  const [durasiHari, setDurasiHari] = useState(2);
-  const [tanggalPengembalian, setTanggalPengembalian] = useState("2026-11-30");
+  // ─── Existing Draft Lookup ───
+  const [existingDraft, setExistingDraft] = useState<BookingRecord | null>(null);
+  const [isDraftLoaded, setIsDraftLoaded] = useState(false);
 
-  const [activeCatalogTab, setActiveCatalogTab] = useState<"satuan" | "paket">("satuan");
-  const [cartItems, setCartItems] = useState<BookingItem[]>([
-    {
-      id: "cat-1",
-      nama: "Tenda Kapasitas 4 Orang",
-      tipe: "satuan",
-      kategori: "Tenda",
-      jumlah: 1,
-      hargaPerHari: 40000,
-      subtotal: 80000,
-    },
-  ]);
+  // ─── Customer State ───
+  const [customers, setCustomers] = useState<CustomerData[]>(MOCK_CUSTOMERS);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(MOCK_CUSTOMERS[0]); // Default Maya Sari
 
-  const [dpMetode, setDpMetode] = useState<DPMethod>("qris");
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [createdBooking, setCreatedBooking] = useState<BookingRecord | null>(null);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // ─── Date & Duration States (§1, §2, §3, §4 & Reference Screenshot) ───
+  const [tanggalBooking, setTanggalBooking] = useState<string>(DEFAULT_BOOKING_DATE);
+  const [tanggalMulaiSewa, setTanggalMulaiSewa] = useState<string>(DEFAULT_RENTAL_START);
+  const [durasiHari, setDurasiHari] = useState<number>(5);
 
-  // Recalculate return date
-  React.useEffect(() => {
-    if (tanggalPengambilan && durasiHari > 0) {
-      const parts = tanggalPengambilan.split("-").map(Number);
-      if (parts.length === 3) {
-        const pickup = new Date(parts[0], parts[1] - 1, parts[2]);
-        pickup.setDate(pickup.getDate() + durasiHari);
-        const y = pickup.getFullYear();
-        const m = String(pickup.getMonth() + 1).padStart(2, "0");
-        const d = String(pickup.getDate()).padStart(2, "0");
-        setTanggalPengembalian(`${y}-${m}-${d}`);
+  // ─── Booking Code ───
+  const [createdBookingCode, setCreatedBookingCode] = useState("BK-0451");
+
+  // ─── Products & Cart State ───
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  // ─── Payment States (§4) ───
+  const [nominalDpDisepakati, setNominalDpDisepakati] = useState(0);
+  const [dpDiterimaSekarang, setDpDiterimaSekarang] = useState(0);
+  const [metodePembayaran, setMetodePembayaran] = useState<PaymentMethod>("tunai");
+
+  // ─── Submission & Validation States ───
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [isSuccessDraft, setIsSuccessDraft] = useState(false);
+  const [toastError, setToastError] = useState<string | null>(null);
+
+  // ─── Load Existing Draft Data on Mount if editId is provided (§1, §2, §4) ───
+  useEffect(() => {
+    if (editId && !isDraftLoaded) {
+      const draft = getBookingByIdOrCode(editId);
+      if (draft) {
+        setExistingDraft(draft);
+        setCreatedBookingCode(draft.kode);
+
+        // 1. Pelanggan
+        const matchCust = customers.find(
+          (c) => c.nama.toLowerCase() === draft.pelanggan.nama.toLowerCase()
+        );
+        if (matchCust) {
+          setSelectedCustomer(matchCust);
+        } else {
+          const newCust: CustomerData = {
+            id: `cust-${Date.now()}`,
+            nama: draft.pelanggan.nama,
+            telepon: draft.pelanggan.telepon,
+            alamat: draft.pelanggan.alamat,
+          };
+          setCustomers((prev) => [newCust, ...prev]);
+          setSelectedCustomer(newCust);
+        }
+
+        // 2. Tanggal & Durasi
+        const bDate = draft.tanggalBooking || DEFAULT_BOOKING_DATE;
+        const sDate = draft.tanggalMulaiSewa || draft.tanggalPengambilan || DEFAULT_RENTAL_START;
+        const dur = draft.durasiHari || 2;
+        setTanggalBooking(bDate);
+        setTanggalMulaiSewa(sDate);
+        setDurasiHari(dur);
+
+        // 3. Cart Items
+        const mappedCart: CartItem[] = (draft.items || []).map((it) => {
+          const catProd = MOCK_PRODUCTS.find((p) => p.id === it.id);
+          return {
+            id: it.id,
+            kode: catProd ? catProd.kode : it.id.toUpperCase(),
+            nama: it.nama,
+            tipe: it.tipe,
+            kategori: it.kategori,
+            hargaPerHari: it.hargaPerHari,
+            jumlah: it.jumlah,
+            unitTersedia: catProd ? catProd.totalUnit : it.jumlah,
+            subtotal: it.subtotal,
+            itemsPaket: it.itemsPaket,
+          };
+        });
+        setCart(mappedCart);
+
+        // 4. Pembayaran DP
+        setNominalDpDisepakati(draft.dpNominal || 0);
+        setDpDiterimaSekarang(draft.dpStatus === "lunas" ? draft.dpNominal : 0);
+        if (draft.dpMetode) {
+          setMetodePembayaran(draft.dpMetode);
+        }
+
+        setIsDraftLoaded(true);
+      }
+    } else if (!editId) {
+      // Sync client-side actual current date on mount for new booking
+      const today = getTodayString();
+      if (today && today !== DEFAULT_BOOKING_DATE) {
+        setTanggalBooking(today);
+        setTanggalMulaiSewa(addDays(today, 3));
       }
     }
-  }, [tanggalPengambilan, durasiHari]);
+  }, [editId, isDraftLoaded, customers]);
 
-  // Update subtotals
-  React.useEffect(() => {
-    setCartItems((prev) =>
+  // ─── Derived Calculations ───
+  const hDiff = useMemo(() => {
+    return calculateHDiffBetween(tanggalBooking, tanggalMulaiSewa);
+  }, [tanggalBooking, tanggalMulaiSewa]);
+
+  const dateError = useMemo(() => {
+    if (tanggalBooking && tanggalMulaiSewa && tanggalMulaiSewa < tanggalBooking) {
+      return "Tanggal Mulai Sewa tidak boleh lebih awal daripada Tanggal Booking.";
+    }
+    return null;
+  }, [tanggalBooking, tanggalMulaiSewa]);
+
+  const tanggalSelesaiSewa = useMemo(() => {
+    return calculateEndDate(tanggalMulaiSewa, durasiHari);
+  }, [tanggalMulaiSewa, durasiHari]);
+
+  // Base stock ketersediaan per rentang tanggal pemesanan
+  const baseProducts = useMemo(() => {
+    return calculatePeriodBaseStock(MOCK_PRODUCTS, tanggalMulaiSewa, tanggalSelesaiSewa);
+  }, [tanggalMulaiSewa, tanggalSelesaiSewa]);
+
+  // Ketersediaan dinamis real-time (base stock dikurangi item & paket di dalam keranjang)
+  const { dynamicProducts, remainingSingleStockMap, remainingPackageStockMap } = useMemo(() => {
+    return calculateDynamicCatalogWithCart(baseProducts, cart);
+  }, [baseProducts, cart]);
+
+  // Peta gabungan sisa stok untuk validasi stepper dan pencegahan over-allocation
+  const remainingStockMap = useMemo(() => {
+    return { ...remainingSingleStockMap, ...remainingPackageStockMap };
+  }, [remainingSingleStockMap, remainingPackageStockMap]);
+
+  // Cart Total Calculation (Single source of truth for payment)
+  const totalBiaya = useMemo(() => {
+    return cart.reduce((acc, curr) => acc + curr.subtotal, 0);
+  }, [cart]);
+
+  // DP Wajib rule (§4): H-2 atau lebih awal (hDiff >= 2) => 25% totalBiaya, H-1 / Hari-H (hDiff <= 1) => 0
+  const dpWajib = useMemo(() => {
+    if (hDiff >= 2) {
+      return Math.round(totalBiaya * 0.25);
+    }
+    return 0;
+  }, [hDiff, totalBiaya]);
+
+  // Reaktif: perbarui nominalDpDisepakati saat dpWajib berubah (jika bukan saat edit draft awal)
+  useEffect(() => {
+    if (!existingDraft) {
+      setNominalDpDisepakati(dpWajib);
+    }
+  }, [dpWajib, existingDraft]);
+
+  // ─── Handle Duration Change & Update Cart Subtotals (§1 & §2) ───
+  const handleDurasiChange = (newDurasi: number) => {
+    const validDur = Math.max(1, newDurasi);
+    setDurasiHari(validDur);
+    setCart((prev) =>
       prev.map((item) => ({
         ...item,
-        subtotal: item.hargaPerHari * item.jumlah * durasiHari,
+        subtotal: item.hargaPerHari * item.jumlah * validDur,
       }))
     );
-  }, [durasiHari]);
+  };
 
-  const handleAddToCart = (catItem: CatalogItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === catItem.id);
+  // ─── Cart Handlers (Real-time Inventory Synchronization) ───
+  const handleAddToCart = (product: CatalogProduct) => {
+    const currentRemaining = remainingStockMap[product.id] ?? product.unitTersedia;
+    if (currentRemaining <= 0) {
+      showToast(`Stok unit ${product.nama} sudah maksimal atau habis untuk periode ini.`);
+      return;
+    }
+
+    setCart((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === catItem.id
+          item.id === product.id
             ? {
                 ...item,
                 jumlah: item.jumlah + 1,
@@ -86,25 +225,35 @@ export default function AdminBookingBaruPage() {
             : item
         );
       }
+
       return [
         ...prev,
         {
-          id: catItem.id,
-          nama: catItem.nama,
-          tipe: catItem.tipe,
-          kategori: catItem.kategori,
+          id: product.id,
+          kode: product.kode,
+          nama: product.nama,
+          tipe: product.tipe,
+          kategori: product.kategori,
+          hargaPerHari: product.hargaPerHari,
           jumlah: 1,
-          hargaPerHari: catItem.hargaPerHari,
-          subtotal: catItem.hargaPerHari * 1 * durasiHari,
-          deskripsi: catItem.deskripsi,
-          itemsPaket: catItem.itemsPaket,
+          unitTersedia: product.totalUnit,
+          subtotal: product.hargaPerHari * 1 * durasiHari,
+          itemsPaket: product.itemsPaket,
         },
       ];
     });
   };
 
   const handleUpdateQty = (id: string, delta: number) => {
-    setCartItems((prev) =>
+    if (delta > 0) {
+      const currentRemaining = remainingStockMap[id] ?? 0;
+      if (currentRemaining <= 0) {
+        showToast("Stok unit sudah mencapai batas maksimal yang tersedia.");
+        return;
+      }
+    }
+
+    setCart((prev) =>
       prev
         .map((item) => {
           if (item.id === id) {
@@ -118,431 +267,255 @@ export default function AdminBookingBaruPage() {
           }
           return item;
         })
-        .filter(Boolean) as BookingItem[]
+        .filter(Boolean) as CartItem[]
     );
   };
 
-  const totalBiaya = cartItems.reduce((acc, curr) => acc + curr.subtotal, 0);
-  const pickupDateObj = new Date(tanggalPengambilan);
-  const now = new Date("2026-11-27");
-  const diffDays = Math.ceil((pickupDateObj.getTime() - now.getTime()) / (1000 * 3600 * 24));
-  const isH1OrLess = diffDays <= 1;
-
-  const dpPersen = isH1OrLess ? 0 : 25;
-  const dpNominal = isH1OrLess ? 0 : Math.round(totalBiaya * 0.25);
-  const sisaPelunasan = totalBiaya - dpNominal;
-
-  const validateForm = () => {
-    const errs: { [key: string]: string } = {};
-    if (!nama.trim()) errs.nama = "Nama pelanggan wajib diisi";
-    if (!telepon.trim()) errs.telepon = "Nomor WhatsApp / telepon wajib diisi";
-    if (!tanggalPengambilan) errs.tanggalPengambilan = "Tanggal pengambilan wajib diisi";
-    if (durasiHari < 1) errs.durasiHari = "Durasi minimal 1 hari";
-    if (cartItems.length === 0) errs.cart = "Pilih minimal 1 barang atau paket sewa";
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  const handleRemoveItem = (id: string) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleSubmit = (targetStatus: "draft" | "dikonfirmasi") => {
-    if (!validateForm()) return;
+  const showToast = (msg: string) => {
+    setToastError(msg);
+    setTimeout(() => setToastError(null), 3500);
+  };
 
-    const newBooking: BookingRecord = {
-      id: `b-${Date.now()}`,
-      kode: `BK-02${Math.floor(Math.random() * 90 + 10)}`,
-      pelanggan: { nama, telepon, noIdentitas, alamat },
-      items: cartItems,
-      tanggalPengambilan,
-      jamPengambilan,
-      durasiHari,
-      tanggalPengembalian,
-      jamPengembalian: "20:00 WIB",
-      totalBiaya,
-      dpPersen,
-      dpNominal,
-      dpStatus: targetStatus === "dikonfirmasi" ? (isH1OrLess ? "tidak_perlu" : "lunas") : "belum",
-      dpMetode: targetStatus === "dikonfirmasi" && !isH1OrLess ? dpMetode : undefined,
-      sisaPelunasan,
-      status: targetStatus,
-      catatan,
-      dibuatOleh: "Staf Admin",
-      waktuDibuat: "27 Nov 2026, 09:30 WIB",
-      riwayat: [
-        {
-          waktu: "27 Nov 2026, 09:30 WIB",
-          user: "Staf Admin",
-          aksi: targetStatus === "dikonfirmasi" ? "Booking Dikonfirmasi" : "Draft Disimpan",
-          catatan: "Dibuat dari Form Booking Baru.",
-        },
-      ],
-      isTodayPickup: tanggalPengambilan === "2026-11-27",
+  // ─── Helper: Build Booking Record Structure ───
+  const buildBookingRecord = (status: "draft" | "selesai"): BookingRecord => {
+    const bookingId = existingDraft ? existingDraft.id : `b-${Date.now()}`;
+    const code = createdBookingCode;
+
+    const bookingItems: BookingItem[] = cart.map((c) => ({
+      id: c.id,
+      nama: c.nama,
+      tipe: c.tipe,
+      kategori: c.kategori,
+      jumlah: c.jumlah,
+      hargaPerHari: c.hargaPerHari,
+      subtotal: c.subtotal,
+      itemsPaket: c.itemsPaket,
+    }));
+
+    const isLunasDP = dpDiterimaSekarang >= nominalDpDisepakati && nominalDpDisepakati > 0;
+    const isNoDpNeeded = hDiff <= 1;
+
+    let dpStatusValue: "lunas" | "belum" | "tidak_perlu" = "belum";
+    if (isNoDpNeeded) {
+      dpStatusValue = "tidak_perlu";
+    } else if (isLunasDP) {
+      dpStatusValue = "lunas";
+    }
+
+    const nowStr = new Date().toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const auditEntry = {
+      waktu: `${nowStr}, ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB`,
+      user: "Staf Admin",
+      aksi: status === "draft" ? (existingDraft ? "Draft diperbarui" : "Draft dibuat") : "Booking Selesai",
+      catatan:
+        status === "draft"
+          ? "Data booking draft disimpan melalui form Catat Booking."
+          : "Pemesanan telah disepakati dan dicatat resmi.",
     };
 
-    setCreatedBooking(newBooking);
-    setIsSuccess(true);
+    const existingLogs = existingDraft?.riwayat || [];
+
+    return {
+      id: bookingId,
+      kode: code,
+      pelanggan: {
+        nama: selectedCustomer?.nama || "Pelanggan Belum Dipilih",
+        telepon: selectedCustomer?.telepon || "-",
+        alamat: selectedCustomer?.alamat,
+      },
+      items: bookingItems,
+      tanggalBooking,
+      tanggalMulaiSewa,
+      tanggalPengambilan: tanggalMulaiSewa,
+      jamPengambilan: existingDraft?.jamPengambilan || "10:00 WIB",
+      durasiHari,
+      tanggalSelesaiSewa,
+      tanggalPengembalian: tanggalSelesaiSewa,
+      jamPengembalian: existingDraft?.jamPengembalian || "19:00 WIB",
+      totalBiaya,
+      dpPersen: totalBiaya > 0 ? Math.round((nominalDpDisepakati / totalBiaya) * 100) : 0,
+      dpNominal: nominalDpDisepakati,
+      dpStatus: dpStatusValue,
+      dpMetode: metodePembayaran,
+      sisaPelunasan: Math.max(0, totalBiaya - dpDiterimaSekarang),
+      status,
+      catatan: existingDraft?.catatan || "",
+      dibuatOleh: existingDraft?.dibuatOleh || "Staf Admin",
+      waktuDibuat: existingDraft?.waktuDibuat || `${nowStr}, 09:00 WIB`,
+      riwayat: [auditEntry, ...existingLogs],
+    };
   };
 
-  const filteredCatalog = CATALOG_ITEMS.filter((item) => item.tipe === activeCatalogTab);
+  // ─── Simpan Sebagai Draft (§5) ───
+  const handleSaveDraft = () => {
+    if (!selectedCustomer) {
+      showToast("Pilih data pelanggan terlebih dahulu untuk menyimpan draft!");
+      return;
+    }
+
+    const draftRecord = buildBookingRecord("draft");
+    saveOrUpdateBooking(draftRecord);
+
+    setIsSuccessDraft(true);
+    setIsSuccessOpen(true);
+  };
+
+  // ─── Selesaikan Booking (§6 & §8) ───
+  const handleCreateBooking = () => {
+    if (dateError) {
+      showToast(dateError);
+      return;
+    }
+    if (!selectedCustomer) {
+      showToast("Pilih data pelanggan terlebih dahulu!");
+      return;
+    }
+    if (cart.length === 0) {
+      showToast("Keranjang booking masih kosong. Tambahkan minimal 1 barang atau paket.");
+      return;
+    }
+    if (durasiHari < 1) {
+      showToast("Durasi sewa minimal 1 hari.");
+      return;
+    }
+
+    const finishedRecord = buildBookingRecord("selesai");
+    saveOrUpdateBooking(finishedRecord);
+
+    setIsSuccessDraft(false);
+    setIsSuccessOpen(true);
+  };
+
+  const handleResetForm = () => {
+    setIsSuccessOpen(false);
+    setCart([]);
+    setNominalDpDisepakati(0);
+    setDpDiterimaSekarang(0);
+    setExistingDraft(null);
+    setCreatedBookingCode(`BK-0${Math.floor(Math.random() * 800 + 100)}`);
+  };
 
   return (
     <div className="main">
-      <div className="booking-page-container">
-        {/* Header */}
-        <section className="booking-hero">
-          <div className="booking-hero-left">
-            <span className="booking-breadcrumb">ADMIN · KASIR BOOKING</span>
-            <h1 className="booking-title">Booking Baru</h1>
-            <p className="booking-desc">
-              Form pencatatan reservasi sewa dan pembayaran DP pelanggan hasil kesepakatan WhatsApp / toko.
-            </p>
-          </div>
-          <div className="booking-hero-actions">
-            <Link
-              href="/admin/booking"
-              className="btn sm"
-              style={{
-                background: "rgba(255, 255, 255, 0.12)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.22)",
-              }}
-            >
-              ← Kembali ke Menu Booking
-            </Link>
-          </div>
-        </section>
-
-        {/* Success Struk Screen */}
-        {isSuccess && createdBooking ? (
-          <div className="card" style={{ maxWidth: "640px", margin: "0 auto", width: "100%" }}>
-            <div className="ch" style={{ background: "var(--st-ok-bg)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "var(--st-ok)", fontSize: "20px" }}>✓</span>
-                <h2 className="ct" style={{ color: "var(--st-ok-t)" }}>
-                  Booking Berhasil Dicatat ({createdBooking.kode})
-                </h2>
-              </div>
-            </div>
-            <div className="pad" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div className="detail-info-grid">
-                <div className="detail-info-item">
-                  <span className="dii-label">Pelanggan</span>
-                  <span className="dii-val">{createdBooking.pelanggan.nama}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="dii-label">Pengambilan</span>
-                  <span className="dii-val">{formatTanggal(createdBooking.tanggalPengambilan)}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="dii-label">Total Sewa</span>
-                  <span className="dii-val">{formatRupiah(createdBooking.totalBiaya)}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="dii-label">DP ({createdBooking.dpPersen}%)</span>
-                  <span className="dii-val" style={{ color: "var(--acc-t)" }}>
-                    {formatRupiah(createdBooking.dpNominal)}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "8px" }}>
-                <button
-                  type="button"
-                  className="btn sm"
-                  onClick={() => {
-                    setIsSuccess(false);
-                    setCreatedBooking(null);
-                    setNama("");
-                    setTelepon("");
-                  }}
-                >
-                  + Catat Booking Lain
-                </button>
-                <Link href="/admin/booking" className="btn pri sm">
-                  Lihat di Tabel Booking →
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Form Content */
-          <div className="card">
-            <div className="ch">
-              <h2 className="ct">Form Reservasi &amp; Kasir Booking</h2>
-              <span className="b in">Mode: Booking</span>
-            </div>
-            <div className="pad" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-              {/* Section 1: Customer */}
-              <div>
-                <div className="detail-section-title">1. Data Pelanggan</div>
-                <div className="form-group-grid">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Nama Pelanggan <span className="req">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Nama lengkap pemesan"
-                      value={nama}
-                      onChange={(e) => setNama(e.target.value)}
-                    />
-                    {errors.nama && (
-                      <span style={{ fontSize: "11px", color: "var(--st-er-t)" }}>{errors.nama}</span>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">
-                      Nomor WhatsApp / Telepon <span className="req">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="08xxxxxxxxxx"
-                      value={telepon}
-                      onChange={(e) => setTelepon(e.target.value)}
-                    />
-                    {errors.telepon && (
-                      <span style={{ fontSize: "11px", color: "var(--st-er-t)" }}>{errors.telepon}</span>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Nomor KTP / SIM</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Nomor identitas (opsional)"
-                      value={noIdentitas}
-                      onChange={(e) => setNoIdentitas(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Alamat / Domisili</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Alamat pelanggan"
-                      value={alamat}
-                      onChange={(e) => setAlamat(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: Schedule */}
-              <div>
-                <div className="detail-section-title">2. Jadwal &amp; Durasi Sewa</div>
-                <div className="form-group-grid">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Tanggal Pengambilan <span className="req">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={tanggalPengambilan}
-                      onChange={(e) => setTanggalPengambilan(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Jam Pengambilan</label>
-                    <select
-                      className="booking-select"
-                      value={jamPengambilan}
-                      onChange={(e) => setJamPengambilan(e.target.value)}
-                    >
-                      <option value="08:00 WIB">08:00 WIB</option>
-                      <option value="09:00 WIB">09:00 WIB</option>
-                      <option value="10:00 WIB">10:00 WIB</option>
-                      <option value="11:30 WIB">11:30 WIB</option>
-                      <option value="14:00 WIB">14:00 WIB</option>
-                      <option value="16:00 WIB">16:00 WIB</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">
-                      Durasi Sewa (Hari) <span className="req">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={14}
-                      className="form-input"
-                      value={durasiHari}
-                      onChange={(e) => setDurasiHari(Math.max(1, parseInt(e.target.value) || 1))}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Tanggal Pengembalian (Otomatis)</label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={tanggalPengembalian}
-                      readOnly
-                      style={{ background: "var(--n100)" }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 3: Catalog & Cart (§E.32) */}
-              <div>
-                <div className="detail-section-title">3. Katalog Barang &amp; Paket Sewa (§E.32)</div>
-                <div className="catalog-picker-card">
-                  <div className="tabs" style={{ marginBottom: "8px" }}>
-                    <button
-                      type="button"
-                      className={`tab ${activeCatalogTab === "satuan" ? "on" : ""}`}
-                      onClick={() => setActiveCatalogTab("satuan")}
-                    >
-                      ⛺ Barang Satuan ({CATALOG_ITEMS.filter((c) => c.tipe === "satuan").length})
-                    </button>
-                    <button
-                      type="button"
-                      className={`tab ${activeCatalogTab === "paket" ? "on" : ""}`}
-                      onClick={() => setActiveCatalogTab("paket")}
-                    >
-                      📦 Paket Penyewaan ({CATALOG_ITEMS.filter((c) => c.tipe === "paket").length})
-                    </button>
-                  </div>
-                  <div className="catalog-list">
-                    {filteredCatalog.map((item) => (
-                      <div key={item.id} className="catalog-item-box">
-                        <div>
-                          <div className="cib-title">{item.nama}</div>
-                          <div className="cib-price">{formatRupiah(item.hargaPerHari)} / hari</div>
-                          {item.deskripsi && (
-                            <div style={{ fontSize: "11px", color: "var(--n600)", marginTop: "2px" }}>
-                              {item.deskripsi}
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="btn sm pri"
-                          style={{ marginTop: "6px" }}
-                          onClick={() => handleAddToCart(item)}
-                        >
-                          + Tambah
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Cart Table */}
-                <div style={{ marginTop: "14px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--k)" }}>
-                    Keranjang Barang ({cartItems.length} item)
-                  </span>
-                  <table className="cart-items-table" style={{ marginTop: "8px" }}>
-                    <thead>
-                      <tr>
-                        <th>Item</th>
-                        <th style={{ width: "120px", textAlign: "center" }}>Jumlah</th>
-                        <th style={{ width: "110px", textAlign: "right" }}>Harga/Hari</th>
-                        <th style={{ width: "130px", textAlign: "right" }}>Subtotal ({durasiHari} Hari)</th>
-                        <th style={{ width: "50px", textAlign: "center" }}></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cartItems.map((item) => (
-                        <tr key={item.id}>
-                          <td>
-                            <span style={{ fontWeight: 600, color: "var(--k)" }}>
-                              {item.tipe === "paket" ? "📦 " : "⛺ "}
-                              {item.nama}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <div className="qty-stepper">
-                              <button
-                                type="button"
-                                className="qty-btn"
-                                onClick={() => handleUpdateQty(item.id, -1)}
-                              >
-                                −
-                              </button>
-                              <span className="qty-val">{item.jumlah}</span>
-                              <button
-                                type="button"
-                                className="qty-btn"
-                                onClick={() => handleUpdateQty(item.id, 1)}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-                          <td style={{ textAlign: "right", color: "var(--n600)" }}>
-                            {formatRupiah(item.hargaPerHari)}
-                          </td>
-                          <td style={{ textAlign: "right", fontWeight: 700, color: "var(--k)" }}>
-                            {formatRupiah(item.subtotal)}
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateQty(item.id, -item.jumlah)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "var(--st-er)",
-                                cursor: "pointer",
-                              }}
-                            >
-                              ✕
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Section 4: Price & DP */}
-              <div>
-                <div className="detail-section-title">4. Perhitungan DP &amp; Pelunasan</div>
-                <div className="detail-financial-summary">
-                  <div className="dfs-row">
-                    <span>Total Biaya Sewa ({durasiHari} Hari):</span>
-                    <span style={{ fontWeight: 700 }}>{formatRupiah(totalBiaya)}</span>
-                  </div>
-                  <div className="dfs-row">
-                    <span>Kebutuhan Uang Muka (DP {dpPersen}%):</span>
-                    <span style={{ fontWeight: 700, color: "var(--acc-t)" }}>
-                      {formatRupiah(dpNominal)}
-                    </span>
-                  </div>
-                  <div className="dfs-row total">
-                    <span>Sisa Pelunasan:</span>
-                    <span>{formatRupiah(sisaPelunasan)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <Link href="/admin/booking" className="btn sm">
-                  Batal
-                </Link>
-                <button
-                  type="button"
-                  className="btn sm"
-                  onClick={() => handleSubmit("draft")}
-                >
-                  Simpan sebagai Draft
-                </button>
-                <button
-                  type="button"
-                  className="btn pri sm"
-                  onClick={() => handleSubmit("dikonfirmasi")}
-                >
-                  Konfirmasi Booking
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Top Bar with Back Button */}
+      <div className="bc-page-header">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Link href="/admin/booking" className="bc-back-btn">
+            ← Kembali ke Booking
+          </Link>
+          <span className="hero-badge">
+            {existingDraft ? `ADMIN · LANJUTKAN DRAFT: ${createdBookingCode}` : "ADMIN · CATAT BOOKING"}
+          </span>
+        </div>
       </div>
+
+      {/* Main 2-Column Grid matching Reference Screenshot */}
+      <div className="bc-container">
+        {/* Left Column (65%) */}
+        <div className="bc-left-col">
+          {/* Card 1: Informasi booking */}
+          <BookingInformationCard
+            bookingCode={createdBookingCode}
+            customers={customers}
+            selectedCustomer={selectedCustomer}
+            onSelectCustomer={(c) => setSelectedCustomer(c)}
+            onAddCustomer={(newCust) => setCustomers((prev) => [newCust, ...prev])}
+            tanggalBooking={tanggalBooking}
+            onTanggalBookingChange={setTanggalBooking}
+            tanggalMulaiSewa={tanggalMulaiSewa}
+            onTanggalMulaiSewaChange={setTanggalMulaiSewa}
+            durasiHari={durasiHari}
+            onDurasiHariChange={handleDurasiChange}
+            tanggalSelesaiSewa={tanggalSelesaiSewa}
+            hDiff={hDiff}
+            dateError={dateError}
+          />
+
+          {/* Card 2: Catalog (Single Items & Packages) */}
+          <ProductCatalogCard
+            products={dynamicProducts}
+            onAddToCart={handleAddToCart}
+          />
+        </div>
+
+        {/* Right Column (35%, Sticky Sidebar Container) */}
+        <div className="bc-right-col">
+          <div className="bc-sticky-panel">
+            {/* Card 1: Keranjang booking */}
+            <BookingCartCard
+              cart={cart}
+              durasiHari={durasiHari}
+              remainingStockMap={remainingStockMap}
+              onUpdateQty={handleUpdateQty}
+              onRemoveItem={handleRemoveItem}
+            />
+
+            {/* Card 2: Pembayaran (§4 & §5) */}
+            <BookingPaymentCard
+              totalBiaya={totalBiaya}
+              dpWajib={dpWajib}
+              hDiff={hDiff}
+              nominalDpDisepakati={nominalDpDisepakati}
+              onNominalDpDisepakatiChange={setNominalDpDisepakati}
+              dpDiterimaSekarang={dpDiterimaSekarang}
+              onDpDiterimaSekarangChange={setDpDiterimaSekarang}
+              metodePembayaran={metodePembayaran}
+              onMetodePembayaranChange={setMetodePembayaran}
+              onSubmitBooking={handleCreateBooking}
+              onSaveDraft={handleSaveDraft}
+              isDraftEdit={Boolean(existingDraft)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Success Modal Confirmation */}
+      <BookingSuccessModal
+        isOpen={isSuccessOpen}
+        bookingCode={createdBookingCode}
+        customer={selectedCustomer}
+        cart={cart}
+        tanggalBooking={tanggalBooking}
+        tanggalMulaiSewa={tanggalMulaiSewa}
+        durasiHari={durasiHari}
+        tanggalSelesaiSewa={tanggalSelesaiSewa}
+        totalBiaya={totalBiaya}
+        dpNominal={dpDiterimaSekarang}
+        sisaPembayaran={Math.max(0, totalBiaya - dpDiterimaSekarang)}
+        isDraft={isSuccessDraft}
+        onReset={handleResetForm}
+      />
+
+      {/* Error / Alert Toast */}
+      {toastError && (
+        <div className="booking-toast warning">
+          <span>⚠️ </span>
+          {toastError}
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function BookingCreatePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="main" style={{ padding: "40px 24px", color: "#6B7280" }}>
+          Memuat formulir booking...
+        </div>
+      }
+    >
+      <BookingFormInner />
+    </Suspense>
   );
 }

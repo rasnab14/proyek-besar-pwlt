@@ -55,7 +55,7 @@ export default function DashboardAdminPage() {
 
       {/* ─── 4 KPI Metrics (Sesuai ALUR-NAVIGASI.md: Kartu KPI tidak bisa diklik) ─── */}
       <section className="kpi-grid">
-        {/* Card 1: Booking perlu diproses (Dark) */}
+        {/* Card 1: Booking perlu diproses (Dark) - Sesuai §B.1.1 */}
         <div className="kpi-card kpi-dark">
           <div className="kpi-top">
             <span className="kpi-label">Booking perlu diproses</span>
@@ -66,8 +66,8 @@ export default function DashboardAdminPage() {
               </svg>
             </div>
           </div>
-          <div className="kpi-value">5</div>
-          <div className="kpi-desc">3 Draft · 2 menunggu DP</div>
+          <div className="kpi-value">3</div>
+          <div className="kpi-desc">3 Selesai (siap sewa) · 1 Hangus · 1 Dibatalkan</div>
         </div>
 
         {/* Card 2: Pengambilan hari ini */}
@@ -405,29 +405,40 @@ export default function DashboardAdminPage() {
             </h2>
           </div>
           <div className="list-group">
-            {/* Item 1 - Sesuai ALUR-NAVIGASI.md: Buka -> /admin/booking */}
+            {/* Item 1 - Sesuai §B.1.8 & §E.25: Booking Selesai siap diserahterimakan */}
             <div className="action-row">
               <div className="item-info">
-                <span className="item-title">3 booking berstatus Draft</span>
-                <span className="item-sub">Lengkapi data lalu konfirmasi</span>
+                <span className="item-title">2 booking Selesai siap diserahkan hari ini</span>
+                <span className="item-sub">Proses ke Transaksi Sewa saat serah terima barang</span>
               </div>
               <Link href="/admin/booking" className="btn-outline-sm">
                 Buka
               </Link>
             </div>
 
-            {/* Item 2 - Sesuai ALUR-NAVIGASI.md: Buka -> /admin/booking */}
+            {/* Item 2 - Sesuai §B.1.8 & §E.12: Booking Draft */}
             <div className="action-row">
               <div className="item-info">
-                <span className="item-title">2 booking menunggu DP 25%</span>
-                <span className="item-sub">Pengambilan H-2 atau lebih</span>
+                <span className="item-title">2 booking berstatus Draft</span>
+                <span className="item-sub">Lengkapi kesepakatan pemesanan &amp; catat resmi</span>
               </div>
               <Link href="/admin/booking" className="btn-outline-sm">
                 Buka
               </Link>
             </div>
 
-            {/* Item 3 - Sesuai ALUR-NAVIGASI.md: Buka -> /admin/stok */}
+            {/* Item 3 - Sesuai §B.1.8 & §E.12: Booking lewat batas toleransi */}
+            <div className="action-row">
+              <div className="item-info">
+                <span className="item-title">1 booking lewat batas toleransi pengambilan</span>
+                <span className="item-sub">Perlu ditandai Hangus &amp; lepaskan alokasi stok</span>
+              </div>
+              <Link href="/admin/booking" className="btn-outline-sm">
+                Buka
+              </Link>
+            </div>
+
+            {/* Item 4 - Sesuai §B.1.8: Unit belum siap digunakan */}
             <div className="action-row">
               <div className="item-info">
                 <span className="item-title">6 unit belum siap digunakan</span>

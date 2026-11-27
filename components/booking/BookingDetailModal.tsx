@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { BookingRecord } from "./types";
 import { BookingStatusBadge, DPStatusBadge } from "./BookingStatusBadge";
 import { formatRupiah, formatTanggal } from "@/lib/format";
@@ -14,6 +15,7 @@ interface BookingDetailModalProps {
   onEditBooking?: (booking: BookingRecord) => void;
   onConfirmBooking?: (booking: BookingRecord) => void;
   onCancelBooking?: (booking: BookingRecord) => void;
+  onMarkHangus?: (booking: BookingRecord) => void;
   onProcessRental?: (booking: BookingRecord) => void;
 }
 
@@ -25,6 +27,7 @@ export function BookingDetailModal({
   onEditBooking,
   onConfirmBooking,
   onCancelBooking,
+  onMarkHangus,
   onProcessRental,
 }: BookingDetailModalProps) {
   if (!isOpen || !booking) return null;
@@ -75,7 +78,22 @@ export function BookingDetailModal({
                 Dibatalkan oleh: <strong>{booking.userPembatalan || "Pengguna Berwenang"}</strong> · {booking.waktuPembatalan}
               </div>
               <div style={{ fontSize: "12px", marginTop: "4px", color: "var(--st-er-t)" }}>
-                ※ Sesuai SOP Summit Adventure, uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai <strong>dana hangus</strong> dan tidak dikembalikan.
+                ※ Sesuai ketentuan, booking dibatalkan tidak dapat dilanjutkan ke Transaksi Sewa. Uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai <strong>dana hangus</strong> dan stok telah dilepaskan.
+              </div>
+            </div>
+          )}
+
+          {/* Hangus Banner if hangus */}
+          {booking.status === "hangus" && (
+            <div className="note er" style={{ display: "flex", flexDirection: "column", gap: "4px", background: "#FEF2F2", borderColor: "#FCA5A5" }}>
+              <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "6px", color: "#991B1B" }}>
+                <span>⚠️</span> Booking Dinyatakan Hangus (§E.12)
+              </div>
+              <div style={{ fontSize: "12.5px", color: "#7F1D1D" }}>
+                Pelanggan tidak datang mengambil barang sewa hingga batas toleransi jam operasional toko (pukul 21.00 WIB) pada jadwal pengambilan.
+              </div>
+              <div style={{ fontSize: "12px", color: "#991B1B" }}>
+                ※ Booking berstatus Hangus tidak dapat dilanjutkan ke Transaksi Penyewaan (§E.25). Alokasi stok telah dilepaskan dan uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai dana hangus.
               </div>
             </div>
           )}
@@ -99,10 +117,6 @@ export function BookingDetailModal({
                 <span className="dii-val">{booking.pelanggan.telepon}</span>
               </div>
               <div className="detail-info-item">
-                <span className="dii-label">Nomor Identitas (KTP / SIM)</span>
-                <span className="dii-val">{booking.pelanggan.noIdentitas || "–"}</span>
-              </div>
-              <div className="detail-info-item">
                 <span className="dii-label">Alamat Domisili</span>
                 <span className="dii-val">{booking.pelanggan.alamat || "–"}</span>
               </div>
@@ -122,15 +136,21 @@ export function BookingDetailModal({
             </div>
             <div className="detail-info-grid">
               <div className="detail-info-item">
-                <span className="dii-label">Tanggal &amp; Waktu Pengambilan</span>
+                <span className="dii-label">Tanggal Booking</span>
                 <span className="dii-val">
-                  {formatTanggal(booking.tanggalPengambilan, { includeDay: true })} ({booking.jamPengambilan})
+                  {booking.tanggalBooking
+                    ? formatTanggal(booking.tanggalBooking, { includeDay: true })
+                    : formatTanggal(booking.waktuDibuat)}
                 </span>
               </div>
               <div className="detail-info-item">
-                <span className="dii-label">Tanggal &amp; Waktu Pengembalian</span>
+                <span className="dii-label">Tanggal Mulai Sewa (Rencana)</span>
                 <span className="dii-val">
-                  {formatTanggal(booking.tanggalPengembalian, { includeDay: true })} ({booking.jamPengembalian})
+                  {booking.tanggalMulaiSewa
+                    ? formatTanggal(booking.tanggalMulaiSewa, { includeDay: true })
+                    : booking.tanggalPengambilan
+                    ? formatTanggal(booking.tanggalPengambilan, { includeDay: true })
+                    : "-"}
                 </span>
               </div>
               <div className="detail-info-item">
@@ -140,13 +160,29 @@ export function BookingDetailModal({
                 </span>
               </div>
               <div className="detail-info-item">
-                <span className="dii-label">Status Jadwal</span>
+                <span className="dii-label">Tanggal Selesai Sewa (Otomatis)</span>
+                <span className="dii-val" style={{ color: "#0284C7", fontWeight: 600 }}>
+                  {booking.tanggalSelesaiSewa
+                    ? formatTanggal(booking.tanggalSelesaiSewa, { includeDay: true })
+                    : booking.tanggalPengembalian
+                    ? formatTanggal(booking.tanggalPengembalian, { includeDay: true })
+                    : "-"}
+                </span>
+              </div>
+              <div className="detail-info-item">
+                <span className="dii-label">Pengambilan Fisik Barang</span>
                 <span className="dii-val">
-                  {booking.isTodayPickup ? (
-                    <strong style={{ color: "#B45309" }}>Pengambilan Hari Ini</strong>
+                  {booking.status === "selesai" ? (
+                    <strong style={{ color: "var(--st-ok-t)" }}>Sudah Diambil (Transaksi Selesai)</strong>
                   ) : (
-                    "Mendatang"
+                    "Dicatat saat diproses ke Transaksi Sewa"
                   )}
+                </span>
+              </div>
+              <div className="detail-info-item">
+                <span className="dii-label">Waktu Pencatatan Sistem</span>
+                <span className="dii-val" style={{ fontSize: "12px", color: "var(--n600)" }}>
+                  {booking.waktuDibuat}
                 </span>
               </div>
             </div>
@@ -326,32 +362,30 @@ export function BookingDetailModal({
             <>
               {booking.status === "draft" && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onEditBooking?.(booking);
-                    }}
-                    className="btn sm"
-                    title="Ubah data draft booking"
-                  >
-                    Ubah Data
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onConfirmBooking?.(booking);
-                    }}
+                  <Link
+                    href={`/admin/booking/baru?id=${booking.id}`}
                     className="btn pri sm"
-                    title="Konfirmasi booking"
+                    title="Lanjutkan lengkapi data draft pada form Catat Booking"
+                    onClick={onClose}
                   >
-                    Konfirmasi Booking
-                  </button>
+                    Lanjutkan Draft
+                  </Link>
                 </>
               )}
 
-              {booking.status === "dikonfirmasi" && (
+              {(booking.status === "selesai" || booking.status === "dikonfirmasi") && (
                 <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onMarkHangus?.(booking);
+                    }}
+                    className="btn sm"
+                    style={{ borderColor: "#F59E0B", color: "#B45309" }}
+                    title="Tandai booking hangus karena tidak diambil lewat batas waktu (§E.12)"
+                  >
+                    Tandai Hangus
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -373,17 +407,6 @@ export function BookingDetailModal({
                   >
                     Ubah Data
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onProcessRental?.(booking);
-                    }}
-                    className="btn pri sm"
-                    style={{ background: "var(--st-ok)", borderColor: "var(--st-ok)" }}
-                    title="Lanjutkan booking ke Transaksi Sewa"
-                  >
-                    Lanjutkan ke Transaksi Sewa
-                  </button>
                 </>
               )}
             </>
@@ -392,14 +415,14 @@ export function BookingDetailModal({
           {/* Role: OWNER Action Buttons (Strictly Monitoring - Only Cancellation with Reason if allowed) */}
           {role === "owner" && (
             <>
-              {booking.status === "dikonfirmasi" && (
+              {(booking.status === "selesai" || booking.status === "dikonfirmasi") && (
                 <button
                   type="button"
                   onClick={() => {
                     onCancelBooking?.(booking);
                   }}
                   className="btn sm dng"
-                  title="Batalkan booking terkonfirmasi dengan alasan wajib"
+                  title="Batalkan booking resmi dengan alasan wajib"
                 >
                   Batalkan Booking
                 </button>

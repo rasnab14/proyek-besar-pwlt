@@ -67,9 +67,9 @@ export function BookingSearchFilters({
             aria-label="Filter status booking"
           >
             <option value="semua">Semua Status</option>
+            <option value="selesai">Selesai (Siap Transaksi)</option>
             <option value="draft">Draft</option>
-            <option value="dikonfirmasi">Dikonfirmasi</option>
-            <option value="selesai">Selesai</option>
+            <option value="hangus">Hangus</option>
             <option value="dibatalkan">Dibatalkan</option>
           </select>
 
@@ -140,6 +140,13 @@ export function BookingSearchFilters({
             </button>
             <button
               type="button"
+              className={`booking-quick-tab ${filters.status === "selesai" || filters.status === "dikonfirmasi" ? "active" : ""}`}
+              onClick={() => onFilterChange({ status: "selesai" })}
+            >
+              Selesai
+            </button>
+            <button
+              type="button"
               className={`booking-quick-tab ${filters.status === "draft" ? "active" : ""}`}
               onClick={() => onFilterChange({ status: "draft" })}
             >
@@ -147,17 +154,17 @@ export function BookingSearchFilters({
             </button>
             <button
               type="button"
-              className={`booking-quick-tab ${filters.status === "dikonfirmasi" ? "active" : ""}`}
-              onClick={() => onFilterChange({ status: "dikonfirmasi" })}
+              className={`booking-quick-tab ${filters.status === "hangus" ? "active" : ""}`}
+              onClick={() => onFilterChange({ status: "hangus" })}
             >
-              Dikonfirmasi
+              Hangus
             </button>
             <button
               type="button"
-              className={`booking-quick-tab ${filters.status === "selesai" ? "active" : ""}`}
-              onClick={() => onFilterChange({ status: "selesai" })}
+              className={`booking-quick-tab ${filters.status === "dibatalkan" ? "active" : ""}`}
+              onClick={() => onFilterChange({ status: "dibatalkan" })}
             >
-              Selesai
+              Dibatalkan
             </button>
           </div>
         </div>

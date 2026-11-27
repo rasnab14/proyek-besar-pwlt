@@ -40,7 +40,7 @@ export default function OwnerDashboardPage() {
       transaksi: "3 / 2",
       transaksiSub: "5 transaksi",
       booking: "11 · 14",
-      bookingSub: "Kondisi saat ini",
+      bookingSub: "11 Selesai · 2 Batal/Hangus terpisah",
     },
     bulan: {
       pendapatan: "Rp 19.180.000",
@@ -392,11 +392,11 @@ export default function OwnerDashboardPage() {
           </div>
         </div>
 
-        {/* Card 4: Booking aktif · berjalan */}
+        {/* Card 4: Booking aktif · berjalan (§B.2.4) */}
         <div
           className="kpi-card"
-          onClick={() => showToast(`Booking Aktif: 11 unit · Transaksi Berjalan: 14 transaksi`)}
-          title="Klik untuk status operasional sewa"
+          onClick={() => showToast(`Booking Aktif: 11 booking Selesai · Transaksi Berjalan: 14 transaksi (Booking Batal/Hangus dipantau terpisah)`)}
+          title="Klik untuk rincian booking & transaksi berjalan"
         >
           <span className="kpi-label">Booking aktif · berjalan</span>
           <div className="kpi-value">{kpiData[selectedPeriod].booking}</div>

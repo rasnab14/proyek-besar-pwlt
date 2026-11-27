@@ -22,7 +22,6 @@ export function CreateBookingModal({
   // Form States
   const [nama, setNama] = useState("");
   const [telepon, setTelepon] = useState("");
-  const [noIdentitas, setNoIdentitas] = useState("");
   const [alamat, setAlamat] = useState("");
   const [catatan, setCatatan] = useState("");
 
@@ -49,7 +48,6 @@ export function CreateBookingModal({
     if (editingBooking) {
       setNama(editingBooking.pelanggan.nama);
       setTelepon(editingBooking.pelanggan.telepon);
-      setNoIdentitas(editingBooking.pelanggan.noIdentitas || "");
       setAlamat(editingBooking.pelanggan.alamat || "");
       setCatatan(editingBooking.catatan || "");
       setTanggalPengambilan(editingBooking.tanggalPengambilan);
@@ -63,7 +61,6 @@ export function CreateBookingModal({
       // Default empty
       setNama("");
       setTelepon("");
-      setNoIdentitas("");
       setAlamat("");
       setCatatan("");
       setTanggalPengambilan("2026-11-28");
@@ -194,7 +191,7 @@ export function CreateBookingModal({
   };
 
   // Submit Handler
-  const handleSubmit = (targetStatus: "draft" | "dikonfirmasi") => {
+  const handleSubmit = (targetStatus: "draft" | "selesai") => {
     if (!validateForm()) return;
 
     const newBooking: BookingRecord = {
@@ -203,7 +200,6 @@ export function CreateBookingModal({
       pelanggan: {
         nama,
         telepon,
-        noIdentitas,
         alamat,
       },
       items: cartItems,
@@ -215,8 +211,8 @@ export function CreateBookingModal({
       totalBiaya,
       dpPersen,
       dpNominal,
-      dpStatus: targetStatus === "dikonfirmasi" ? (isH1OrLess ? "tidak_perlu" : "lunas") : "belum",
-      dpMetode: targetStatus === "dikonfirmasi" && !isH1OrLess ? dpMetode : undefined,
+      dpStatus: targetStatus === "selesai" ? (isH1OrLess ? "tidak_perlu" : "lunas") : "belum",
+      dpMetode: targetStatus === "selesai" && !isH1OrLess ? dpMetode : undefined,
       sisaPelunasan,
       status: targetStatus,
       catatan,
@@ -227,10 +223,10 @@ export function CreateBookingModal({
         {
           waktu: "27 Nov 2026, 09:30 WIB",
           user: "Staf Admin",
-          aksi: targetStatus === "dikonfirmasi" ? "Booking Dikonfirmasi" : "Draft Disimpan",
+          aksi: targetStatus === "selesai" ? "Booking Disepakati (Selesai)" : "Draft Disimpan",
           catatan:
-            targetStatus === "dikonfirmasi"
-              ? `Booking dikonfirmasi dengan DP Rp ${dpNominal.toLocaleString()}`
+            targetStatus === "selesai"
+              ? `Booking resmi disepakati (Selesai) dengan DP Rp ${dpNominal.toLocaleString()}`
               : "Draft booking berhasil diperbarui.",
         },
       ],
@@ -317,22 +313,11 @@ export function CreateBookingModal({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Nomor Identitas (KTP / SIM)</label>
+                <label className="form-label">Alamat / Asal Kampus / Domisili (Opsional)</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="3404xxxxxxxxxxxx"
-                  value={noIdentitas}
-                  onChange={(e) => setNoIdentitas(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Alamat / Asal Kampus / Domisili</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Contoh: Pogung Baru, Sleman"
+                  placeholder="Contoh: Pogung Baru, Sleman (opsional)"
                   value={alamat}
                   onChange={(e) => setAlamat(e.target.value)}
                 />
@@ -680,10 +665,10 @@ export function CreateBookingModal({
           <button
             type="button"
             className="btn pri sm"
-            onClick={() => handleSubmit("dikonfirmasi")}
-            title="Konfirmasi kesepakatan booking dan kunci alokasi stok"
+            onClick={() => handleSubmit("selesai")}
+            title="Selesaikan kesepakatan booking dan kunci alokasi stok"
           >
-            Konfirmasi Booking
+            Selesaikan Booking
           </button>
         </div>
       </div>

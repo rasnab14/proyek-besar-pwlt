@@ -8,7 +8,7 @@ export default function AdminPelangganPage() {
           <span className="hero-badge">ADMIN · PELANGGAN</span>
           <h1 className="hero-title">Data Pelanggan</h1>
           <p className="hero-sub">
-            Direktori pelanggan rental, data kontak, identitas, dan riwayat transaksi
+            Direktori pelanggan rental, data kontak, dan riwayat transaksi
           </p>
         </div>
         <div className="hero-actions">
@@ -25,7 +25,7 @@ export default function AdminPelangganPage() {
         </div>
         <div className="pad">
           <p className="sub">
-            Pencarian data pelanggan berdasarkan nama, nomor WhatsApp, atau nomor identitas (KTP/SIM).
+            Pencarian data pelanggan berdasarkan nama atau nomor WhatsApp.
           </p>
         </div>
       </div>

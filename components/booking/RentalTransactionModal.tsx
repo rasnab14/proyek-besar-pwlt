@@ -20,8 +20,7 @@ export function RentalTransactionModal({
   onCompleteTransaction,
 }: RentalTransactionModalProps) {
   const [metodePelunasan, setMetodePelunasan] = useState<"tunai" | "qris" | "transfer">("tunai");
-  const [jenisJaminan, setJenisJaminan] = useState<"KTP" | "SIM" | "Kartu Mahasiswa">("KTP");
-  const [noJaminan, setNoJaminan] = useState(booking?.pelanggan.noIdentitas || "");
+  const [jenisJaminan, setJenisJaminan] = useState("");
 
   if (!isOpen || !booking) return null;
 
@@ -109,29 +108,20 @@ export function RentalTransactionModal({
             </div>
           </div>
 
-          <div className="form-group-grid">
-            <div className="form-group">
-              <label className="form-label">Jenis Identitas Jaminan</label>
-              <select
-                className="booking-select"
-                value={jenisJaminan}
-                onChange={(e) => setJenisJaminan(e.target.value as any)}
-              >
-                <option value="KTP">KTP Asli</option>
-                <option value="SIM">SIM Asli</option>
-                <option value="Kartu Mahasiswa">Kartu Mahasiswa (KTM)</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Nomor / Identitas Jaminan</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Nomor identitas fisik ditahan"
-                value={noJaminan}
-                onChange={(e) => setNoJaminan(e.target.value)}
-              />
-            </div>
+          <div className="form-group">
+            <label className="form-label">
+              Jenis Identitas Jaminan Fisik <span className="req">*</span>
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Tulis manual jenis jaminan (misal: KTP Dimas, SIM A, KTM UGM...)"
+              value={jenisJaminan}
+              onChange={(e) => setJenisJaminan(e.target.value)}
+            />
+            <span style={{ fontSize: "11.5px", color: "var(--n500)", marginTop: "4px", display: "block" }}>
+              Ditulis manual oleh Admin saat serah terima barang sewa tanpa perlu mencatat nomor identitas jaminan.
+            </span>
           </div>
         </div>
 

@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { BookingRecord } from "./types";
 import { BookingStatusBadge, DPStatusBadge } from "./BookingStatusBadge";
 import { formatRupiah, formatTanggal } from "@/lib/format";
@@ -158,28 +159,15 @@ export function BookingDataTable({
                   <div className="table-actions" style={{ justifyContent: "flex-end" }}>
                     {role === "admin" ? (
                       <>
-                        {/* Admin Action logic according to ALUR-NAVIGASI.md */}
+                        {/* Admin Action logic: Lanjutkan (Draft) & Detail */}
                         {booking.status === "draft" && (
-                          <button
-                            type="button"
-                            onClick={() => onEditBooking?.(booking)}
+                          <Link
+                            href={`/admin/booking/baru?id=${booking.id}`}
                             className="btn pri sm"
-                            title="Lanjutkan lengkapi data booking"
+                            title="Lanjutkan lengkapi data booking menggunakan form Catat Booking"
                           >
                             Lanjutkan
-                          </button>
-                        )}
-
-                        {booking.status === "dikonfirmasi" && booking.isTodayPickup && (
-                          <button
-                            type="button"
-                            onClick={() => onProcessRental?.(booking)}
-                            className="btn pri sm"
-                            style={{ background: "var(--st-ok)", borderColor: "var(--st-ok)" }}
-                            title="Proses menjadi transaksi sewa & serah terima"
-                          >
-                            Proses sewa
-                          </button>
+                          </Link>
                         )}
 
                         {/* Always provide Detail button */}

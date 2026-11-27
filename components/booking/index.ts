@@ -12,3 +12,4 @@ export * from "./BookingDetailModal";
 export * from "./CreateBookingModal";
 export * from "./BookingCancellationDialog";
 export * from "./RentalTransactionModal";
+export * from "./bookingStore";

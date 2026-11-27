@@ -1,12 +1,15 @@
 // app/admin/booking/page.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import "@/components/booking/booking.css";
 import {
   BookingRecord,
   BookingFilterState,
   INITIAL_BOOKINGS,
+  getStoredBookings,
+  saveOrUpdateBooking,
   BookingPageHeader,
   BookingSummaryCards,
   BookingSearchFilters,
@@ -14,14 +17,23 @@ import {
   BookingPagination,
   BookingEmptyState,
   BookingDetailModal,
-  CreateBookingModal,
   BookingCancellationDialog,
-  RentalTransactionModal,
 } from "@/components/booking";
 
 export default function AdminBookingPage() {
-  // ─── Data State (Local Frontend State) ───
+  const router = useRouter();
+
+  // ─── Data State (Synced with Shared Booking Store) ───
   const [bookings, setBookings] = useState<BookingRecord[]>(INITIAL_BOOKINGS);
+
+  useEffect(() => {
+    setBookings(getStoredBookings());
+    const handleUpdate = () => {
+      setBookings(getStoredBookings());
+    };
+    window.addEventListener("summit_bookings_updated", handleUpdate);
+    return () => window.removeEventListener("summit_bookings_updated", handleUpdate);
+  }, []);
 
   // ─── Filter State ───
   const [filters, setFilters] = useState<BookingFilterState>({
@@ -37,10 +49,7 @@ export default function AdminBookingPage() {
   // ─── Modals State ───
   const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<BookingRecord | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<BookingRecord | null>(null);
-  const [rentalBooking, setRentalBooking] = useState<BookingRecord | null>(null);
 
   // ─── Toast Feedback ───
   const [toast, setToast] = useState<{ message: string; type: "success" | "warning" | "danger" } | null>(null);
@@ -104,56 +113,65 @@ export default function AdminBookingPage() {
   };
 
   const handleOpenCreate = () => {
-    setEditingBooking(null);
-    setIsCreateOpen(true);
+    router.push("/admin/booking/baru");
   };
 
   const handleOpenEdit = (booking: BookingRecord) => {
-    setEditingBooking(booking);
-    setIsCreateOpen(true);
-  };
-
-  const handleSaveBooking = (savedBooking: BookingRecord) => {
-    setBookings((prev) => {
-      const idx = prev.findIndex((b) => b.id === savedBooking.id);
-      if (idx >= 0) {
-        const updated = [...prev];
-        updated[idx] = savedBooking;
-        return updated;
-      }
-      return [savedBooking, ...prev];
-    });
-
-    setIsCreateOpen(false);
-    setEditingBooking(null);
-    showToast(
-      savedBooking.status === "dikonfirmasi"
-        ? `Booking ${savedBooking.kode} berhasil dikonfirmasi!`
-        : `Draft booking ${savedBooking.kode} berhasil disimpan!`,
-      "success"
-    );
+    router.push(`/admin/booking/baru?id=${booking.id}`);
   };
 
   const handleConfirmDraft = (booking: BookingRecord) => {
     const updated: BookingRecord = {
       ...booking,
-      status: "dikonfirmasi",
+      status: "selesai",
       dpStatus: "lunas",
       dpMetode: booking.dpMetode || "qris",
       riwayat: [
-        ...booking.riwayat,
         {
           waktu: "Hari Ini, Baru Saja",
           user: "Admin",
-          aksi: "Booking Dikonfirmasi",
-          catatan: "Status draft diubah menjadi booking terkonfirmasi.",
+          aksi: "Booking Disepakati (Selesai)",
+          catatan: "Status draft diubah menjadi booking Selesai resmi (siap diproses ke Transaksi Sewa).",
         },
+        ...booking.riwayat,
       ],
     };
 
+    saveOrUpdateBooking(updated);
     setBookings((prev) => prev.map((b) => (b.id === booking.id ? updated : b)));
     setIsDetailOpen(false);
-    showToast(`Booking ${booking.kode} berhasil dikonfirmasi!`, "success");
+    showToast(`Booking ${booking.kode} berhasil disepakati dan berstatus Selesai!`, "success");
+  };
+
+  const handleMarkHangus = (booking: BookingRecord) => {
+    let updatedBooking: BookingRecord | null = null;
+    setBookings((prev) =>
+      prev.map((b) => {
+        if (b.id === booking.id) {
+          updatedBooking = {
+            ...b,
+            status: "hangus",
+            dpStatus: b.dpNominal > 0 ? "hangus" : b.dpStatus,
+            riwayat: [
+              {
+                waktu: "Hari Ini, Baru Saja",
+                user: "Admin",
+                aksi: "Booking Dinyatakan Hangus",
+                catatan: "Melewati batas toleransi pengambilan operasional tanpa konfirmasi (§E.12). DP dicatat sebagai penerimaan hangus dan stok dilepaskan.",
+              },
+              ...b.riwayat,
+            ],
+          };
+          return updatedBooking;
+        }
+        return b;
+      })
+    );
+    if (updatedBooking) {
+      saveOrUpdateBooking(updatedBooking);
+    }
+    setIsDetailOpen(false);
+    showToast(`Booking ${booking.kode} berhasil ditandai Hangus. Stok telah dilepaskan kembali.`, "warning");
   };
 
   const handleStartCancel = (booking: BookingRecord) => {
@@ -162,10 +180,11 @@ export default function AdminBookingPage() {
   };
 
   const handleConfirmCancel = (bookingId: string, alasan: string) => {
+    let updatedBooking: BookingRecord | null = null;
     setBookings((prev) =>
       prev.map((b) => {
         if (b.id === bookingId) {
-          return {
+          updatedBooking = {
             ...b,
             status: "dibatalkan",
             dpStatus: b.dpNominal > 0 ? "hangus" : b.dpStatus,
@@ -173,54 +192,25 @@ export default function AdminBookingPage() {
             waktuPembatalan: "Hari Ini, Baru Saja",
             userPembatalan: "Admin",
             riwayat: [
-              ...b.riwayat,
               {
                 waktu: "Hari Ini, Baru Saja",
                 user: "Admin",
                 aksi: "Booking Dibatalkan",
                 catatan: `Alasan: ${alasan}. DP hangus: Rp ${b.dpNominal.toLocaleString()}`,
               },
+              ...b.riwayat,
             ],
           };
+          return updatedBooking;
         }
         return b;
       })
     );
-
+    if (updatedBooking) {
+      saveOrUpdateBooking(updatedBooking);
+    }
     setCancellingBooking(null);
     showToast(`Booking berhasil dibatalkan. DP dicatat sebagai hangus sesuai SOP.`, "danger");
-  };
-
-  const handleStartRental = (booking: BookingRecord) => {
-    setIsDetailOpen(false);
-    setRentalBooking(booking);
-  };
-
-  const handleCompleteRental = (bookingId: string) => {
-    setBookings((prev) =>
-      prev.map((b) => {
-        if (b.id === bookingId) {
-          return {
-            ...b,
-            status: "selesai",
-            sisaPelunasan: 0,
-            riwayat: [
-              ...b.riwayat,
-              {
-                waktu: "Hari Ini, Baru Saja",
-                user: "Admin",
-                aksi: "Pelunasan & Transaksi Selesai",
-                catatan: "Barang diserahkan ke pelanggan & pelunasan diterima.",
-              },
-            ],
-          };
-        }
-        return b;
-      })
-    );
-
-    setRentalBooking(null);
-    showToast(`Transaksi sewa berhasil diproses! Barang telah diserahkan ke pelanggan.`, "success");
   };
 
   return (
@@ -267,7 +257,6 @@ export default function AdminBookingPage() {
                 onViewDetail={handleOpenDetail}
                 onEditBooking={handleOpenEdit}
                 onCancelBooking={handleStartCancel}
-                onProcessRental={handleStartRental}
               />
               <BookingPagination
                 currentPage={currentPage}
@@ -294,34 +283,15 @@ export default function AdminBookingPage() {
         onEditBooking={handleOpenEdit}
         onConfirmBooking={handleConfirmDraft}
         onCancelBooking={handleStartCancel}
-        onProcessRental={handleStartRental}
+        onMarkHangus={handleMarkHangus}
       />
 
-      {/* 2. Create / Edit Booking Modal */}
-      <CreateBookingModal
-        isOpen={isCreateOpen}
-        onClose={() => {
-          setIsCreateOpen(false);
-          setEditingBooking(null);
-        }}
-        onSubmitBooking={handleSaveBooking}
-        editingBooking={editingBooking}
-      />
-
-      {/* 3. Cancellation Dialog with Reason */}
+      {/* 2. Cancellation Dialog with Reason */}
       <BookingCancellationDialog
         booking={cancellingBooking}
         isOpen={Boolean(cancellingBooking)}
         onClose={() => setCancellingBooking(null)}
         onConfirmCancel={handleConfirmCancel}
-      />
-
-      {/* 4. Rental Transaction Forward Dialog */}
-      <RentalTransactionModal
-        booking={rentalBooking}
-        isOpen={Boolean(rentalBooking)}
-        onClose={() => setRentalBooking(null)}
-        onCompleteTransaction={handleCompleteRental}
       />
 
       {/* ─── Toast Feedback ─── */}
