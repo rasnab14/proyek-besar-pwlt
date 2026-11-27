@@ -15,7 +15,6 @@ interface BookingDetailModalProps {
   onEditBooking?: (booking: BookingRecord) => void;
   onConfirmBooking?: (booking: BookingRecord) => void;
   onCancelBooking?: (booking: BookingRecord) => void;
-  onMarkHangus?: (booking: BookingRecord) => void;
   onProcessRental?: (booking: BookingRecord) => void;
 }
 
@@ -27,7 +26,6 @@ export function BookingDetailModal({
   onEditBooking,
   onConfirmBooking,
   onCancelBooking,
-  onMarkHangus,
   onProcessRental,
 }: BookingDetailModalProps) {
   if (!isOpen || !booking) return null;
@@ -78,22 +76,7 @@ export function BookingDetailModal({
                 Dibatalkan oleh: <strong>{booking.userPembatalan || "Pengguna Berwenang"}</strong> · {booking.waktuPembatalan}
               </div>
               <div style={{ fontSize: "12px", marginTop: "4px", color: "var(--st-er-t)" }}>
-                ※ Sesuai ketentuan, booking dibatalkan tidak dapat dilanjutkan ke Transaksi Sewa. Uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai <strong>dana hangus</strong> dan stok telah dilepaskan.
-              </div>
-            </div>
-          )}
-
-          {/* Hangus Banner if hangus */}
-          {booking.status === "hangus" && (
-            <div className="note er" style={{ display: "flex", flexDirection: "column", gap: "4px", background: "#FEF2F2", borderColor: "#FCA5A5" }}>
-              <div style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "6px", color: "#991B1B" }}>
-                <span>⚠️</span> Booking Dinyatakan Hangus (§E.12)
-              </div>
-              <div style={{ fontSize: "12.5px", color: "#7F1D1D" }}>
-                Pelanggan tidak datang mengambil barang sewa hingga batas toleransi jam operasional toko (pukul 21.00 WIB) pada jadwal pengambilan.
-              </div>
-              <div style={{ fontSize: "12px", color: "#991B1B" }}>
-                ※ Booking berstatus Hangus tidak dapat dilanjutkan ke Transaksi Penyewaan (§E.25). Alokasi stok telah dilepaskan dan uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai dana hangus.
+                ※ Sesuai ketentuan, booking dibatalkan tidak dapat dilanjutkan ke Transaksi Sewa. Uang muka DP sebesar {formatRupiah(booking.dpNominal)} dicatat sebagai <strong>dana yang tidak dikembalikan</strong> dan alokasi stok telah dilepaskan.
               </div>
             </div>
           )}
@@ -373,19 +356,8 @@ export function BookingDetailModal({
                 </>
               )}
 
-              {(booking.status === "selesai" || booking.status === "dikonfirmasi") && (
+              {booking.status === "selesai" && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onMarkHangus?.(booking);
-                    }}
-                    className="btn sm"
-                    style={{ borderColor: "#F59E0B", color: "#B45309" }}
-                    title="Tandai booking hangus karena tidak diambil lewat batas waktu (§E.12)"
-                  >
-                    Tandai Hangus
-                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -415,7 +387,7 @@ export function BookingDetailModal({
           {/* Role: OWNER Action Buttons (Strictly Monitoring - Only Cancellation with Reason if allowed) */}
           {role === "owner" && (
             <>
-              {(booking.status === "selesai" || booking.status === "dikonfirmasi") && (
+              {booking.status === "selesai" && (
                 <button
                   type="button"
                   onClick={() => {

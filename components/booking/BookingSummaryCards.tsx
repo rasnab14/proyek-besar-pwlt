@@ -14,9 +14,11 @@ export function BookingSummaryCards({
   bookings,
 }: BookingSummaryCardsProps) {
   const draftCount = bookings.filter((b) => b.status === "draft").length;
-  const selesaiCount = bookings.filter((b) => b.status === "selesai" || b.status === "dikonfirmasi").length;
-  const hangusCount = bookings.filter((b) => b.status === "hangus").length;
+  const selesaiCount = bookings.filter((b) => b.status === "selesai").length;
   const dibatalkanCount = bookings.filter((b) => b.status === "dibatalkan").length;
+  const todayPickupCount = bookings.filter(
+    (b) => b.status === "selesai" && Boolean(b.isTodayPickup)
+  ).length;
 
   if (role === "admin") {
     return (
@@ -50,23 +52,7 @@ export function BookingSummaryCards({
           <div className="bsc-sub">Belum selesai dicatat admin</div>
         </div>
 
-        {/* 3. Hangus */}
-        <div className="booking-summary-card accent-warning">
-          <div className="bsc-top">
-            <span className="bsc-label">Hangus</span>
-            <div className="bsc-icon-wrap amber">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            </div>
-          </div>
-          <div className="bsc-value">{hangusCount}</div>
-          <div className="bsc-sub">Tidak diambil lewat batas waktu</div>
-        </div>
-
-        {/* 4. Dibatalkan */}
+        {/* 3. Dibatalkan */}
         <div className="booking-summary-card" style={{ borderLeftColor: "var(--st-er)" }}>
           <div className="bsc-top">
             <span className="bsc-label">Dibatalkan</span>
@@ -78,7 +64,24 @@ export function BookingSummaryCards({
             </div>
           </div>
           <div className="bsc-value">{dibatalkanCount}</div>
-          <div className="bsc-sub">Dibatalkan dengan alasan tercatat</div>
+          <div className="bsc-sub">Batal sewa / tidak diambil (alasan tercatat)</div>
+        </div>
+
+        {/* 4. Pengambilan Hari Ini */}
+        <div className="booking-summary-card accent-done">
+          <div className="bsc-top">
+            <span className="bsc-label">Pengambilan Hari Ini</span>
+            <div className="bsc-icon-wrap blue">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="2" />
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+              </svg>
+            </div>
+          </div>
+          <div className="bsc-value">{todayPickupCount}</div>
+          <div className="bsc-sub">Siap serah terima &amp; pelunasan hari ini</div>
         </div>
       </div>
     );
@@ -116,23 +119,7 @@ export function BookingSummaryCards({
         <div className="bsc-sub">Pemesanan belum tuntas</div>
       </div>
 
-      {/* 3. Hangus */}
-      <div className="booking-summary-card accent-warning">
-        <div className="bsc-top">
-          <span className="bsc-label">Hangus (Terpisah)</span>
-          <div className="bsc-icon-wrap amber">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          </div>
-        </div>
-        <div className="bsc-value">{hangusCount}</div>
-        <div className="bsc-sub">Tidak dihitung pendapatan sewa aktif</div>
-      </div>
-
-      {/* 4. Dibatalkan */}
+      {/* 3. Dibatalkan */}
       <div className="booking-summary-card" style={{ borderLeftColor: "var(--st-er)" }}>
         <div className="bsc-top">
           <span className="bsc-label">Dibatalkan (Terpisah)</span>
@@ -145,6 +132,23 @@ export function BookingSummaryCards({
         </div>
         <div className="bsc-value">{dibatalkanCount}</div>
         <div className="bsc-sub">Tidak dihitung pendapatan sewa aktif</div>
+      </div>
+
+      {/* 4. Pengambilan Hari Ini */}
+      <div className="booking-summary-card accent-done">
+        <div className="bsc-top">
+          <span className="bsc-label">Pengambilan Hari Ini</span>
+          <div className="bsc-icon-wrap blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="3" width="15" height="13" rx="2" />
+              <polygon points="16 8 20 8 23 11 23 16 16 16 8" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+          </div>
+        </div>
+        <div className="bsc-value">{todayPickupCount}</div>
+        <div className="bsc-sub">Jadwal serah terima barang hari ini</div>
       </div>
     </div>
   );

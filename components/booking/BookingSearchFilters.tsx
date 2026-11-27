@@ -69,7 +69,6 @@ export function BookingSearchFilters({
             <option value="semua">Semua Status</option>
             <option value="selesai">Selesai (Siap Transaksi)</option>
             <option value="draft">Draft</option>
-            <option value="hangus">Hangus</option>
             <option value="dibatalkan">Dibatalkan</option>
           </select>
 

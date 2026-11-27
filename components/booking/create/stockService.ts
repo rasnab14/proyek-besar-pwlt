@@ -72,7 +72,7 @@ export function calculatePeriodBaseStock(
   if (tanggalMulaiSewa && tanggalSelesaiSewa) {
     INITIAL_BOOKINGS.forEach((b) => {
       // Hanya booking berstatus 'selesai' yang mengunci stok
-      if (b.status === "selesai" || b.status === "dikonfirmasi") {
+      if (b.status === "selesai") {
         const bStart = b.tanggalPengambilan;
         const bEnd = b.tanggalPengembalian;
 

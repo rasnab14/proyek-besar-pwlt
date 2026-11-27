@@ -133,12 +133,12 @@ erDiagram
 |---|---|---|
 | Sistem | `pengaturan` | DP 25 persen, batas H-2, jam operasional 08.00–21.00 WIB |
 | Akses | `pengguna`, `izin`, `pengguna_izin` | Akun Admin/Owner (mendukung tautan `auth_user_id` Supabase & flag `perlu_ganti_password` setelah reset) dan hak akses khusus (5 laporan + pembatalan booking) |
-| Audit | `riwayat_aktivitas` | Login, logout, tambah, ubah, hapus, batal, hangus, perubahan status/kondisi; data sebelum & sesudah dalam `jsonb`; alasan wajib untuk hapus dan batal; tidak dapat diubah |
+| Audit | `riwayat_aktivitas` | Login, logout, tambah, ubah, hapus, batal, perubahan status/kondisi; data sebelum & sesudah dalam `jsonb`; alasan wajib untuk hapus dan batal; tidak dapat diubah |
 | Pelanggan | `pelanggan` | Kode otomatis `PL-xxxx`, nama & telepon wajib (unik agar tidak tercatat ganda), alamat & instansi opsional; tanpa pencatatan nomor KTP/SIM |
 | Barang | `kategori_barang`, `barang`, `barang_spesifikasi`, `variasi_barang` | Barang sewa atau jual, spesifikasi bawaan & "spesifikasi lain" (maksimal 3, dijaga trigger), variasi beserta harga, satuan, dan ambang `stok_minimum` |
 | Stok | `unit_barang`, `riwayat_kondisi_unit`, `riwayat_stok` | Unit fisik dengan kode unik, enam kondisi, riwayat perubahan kondisi dan mutasi stok (beserta `alasan` penyesuaian) |
 | Paket | `paket`, `paket_isi` | Paket (`PK-xxx`) dan barang penyusunnya (hanya Barang Sewa, dijaga trigger) |
-| Booking | `booking`, `booking_item` | Booking dengan status `draft`, `selesai`, `dibatalkan`, `hangus` (langsung `draft → selesai` tanpa `dikonfirmasi`); menyimpan `tgl_booking`, `tgl_mulai`, `durasi_hari`, `tgl_selesai`, DP wajib & disepakati, `dp_dibayar`, `status_pembayaran`; tanpa input tanggal pengambilan aktual; item satuan/paket dengan snapshot komposisi & harga |
+| Booking | `booking`, `booking_item` | Booking dengan status `draft`, `selesai`, `dibatalkan` (langsung `draft → selesai` tanpa `dikonfirmasi`); menyimpan `tgl_booking`, `tgl_mulai`, `durasi_hari`, `tgl_selesai`, DP wajib & disepakati, `dp_dibayar`, `status_pembayaran`; tanpa input tanggal pengambilan aktual; item satuan/paket dengan snapshot komposisi & harga |
 | Penyewaan | `transaksi_sewa`, `transaksi_sewa_item`, `transaksi_sewa_unit` | Transaksi dari booking berstatus `selesai` atau sewa langsung; status pengambilan, pengembalian, dan pembayaran terpisah; `jaminan_jenis` ditulis manual tanpa nomor jaminan; alokasi unit per periode |
 | Pengembalian | `pengembalian`, `pengembalian_detail`, `biaya_tambahan` | Pengembalian bertahap, kondisi kembali dan `kondisi_setelah` unit (termasuk penyusun paket), denda dan biaya kerusakan/kehilangan manual dengan alasan wajib |
 | Penjualan | `transaksi_jual`, `transaksi_jual_item` | Keranjang penjualan, `nominal_bayar`, `total_dibayar`, `kembalian`, `status_pembayaran` otomatis |
@@ -161,15 +161,15 @@ Struk/bukti dan laporan tidak punya tabel sendiri. Keduanya dibentuk dari data t
 | Satu booking hanya menjadi satu transaksi & hanya status `selesai` yang boleh dilanjutkan | `transaksi_sewa.booking_id` unik + trigger `cek_booking_untuk_sewa` |
 | DP booking otomatis terhubung ke transaksi sewa tanpa dicatat ulang | Trigger `trg_sewa_tautkan_dp` menautkan baris `pembayaran` booking ke `sewa_id` dan menghitung ulang total |
 | Status pembayaran otomatis di `booking`, `transaksi_sewa`, dan `transaksi_jual` | Trigger `trg_pembayaran_sync_aiud` dan `trg_biaya_tambahan_aiud` (insert/update/delete) |
-| Pembatalan wajib berpenyebab & berpelaku, hangus mencatat waktu, hapus hanya untuk Draft ber-alasan | `CHECK ck_booking_batal`, `ck_booking_hangus`, `ck_booking_hapus` pada `booking` & `ck_alasan_hapus` pada `riwayat_aktivitas` |
-| DP hangus dipisahkan sebagai penerimaan non-sewa tanpa dihitung ganda | View `v_penerimaan` memberi label `sumber = 'dp_hangus'` untuk pembayaran milik booking `dibatalkan`/`hangus` |
+| Pembatalan wajib berpenyebab & berpelaku, hapus hanya untuk Draft ber-alasan | `CHECK ck_booking_batal`, `ck_booking_hapus` pada `booking` & `ck_alasan_hapus` pada `riwayat_aktivitas` |
+| DP hangus dipisahkan sebagai penerimaan non-sewa tanpa dihitung ganda | View `v_penerimaan` memberi label `sumber = 'dp_hangus'` untuk pembayaran milik booking `dibatalkan` |
 | Pembayaran harus terkait tepat satu jenis induk | `CHECK ck_pembayaran_induk`, `ck_pembayaran_jenis` |
 | Riwayat tidak dapat diubah atau dihapus | Trigger `tolak_ubah_riwayat` |
 | Stok jual dan stok minimum tidak boleh negatif | `CHECK (stok_jual >= 0)`, `CHECK (stok_minimum >= 0)` |
 
 Aturan yang dijalankan di aplikasi (karena tergantung konteks atau waktu):
 - DP wajib untuk booking H-2 atau lebih, tanpa DP untuk H-1/Hari-H, dengan nilai dari `pengaturan`.
-- Penandaan booking menjadi `hangus` apabila belum diambil melewati jam operasional (`jam_tutup`, default 21.00 WIB) pada hari mulai sewa.
+- Pembatalan booking karena pelanggan tidak hadir/mengambil barang hingga batas jam operasional toko (`jam_tutup`, default 21.00 WIB) pada hari mulai sewa dicatat sebagai `dibatalkan` (alasan no-show) dengan DP non-refundable.
 - Pengembalian setelah pukul 21.00 WIB atau lewat tanggal kembali dianggap terlambat.
 - Unit baru menjadi `tersedia` hanya setelah diperiksa dan dinyatakan siap secara manual oleh Admin.
 - Hanya Owner atau pengguna dengan `izin` khusus yang membuka Laporan atau membatalkan booking.

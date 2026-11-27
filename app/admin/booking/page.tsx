@@ -143,37 +143,6 @@ export default function AdminBookingPage() {
     showToast(`Booking ${booking.kode} berhasil disepakati dan berstatus Selesai!`, "success");
   };
 
-  const handleMarkHangus = (booking: BookingRecord) => {
-    let updatedBooking: BookingRecord | null = null;
-    setBookings((prev) =>
-      prev.map((b) => {
-        if (b.id === booking.id) {
-          updatedBooking = {
-            ...b,
-            status: "hangus",
-            dpStatus: b.dpNominal > 0 ? "hangus" : b.dpStatus,
-            riwayat: [
-              {
-                waktu: "Hari Ini, Baru Saja",
-                user: "Admin",
-                aksi: "Booking Dinyatakan Hangus",
-                catatan: "Melewati batas toleransi pengambilan operasional tanpa konfirmasi (§E.12). DP dicatat sebagai penerimaan hangus dan stok dilepaskan.",
-              },
-              ...b.riwayat,
-            ],
-          };
-          return updatedBooking;
-        }
-        return b;
-      })
-    );
-    if (updatedBooking) {
-      saveOrUpdateBooking(updatedBooking);
-    }
-    setIsDetailOpen(false);
-    showToast(`Booking ${booking.kode} berhasil ditandai Hangus. Stok telah dilepaskan kembali.`, "warning");
-  };
-
   const handleStartCancel = (booking: BookingRecord) => {
     setIsDetailOpen(false);
     setCancellingBooking(booking);
@@ -283,7 +252,6 @@ export default function AdminBookingPage() {
         onEditBooking={handleOpenEdit}
         onConfirmBooking={handleConfirmDraft}
         onCancelBooking={handleStartCancel}
-        onMarkHangus={handleMarkHangus}
       />
 
       {/* 2. Cancellation Dialog with Reason */}

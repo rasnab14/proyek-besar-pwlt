@@ -67,7 +67,7 @@ export default function DashboardAdminPage() {
             </div>
           </div>
           <div className="kpi-value">3</div>
-          <div className="kpi-desc">3 Selesai (siap sewa) · 1 Hangus · 1 Dibatalkan</div>
+          <div className="kpi-desc">3 Selesai (siap sewa) · 2 Dibatalkan</div>
         </div>
 
         {/* Card 2: Pengambilan hari ini */}
@@ -427,11 +427,11 @@ export default function DashboardAdminPage() {
               </Link>
             </div>
 
-            {/* Item 3 - Sesuai §B.1.8 & §E.12: Booking lewat batas toleransi */}
+            {/* Item 3 - Sesuai §B.1.8 & §E.12: Booking lewat jadwal pengambilan */}
             <div className="action-row">
               <div className="item-info">
-                <span className="item-title">1 booking lewat batas toleransi pengambilan</span>
-                <span className="item-sub">Perlu ditandai Hangus &amp; lepaskan alokasi stok</span>
+                <span className="item-title">1 booking lewat jadwal pengambilan</span>
+                <span className="item-sub">Perlu konfirmasi pelanggan / batalkan &amp; lepaskan alokasi stok</span>
               </div>
               <Link href="/admin/booking" className="btn-outline-sm">
                 Buka
