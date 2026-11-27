@@ -43,9 +43,17 @@ export async function updateSession(request: NextRequest) {
   });
 
   // PENTING: auth.getUser() memvalidasi token sesi secara aman dengan server Supabase
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data?.user) {
+      user = data.user;
+    }
+  } catch (err) {
+    console.warn("Supabase auth check in middleware encountered error:", err);
+    // Lewati atau biarkan request lanjut jika terjadi network/offline error agar tidak 500
+    return supabaseResponse;
+  }
 
   const url = request.nextUrl.clone();
 
@@ -57,13 +65,19 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Jika sudah login dan membuka halaman /login, redirect ke dashboard sesuai role
   if (user && url.pathname === "/login") {
-    const { data: profile } = await supabase
-      .from("profil")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    let role = "admin";
+    try {
+      const { data: profile } = await supabase
+        .from("profil")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.role) role = profile.role;
+    } catch {
+      // fallback default
+    }
 
-    if (profile?.role === "owner") {
+    if (role === "owner") {
       url.pathname = "/owner/dashboard";
     } else {
       url.pathname = "/admin/dashboard";
@@ -73,13 +87,19 @@ export async function updateSession(request: NextRequest) {
 
   // 3. Proteksi Khusus Role Owner: jika user bukan owner mencoba masuk ke area /owner
   if (user && url.pathname.startsWith("/owner")) {
-    const { data: profile } = await supabase
-      .from("profil")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    let role = "admin";
+    try {
+      const { data: profile } = await supabase
+        .from("profil")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.role) role = profile.role;
+    } catch {
+      // fallback default
+    }
 
-    if (profile?.role !== "owner") {
+    if (role !== "owner") {
       url.pathname = "/admin/dashboard";
       return NextResponse.redirect(url);
     }

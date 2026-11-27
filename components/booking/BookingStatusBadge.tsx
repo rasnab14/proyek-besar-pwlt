@@ -9,10 +9,11 @@ interface BookingStatusBadgeProps {
 
 export function BookingStatusBadge({ status, className = "" }: BookingStatusBadgeProps) {
   switch (status) {
-    case "dikonfirmasi":
+    case "selesai":
+    case "dikonfirmasi": // alias kompatibilitas lama
       return (
-        <span className={`b ok ${className}`} title="Booking disetujui & dialokasikan">
-          Dikonfirmasi
+        <span className={`b ok ${className}`} title="Booking resmi selesai dicatat & siap diproses ke Transaksi Sewa">
+          Selesai
         </span>
       );
     case "draft":
@@ -21,16 +22,20 @@ export function BookingStatusBadge({ status, className = "" }: BookingStatusBadg
           Draft
         </span>
       );
-    case "selesai":
-      return (
-        <span className={`b nu ${className}`} title="Sudah diproses menjadi transaksi sewa">
-          Selesai
-        </span>
-      );
     case "dibatalkan":
       return (
-        <span className={`b er ${className}`} title="Booking dibatalkan (DP hangus)">
+        <span className={`b er ${className}`} title="Booking dibatalkan (DP hangus, stok dilepaskan)">
           Dibatalkan
+        </span>
+      );
+    case "hangus":
+      return (
+        <span
+          className={`b er ${className}`}
+          style={{ background: "#FEF2F2", color: "#991B1B", borderColor: "#FCA5A5" }}
+          title="Booking hangus karena tidak diambil lewat batas waktu (DP hangus, stok dilepaskan)"
+        >
+          Hangus
         </span>
       );
     default:

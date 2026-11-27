@@ -1,0 +1,1052 @@
+/* components/booking/create/booking-create.css
+ * Precision styling for Summit Rental & Store - Booking Creation Page
+ * Strictly follows Screenshot 1 & Screenshot 2
+ */
+
+/* ─── Top Header & Back Navigation ─── */
+.bc-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bc-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--n600);
+  background: var(--w);
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  box-shadow: var(--sh);
+  transition: all 0.15s ease;
+}
+
+.bc-back-btn:hover {
+  color: var(--k);
+  border-color: var(--n400);
+  background: var(--n50);
+}
+
+/* ─── Main 2-Column Layout (§4 & Sticky Sidebar) ─── */
+.bc-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: stretch;
+  width: 100%;
+  position: relative;
+}
+
+.bc-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Outer column spanning the full height of the catalog content */
+.bc-right-col {
+  height: 100%;
+  position: relative;
+  min-width: 0;
+}
+
+/* ─── Sticky Panel for Cart & Payment (§1, §2, §7) ─── */
+.bc-sticky-panel {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+  z-index: 10;
+}
+
+.bc-sticky-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.bc-sticky-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bc-sticky-panel::-webkit-scrollbar-thumb {
+  background-color: #CBD5E1;
+  border-radius: 9999px;
+}
+
+/* ─── Base Card Style ─── */
+.bc-card {
+  background: var(--w);
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(10, 10, 10, 0.04);
+  padding: 20px;
+  position: relative;
+  overflow: visible;
+}
+
+.bc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.bc-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.bc-code-badge {
+  font-family: monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0284C7;
+  background: #E0F2FE;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* ─── Customer Selection Form (§5) ─── */
+.bc-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 6px;
+}
+
+.bc-customer-search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.bc-customer-search-input {
+  flex: 1;
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #111827;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.bc-customer-search-input:focus {
+  border-color: #0EA5E9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.bc-new-cust-btn {
+  height: 38px;
+  padding: 0 14px;
+  background: var(--w);
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.bc-new-cust-btn:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+  color: #111827;
+}
+
+/* Customer Search Results / Selected List */
+.bc-customer-list {
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  background: #FAFAFA;
+}
+
+.bc-customer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #E5E7EB;
+  cursor: pointer;
+  background: #ffffff;
+  transition: background 0.15s ease;
+}
+
+.bc-customer-item:last-child {
+  border-bottom: none;
+}
+
+.bc-customer-item:hover {
+  background: #F0F9FF;
+}
+
+.bc-customer-item.selected {
+  background: #E0F2FE;
+  border-left: 3px solid #0284C7;
+}
+
+.bc-cust-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.bc-cust-phone {
+  font-size: 12.5px;
+  color: #4B5563;
+  font-family: monospace;
+}
+
+/* ─── Simplified Booking Dates Grid (§1 & Reference Screenshot) ─── */
+.bc-date-duration-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.9fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .bc-date-duration-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bc-field-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.bc-duration-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bc-duration-field .bc-date-input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.bc-duration-suffix {
+  position: absolute;
+  right: 12px;
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.bc-end-date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.bc-end-date-label {
+  font-size: 12.5px;
+  color: #4B5563;
+  font-weight: 500;
+}
+
+.bc-end-date-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0284C7;
+  letter-spacing: -0.2px;
+}
+
+.bc-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bc-date-label {
+  font-size: 12px;
+  color: #4B5563;
+  font-weight: 500;
+}
+
+.bc-date-input {
+  height: 38px;
+  padding: 6px 10px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #111827;
+  background: #ffffff;
+  outline: none;
+}
+
+.bc-date-input:focus {
+  border-color: #0EA5E9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.bc-date-readonly {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.bc-duration-box {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E0F2FE;
+  border: 1px solid #BAE6FD;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0284C7;
+}
+
+/* Date validation error */
+.bc-date-error-banner {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #DC2626;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Blue DP Notice Banner (§6) */
+.bc-dp-notice-banner {
+  background: #E0F2FE;
+  border: 1px solid #BAE6FD;
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #0369A1;
+  line-height: 1.55;
+  display: block;
+}
+
+.bc-dp-notice-banner strong {
+  color: #0284C7;
+  font-weight: 700;
+}
+
+/* ─── Catalog Card (§7 & §8) ─── */
+.bc-catalog-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bc-cat-tab-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.bc-cat-tab-btn.active {
+  background: #E0F2FE;
+  border-color: #BAE6FD;
+  color: #0284C7;
+}
+
+.bc-cat-tab-btn:not(.active) {
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+.bc-cat-tab-btn:not(.active):hover {
+  background: #E5E7EB;
+  color: #111827;
+}
+
+/* Product Search Bar */
+.bc-prod-search-box {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.bc-prod-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+}
+
+.bc-prod-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #111827;
+  outline: none;
+}
+
+.bc-prod-search-input:focus {
+  border-color: #0EA5E9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Category Filter Pills */
+.bc-category-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.bc-pill-btn {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.bc-pill-btn.active {
+  background: #0A0A0A;
+  color: #ffffff;
+  border-color: #0A0A0A;
+}
+
+.bc-pill-btn:not(.active) {
+  background: #ffffff;
+  color: #374151;
+  border-color: #E5E7EB;
+}
+
+.bc-pill-btn:not(.active):hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Sub-row: Count & Filters */
+.bc-subfilter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 12.5px;
+  color: #6B7280;
+}
+
+.bc-subfilter-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bc-avail-seg {
+  display: inline-flex;
+  background: #E0F2FE;
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid #BAE6FD;
+}
+
+.bc-avail-seg-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: #0369A1;
+  transition: all 0.15s ease;
+}
+
+.bc-avail-seg-btn.active {
+  background: #ffffff;
+  color: #0284C7;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.bc-sort-select {
+  height: 30px;
+  padding: 2px 24px 2px 8px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+/* ─── Product Card Grid (4 cols on desktop) ─── */
+.bc-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.bc-product-card {
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.bc-product-card.available {
+  cursor: pointer;
+}
+
+.bc-product-card.available:hover {
+  transform: translateY(-2px);
+  border-color: #0EA5E9;
+  box-shadow: 0 6px 14px rgba(14, 165, 233, 0.12);
+}
+
+.bc-product-card.unavailable {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #FAFAFA;
+}
+
+/* Upper Half: Image / Illustration Area */
+.bc-card-img-area {
+  height: 110px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.bc-card-img-area.bg-tenda {
+  background: #E0F2FE;
+}
+
+.bc-card-img-area.bg-tas {
+  background: #DCFCE7;
+}
+
+.bc-card-img-area.bg-masak {
+  background: #FEF3C7;
+}
+
+.bc-card-img-area.bg-tidur {
+  background: #F3E8FF;
+}
+
+.bc-card-img-area.bg-aksesoris {
+  background: #F1F5F9;
+}
+
+.bc-card-img-area.bg-paket {
+  background: #E0E7FF;
+}
+
+.bc-card-category-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ffffff;
+  color: #1F2937;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.bc-card-soldout-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bc-card-icon-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bc-card-foto-label {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(56, 189, 248, 0.9);
+}
+
+/* Lower Half: Product Details */
+.bc-card-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bc-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bc-card-sku {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.bc-card-price-row {
+  margin-top: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.bc-card-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.bc-card-price-unit {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.bc-card-stock-row {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bc-stock-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.bc-stock-dot.green {
+  background: #16A34A;
+}
+
+.bc-stock-text.green {
+  color: #166534;
+}
+
+.bc-stock-dot.red {
+  background: #DC2626;
+}
+
+.bc-stock-text.red {
+  color: #DC2626;
+  font-size: 11.5px;
+}
+
+/* ─── Right Column: Booking Cart (§9 & §10) ─── */
+.bc-cart-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0284C7;
+  background: #E0F2FE;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bc-cart-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: #6B7280;
+}
+
+.bc-cart-empty-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.bc-cart-empty-sub {
+  font-size: 12px;
+  margin: 0;
+}
+
+.bc-cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bc-cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #F9FAFB;
+  border: 1px solid #F3F4F6;
+  gap: 8px;
+}
+
+.bc-ci-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bc-ci-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bc-ci-rate {
+  font-size: 11.5px;
+  color: #6B7280;
+}
+
+.bc-ci-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.bc-ci-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #F3F4F6;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bc-ci-btn:hover:not(:disabled) {
+  background: #E5E7EB;
+}
+
+.bc-ci-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bc-ci-qty {
+  width: 24px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.bc-ci-subtotal {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  min-width: 65px;
+  text-align: right;
+}
+
+.bc-ci-del-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bc-ci-del-btn:hover {
+  color: #DC2626;
+}
+
+/* Cart Subtotal & Total Rows */
+.bc-cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #4B5563;
+  margin-top: 6px;
+}
+
+.bc-cart-summary-row.total {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #111827;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+/* ─── Right Column: Payment Card (§11 & §12) ─── */
+.bc-pay-banner {
+  background: #E0F2FE;
+  border: 1px solid #BAE6FD;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #0369A1;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.bc-pay-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.bc-pay-input-group {
+  margin-bottom: 12px;
+}
+
+.bc-pay-input {
+  width: 100%;
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #111827;
+  outline: none;
+}
+
+.bc-pay-input:focus {
+  border-color: #0EA5E9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.bc-pay-helper {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 3px;
+}
+
+.bc-pay-input.input-warning {
+  border-color: #F87171;
+  background-color: #FEF2F2;
+}
+
+.bc-pay-warning {
+  font-size: 11px;
+  color: #DC2626;
+  font-weight: 500;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Payment Methods Segment */
+.bc-methods-seg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bc-method-btn {
+  height: 36px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.bc-method-btn.active {
+  background: #E0F2FE;
+  border-color: #38BDF8;
+  color: #0284C7;
+}
+
+.bc-method-btn:hover:not(.active) {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+/* Payment Status Badge */
+.bc-status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.bc-status-pill.unpaid {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.bc-status-pill.partial {
+  background: #E0F2FE;
+  color: #0369A1;
+}
+
+.bc-status-pill.paid {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+/* Primary "Buat Booking" Button (§12) */
+.bc-submit-btn {
+  width: 100%;
+  height: 42px;
+  background: #0D1117;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.bc-submit-btn:hover:not(:disabled) {
+  background: #1F2937;
+  box-shadow: 0 4px 12px rgba(13, 17, 23, 0.25);
+}
+
+.bc-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Responsive Queries (§15) ─── */
+@media (max-width: 1200px) and (min-width: 900px) {
+  .bc-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
+  .bc-container {
+    grid-template-columns: 1fr;
+  }
+  .bc-right-col {
+    position: static;
+    height: auto;
+  }
+  .bc-sticky-panel {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .bc-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bc-dates-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .bc-product-grid {
+    grid-template-columns: 1fr;
+  }
+  .bc-dates-grid {
+    grid-template-columns: 1fr;
+  }
+  .bc-category-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+}

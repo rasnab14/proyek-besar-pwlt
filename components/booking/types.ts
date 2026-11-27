@@ -4,7 +4,7 @@
  * Strict adherence to docs/KEBUTUHAN-FUNGSIONAL.md §E & ALUR-NAVIGASI.md
  */
 
-export type BookingStatus = "draft" | "dikonfirmasi" | "selesai" | "dibatalkan";
+export type BookingStatus = "draft" | "selesai" | "dibatalkan" | "hangus" | "dikonfirmasi";
 
 export type DPStatus = "lunas" | "belum" | "tidak_perlu" | "hangus";
 
@@ -13,7 +13,7 @@ export type DPMethod = "tunai" | "qris" | "transfer";
 export interface BookingCustomer {
   nama: string;
   telepon: string;
-  noIdentitas: string; // KTP atau SIM
+  noIdentitas?: string; // Opsional / Legacy
   alamat?: string;
 }
 
@@ -41,9 +41,12 @@ export interface BookingRecord {
   kode: string; // e.g. BK-0245
   pelanggan: BookingCustomer;
   items: BookingItem[];
+  tanggalBooking?: string; // Tanggal kesepakatan booking (YYYY-MM-DD)
+  tanggalMulaiSewa?: string; // Tanggal rencana mulai sewa (YYYY-MM-DD)
   tanggalPengambilan: string; // YYYY-MM-DD
   jamPengambilan: string; // e.g. "09:00 WIB"
   durasiHari: number;
+  tanggalSelesaiSewa?: string; // YYYY-MM-DD (otomatis dihitung dari tanggalMulaiSewa + durasi)
   tanggalPengembalian: string; // YYYY-MM-DD
   jamPengembalian: string; // e.g. "20:00 WIB"
   totalBiaya: number;

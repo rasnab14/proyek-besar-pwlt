@@ -35,13 +35,12 @@ export function BookingPageHeader({
           >
             Pelunasan (Transaksi Sewa)
           </Link>
-          <button
-            type="button"
-            onClick={onCreateBooking}
+          <Link
+            href="/admin/booking/baru"
             className="btn pri sm"
           >
             + Catat Booking
-          </button>
+          </Link>
         </div>
 
         {/* Mountain Contour Graphic */}

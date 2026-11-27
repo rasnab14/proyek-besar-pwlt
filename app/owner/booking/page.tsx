@@ -1,12 +1,14 @@
 // app/owner/booking/page.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "@/components/booking/booking.css";
 import {
   BookingRecord,
   BookingFilterState,
   INITIAL_BOOKINGS,
+  getStoredBookings,
+  saveOrUpdateBooking,
   BookingPageHeader,
   BookingSummaryCards,
   BookingSearchFilters,
@@ -18,8 +20,17 @@ import {
 } from "@/components/booking";
 
 export default function OwnerBookingMonitoringPage() {
-  // ─── Data State (Local Frontend State) ───
+  // ─── Data State (Synced with Shared Booking Store) ───
   const [bookings, setBookings] = useState<BookingRecord[]>(INITIAL_BOOKINGS);
+
+  useEffect(() => {
+    setBookings(getStoredBookings());
+    const handleUpdate = () => {
+      setBookings(getStoredBookings());
+    };
+    window.addEventListener("summit_bookings_updated", handleUpdate);
+    return () => window.removeEventListener("summit_bookings_updated", handleUpdate);
+  }, []);
 
   // ─── Filter State ───
   const [filters, setFilters] = useState<BookingFilterState>({
@@ -111,10 +122,11 @@ export default function OwnerBookingMonitoringPage() {
   };
 
   const handleConfirmCancel = (bookingId: string, alasan: string) => {
+    let updatedBooking: BookingRecord | null = null;
     setBookings((prev) =>
       prev.map((b) => {
         if (b.id === bookingId) {
-          return {
+          updatedBooking = {
             ...b,
             status: "dibatalkan",
             dpStatus: b.dpNominal > 0 ? "hangus" : b.dpStatus,
@@ -122,20 +134,24 @@ export default function OwnerBookingMonitoringPage() {
             waktuPembatalan: "Hari Ini, Baru Saja",
             userPembatalan: "Owner / Pimpinan",
             riwayat: [
-              ...b.riwayat,
               {
                 waktu: "Hari Ini, Baru Saja",
                 user: "Owner",
                 aksi: "Booking Dibatalkan oleh Owner",
                 catatan: `Alasan: ${alasan}. DP hangus: Rp ${b.dpNominal.toLocaleString()}`,
               },
+              ...b.riwayat,
             ],
           };
+          return updatedBooking;
         }
         return b;
       })
     );
 
+    if (updatedBooking) {
+      saveOrUpdateBooking(updatedBooking);
+    }
     setCancellingBooking(null);
     showToast(`Booking berhasil dibatalkan oleh Owner dengan alasan tercatat.`, "danger");
   };
