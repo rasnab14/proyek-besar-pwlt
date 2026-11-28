@@ -58,10 +58,10 @@ export function SewaSummaryCards({ role, records }: SewaSummaryCardsProps) {
           </svg>
         </div>
 
-        {/* Card 2: Menunggu pengembalian */}
+        {/* Card 2: Belum diambil */}
         <div className="tx-summary-card">
           <div className="tx-card-header">
-            <span className="tx-card-title">Menunggu pengembalian</span>
+            <span className="tx-card-title">Belum diambil</span>
             <div className="tx-card-icon tx-icon-green">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -71,14 +71,34 @@ export function SewaSummaryCards({ role, records }: SewaSummaryCardsProps) {
             </div>
           </div>
           <div className="tx-card-main">
-            <span className="tx-card-value">{menungguPengembalian}</span>
+            <span className="tx-card-value">{belumDiambil}</span>
           </div>
           <svg className="tx-sparkline" viewBox="0 0 100 30" fill="none">
             <path d="M0 20 Q 20 28, 50 18 T 80 12 T 100 16" stroke="#86EFAC" strokeWidth="2" fill="none" strokeLinecap="round" />
           </svg>
         </div>
 
-        {/* Card 3: Sudah lunas */}
+        {/* Card 3: Belum lunas */}
+        <div className="tx-summary-card">
+          <div className="tx-card-header">
+            <span className="tx-card-title">Belum lunas</span>
+            <div className="tx-card-icon tx-icon-amber">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+          </div>
+          <div className="tx-card-main">
+            <span className="tx-card-value">{belumLunasCount}</span>
+            <span className="tx-card-sub">Sisa tagihan {formatSisa}</span>
+          </div>
+          <svg className="tx-sparkline" viewBox="0 0 100 30" fill="none">
+            <path d="M0 26 Q 30 16, 55 24 T 85 10 T 100 14" stroke="#FDE68A" strokeWidth="2" fill="none" strokeLinecap="round" />
+          </svg>
+        </div>
+
+        {/* Card 4: Sudah lunas */}
         <div className="tx-summary-card">
           <div className="tx-card-header">
             <span className="tx-card-title">Sudah lunas</span>
@@ -91,29 +111,10 @@ export function SewaSummaryCards({ role, records }: SewaSummaryCardsProps) {
           </div>
           <div className="tx-card-main">
             <span className="tx-card-value">{sudahLunasCount}</span>
+            <span className="tx-card-sub">Tagihan beres</span>
           </div>
           <svg className="tx-sparkline" viewBox="0 0 100 30" fill="none">
             <path d="M0 24 Q 25 12, 55 20 T 100 6" stroke="#86EFAC" strokeWidth="2" fill="none" strokeLinecap="round" />
-          </svg>
-        </div>
-
-        {/* Card 4: Sisa tagihan */}
-        <div className="tx-summary-card">
-          <div className="tx-card-header">
-            <span className="tx-card-title">Sisa tagihan</span>
-            <div className="tx-card-icon tx-icon-blue">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
-            </div>
-          </div>
-          <div className="tx-card-main">
-            <span className="tx-card-value" style={{ fontSize: "20px" }}>{formatSisa}</span>
-          </div>
-          <svg className="tx-sparkline" viewBox="0 0 100 30" fill="none">
-            <path d="M0 18 Q 30 26, 60 14 T 100 6" stroke="#93C5FD" strokeWidth="2" fill="none" strokeLinecap="round" />
           </svg>
         </div>
       </div>

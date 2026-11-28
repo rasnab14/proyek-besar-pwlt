@@ -357,17 +357,24 @@
 /* ─── Content Card Base ─── */
 .content-card {
   background: #ffffff;
-  border: 1px solid #dce6ee;
+  border: 1px solid #CBD5E1;
   border-radius: 14px;
   padding: 22px 24px;
-  box-shadow: 0 1px 3px rgba(10, 10, 10, 0.04);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.content-card:hover {
+  border-color: #94A3B8;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1.5px solid #E2E8F0;
 }
 
 .card-title {
@@ -561,14 +568,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
+  padding: 11px 12px;
   border-radius: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #E2E8F0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .kondisi-row:hover {
-  background: #f8fafc;
+  background: #F0F9FF;
+  border-color: #BAE6FD;
   transform: translateX(3px);
 }
 .kondisi-row:last-child {
@@ -625,19 +633,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 10px;
+  padding: 13px 12px;
   border-radius: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #E2E8F0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .trans-item-row:hover {
-  background: #f8fafc;
+  background: #F0F9FF;
+  border-color: #BAE6FD;
   transform: translateX(3px);
 }
 .trans-item-row:last-child {
   border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 
 .trans-item-left {
@@ -681,14 +690,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #E2E8F0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .ranking-row:hover {
-  background: #f8fafc;
+  background: #F0F9FF;
+  border-color: #BAE6FD;
   transform: translateX(2px);
 }
 .ranking-row:last-child {
@@ -718,19 +728,20 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 10px;
+  padding: 13px 12px;
   border-radius: 8px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #E2E8F0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .activity-row:hover {
-  background: #f8fafc;
+  background: #F0F9FF;
+  border-color: #BAE6FD;
   transform: translateX(3px);
 }
 .activity-row:last-child {
   border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: 4px;
 }
 
 .avatar-circle {

@@ -1,6 +1,7 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import MobileNav from "@/components/mobile/MobileNav";
 import PageTransition from "@/components/transitions/PageTransition";
+import RouteProgressBar from "@/components/transitions/RouteProgressBar";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="app-layout">
+      <RouteProgressBar />
       <MobileNav role="admin" />
       <Sidebar role="admin" />
       <div className="app-main">

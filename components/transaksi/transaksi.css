@@ -320,10 +320,10 @@
 /* ─── Table Container & Rows ─── */
 .tx-table-card {
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #CBD5E1;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
 }
 
 .tx-table-responsive {
@@ -334,70 +334,110 @@
 
 .tx-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 .tx-table th {
-  background: #F8FAFC;
-  color: #475569;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  background: #F1F5F9;
+  color: #1E293B;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 12px 16px;
-  border-bottom: 1px solid #E2E8F0;
+  padding: 13px 18px;
+  border-bottom: 2px solid #CBD5E1;
   white-space: nowrap;
 }
 
 .tx-table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid #F1F5F9;
+  padding: 14px 18px;
+  border-bottom: 1px solid #E2E8F0;
   color: #0F172A;
   vertical-align: middle;
+  transition: background-color 0.15s ease;
 }
 
-.tx-table tr:hover td {
+/* Zebra row alternating background */
+.tx-table tbody tr:nth-child(even) td {
   background-color: #F8FAFC;
+}
+
+/* Row hover highlight */
+.tx-table tbody tr:hover td {
+  background-color: #F0F9FF !important;
 }
 
 /* Cell Specifics */
 .tx-code-wrap {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .tx-code-link {
   font-weight: 700;
   color: #0284C7;
+  font-size: 13.5px;
   text-decoration: none;
   cursor: pointer;
 }
 
 .tx-code-link:hover {
   text-decoration: underline;
+  color: #0369A1;
 }
 
 .tx-code-sub {
-  font-size: 11px;
-  color: #64748B;
+  font-size: 11.5px;
+  color: #475569;
+  font-weight: 500;
 }
 
 .tx-pelanggan-name {
   font-weight: 600;
   color: #0F172A;
+  font-size: 13.5px;
 }
 
-/* Dot Badges */
+/* Dot Badges with High-Contrast Pill Styling */
 .tx-dot-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #E2E8F0;
+  background: #F8FAFC;
+}
+
+.tx-dot-badge:has(.tx-dot-green) {
+  background: #ECFDF5;
+  border-color: #A7F3D0;
+  color: #065F46;
+}
+
+.tx-dot-badge:has(.tx-dot-amber) {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+  color: #92400E;
+}
+
+.tx-dot-badge:has(.tx-dot-red) {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #991B1B;
+}
+
+.tx-dot-badge:has(.tx-dot-blue) {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
 }
 
 .tx-dot {

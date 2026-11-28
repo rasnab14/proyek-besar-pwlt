@@ -28,6 +28,7 @@ interface BookingSuccessModalProps {
   dpNominal: number;
   sisaPembayaran: number;
   isDraft?: boolean;
+  returnToTransaksi?: boolean;
   onReset: () => void;
 }
 
@@ -44,6 +45,7 @@ export function BookingSuccessModal({
   dpNominal,
   sisaPembayaran,
   isDraft = false,
+  returnToTransaksi = false,
   onReset,
 }: BookingSuccessModalProps) {
   if (!isOpen) return null;
@@ -130,13 +132,20 @@ export function BookingSuccessModal({
           </div>
         </div>
 
-        <div className="modal-footer" style={{ justifyContent: "space-between" }}>
+        <div className="modal-footer" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
           <button type="button" className="btn sm" onClick={onReset}>
             + Catat Booking Baru
           </button>
-          <Link href="/admin/booking" className="btn pri sm">
-            Lihat di Daftar Booking →
-          </Link>
+          <div style={{ display: "flex", gap: "8px" }}>
+            {returnToTransaksi && (
+              <Link href="/admin/transaksi/sewa" className="btn pri sm" style={{ background: "#0284C7" }}>
+                ← Kembali ke Transaksi Penyewaan
+              </Link>
+            )}
+            <Link href="/admin/booking" className="btn pri sm">
+              Lihat di Daftar Booking →
+            </Link>
+          </div>
         </div>
       </div>
     </div>

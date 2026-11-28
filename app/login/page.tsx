@@ -70,14 +70,45 @@ export default function LoginPage() {
           }
 
           if (authData.user) {
-            // Ambil role dari tabel public.profil
-            const { data: profile } = await supabase
-              .from("profil")
-              .select("role")
-              .eq("id", authData.user.id)
-              .maybeSingle();
+            // Ambil peran pengguna dari profil atau pengguna
+            let role: "owner" | "admin" = "admin";
 
-            const role = profile?.role || (trimmedUser.includes("owner") ? "owner" : "admin");
+            // 1. Cek app_metadata / user_metadata
+            const metaRole = (authData.user.app_metadata?.role ||
+              authData.user.app_metadata?.peran ||
+              authData.user.user_metadata?.role ||
+              authData.user.user_metadata?.peran) as string | undefined;
+
+            if (metaRole === "owner" || metaRole === "admin") {
+              role = metaRole;
+            } else if (trimmedUser.toLowerCase().includes("owner")) {
+              role = "owner";
+            } else {
+              // Cek tabel pengguna (docs/schema.sql)
+              const { data: userRow } = await supabase
+                .from("pengguna")
+                .select("peran")
+                .eq("id", authData.user.id)
+                .maybeSingle();
+
+              if (userRow?.peran === "owner" || userRow?.peran === "admin") {
+                role = userRow.peran;
+              } else {
+                // Cek tabel profil
+                const { data: profile } = await supabase
+                  .from("profil")
+                  .select("role")
+                  .eq("id", authData.user.id)
+                  .maybeSingle();
+                if (profile?.role === "owner" || profile?.role === "admin") {
+                  role = profile.role;
+                }
+              }
+            }
+
+            // Simpan cookie summit_user_role agar middleware mengenali role
+            document.cookie = `summit_user_role=${role}; path=/; max-age=604800; SameSite=Lax`;
+
             const target = role === "owner" ? "/owner/dashboard" : "/admin/dashboard";
 
             setIsExiting(true);
@@ -91,9 +122,9 @@ export default function LoginPage() {
 
       // 2. Fallback mode (jika Supabase belum dihubungkan / offline testing)
       await new Promise((res) => setTimeout(res, 400));
-      const target = trimmedUser.toLowerCase().includes("owner")
-        ? "/owner/dashboard"
-        : "/admin/dashboard";
+      const role = trimmedUser.toLowerCase().includes("owner") ? "owner" : "admin";
+      document.cookie = `summit_user_role=${role}; path=/; max-age=604800; SameSite=Lax`;
+      const target = role === "owner" ? "/owner/dashboard" : "/admin/dashboard";
 
       setIsExiting(true);
       setTimeout(() => {

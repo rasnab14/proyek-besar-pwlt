@@ -19,6 +19,7 @@
 
 import { CatalogProduct, CartItem } from "./types";
 import { getStoredBookings } from "@/components/booking/bookingStore";
+import { getStoredTransaksiSewa } from "@/components/transaksi/sewaStore";
 
 export interface PackageComponentRequirement {
   productId: string;
@@ -72,16 +73,62 @@ export function calculatePeriodBaseStock(
   products: CatalogProduct[],
   tanggalMulaiSewa: string,
   tanggalSelesaiSewa: string,
-  excludeBookingId?: string
+  excludeBookingId?: string,
+  excludeTxId?: string
 ): CatalogProduct[] {
-  // 1. Hitung alokasi dari booking lain yang berstatus 'selesai' dan bertumpang tindih
+  // 1. Hitung alokasi dari booking lain dan transaksi penyewaan aktif yang bertumpang tindih
   const bookedUnitsMap: Record<string, number> = {};
   const activeBookings = getStoredBookings();
+  const activeTransactions = getStoredTransaksiSewa();
 
   if (tanggalMulaiSewa && tanggalSelesaiSewa) {
+    const linkedBookingIds = new Set<string>();
+
+    // A. Perhitungkan Transaksi Penyewaan aktif (§F.1.D)
+    activeTransactions.forEach((tx) => {
+      // Lewati transaksi yang sedang disunting atau berasal dari booking yang sedang disunting agar tidak terhitung ganda
+      if (excludeTxId && (tx.id.toLowerCase() === excludeTxId.toLowerCase() || tx.kode.toLowerCase() === excludeTxId.toLowerCase())) {
+        return;
+      }
+      if (excludeBookingId && ((tx.bookingId && tx.bookingId.toLowerCase() === excludeBookingId.toLowerCase()) || (tx.bookingKode && tx.bookingKode.toLowerCase() === excludeBookingId.toLowerCase()))) {
+        return;
+      }
+      // Transaksi yang barangnya sudah selesai dikembalikan tidak lagi mengunci stok
+      if (tx.statusPengembalian === "seluruhnya") {
+        return;
+      }
+
+      // Catat relasi booking asal agar booking yang telah dikonversi TIDAK terhitung ganda (§F.1.D)
+      if (tx.bookingId) linkedBookingIds.add(tx.bookingId.toLowerCase());
+      if (tx.bookingKode) linkedBookingIds.add(tx.bookingKode.toLowerCase());
+
+      const txStart = tx.tglMulai || "";
+      const txEnd = tx.tglSelesai || "";
+
+      if (isDateOverlap(tanggalMulaiSewa, tanggalSelesaiSewa, txStart, txEnd)) {
+        tx.items.forEach((item) => {
+          if (item.tipe === "satuan") {
+            bookedUnitsMap[item.id] = (bookedUnitsMap[item.id] || 0) + item.jumlah;
+          } else if (item.tipe === "paket") {
+            const compList = PACKAGE_COMPONENTS_MAP[item.id] || [];
+            compList.forEach((c) => {
+              bookedUnitsMap[c.productId] =
+                (bookedUnitsMap[c.productId] || 0) + c.qty * item.jumlah;
+            });
+          }
+        });
+      }
+    });
+
+    // B. Perhitungkan Booking aktif yang berstatus 'selesai'
     activeBookings.forEach((b) => {
       // Lewati booking yang sedang disunting agar unit lamanya tidak terhitung ganda
       if (excludeBookingId && (b.id === excludeBookingId || b.kode === excludeBookingId)) {
+        return;
+      }
+
+      // JANGAN duplikasi alokasi jika booking sudah dikonversi dan telah diperhitungkan pada transaksi aktif di atas (§F.1.D)
+      if (linkedBookingIds.has(b.id.toLowerCase()) || linkedBookingIds.has(b.kode.toLowerCase())) {
         return;
       }
 

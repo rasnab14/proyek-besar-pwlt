@@ -93,7 +93,7 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
     }
   }, [pathname, role]);
 
-  // 1. Hover Detection Delay (350ms): kursor harus menetap 350ms sebelum membuka
+  // 1. Hover Detection Delay (80ms): kursor menyentuh langsung responsif membuka cepat
   const handleMouseEnter = () => {
     if (leaveTimerRef.current) {
       clearTimeout(leaveTimerRef.current);
@@ -104,11 +104,11 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
       hoverTimerRef.current = setTimeout(() => {
         setIsHovered(true);
         hoverTimerRef.current = null;
-      }, 350);
+      }, 80);
     }
   };
 
-  // 2. Mouse Leave Delay (600ms): jeda sebelum menguncup agar tidak sensitif/flicker
+  // 2. Mouse Leave Delay (220ms): jeda sebelum menguncup agar tidak sensitif/flicker
   const handleMouseLeave = () => {
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
@@ -119,7 +119,7 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
       leaveTimerRef.current = setTimeout(() => {
         setIsHovered(false);
         leaveTimerRef.current = null;
-      }, 600);
+      }, 220);
     }
   };
 
@@ -145,6 +145,8 @@ export default function Sidebar({ role, userName, onLogout }: Props) {
 
   const handleLogout = async () => {
     try {
+      // Hapus cookie role pengguna
+      document.cookie = "summit_user_role=; path=/; max-age=0; SameSite=Lax";
       const supabase = createClient();
       if (supabase) {
         await supabase.auth.signOut();

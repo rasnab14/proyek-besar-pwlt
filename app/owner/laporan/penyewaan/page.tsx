@@ -261,7 +261,7 @@ export default function OwnerLaporanPenyewaanPage() {
                           {t.jaminanFisik || "–"}
                         </td>
                         <td style={{ textAlign: "center" }}>
-                          <span className="b ok" style={{ fontSize: "11.5px" }}>
+                          <span className={`b ${t.statusPengambilan === "sudah_diambil" ? "ok" : "wn"}`} style={{ fontSize: "11.5px" }}>
                             {t.statusPengambilan === "sudah_diambil" ? "Sudah Diambil" : "Belum Diambil"}
                           </span>
                         </td>
