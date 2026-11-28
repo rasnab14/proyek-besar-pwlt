@@ -112,14 +112,33 @@ D. Pengelolaan Stok dan Ketersediaan (Revisi)
 21.	Sistem menyediakan perubahan status menjadi Tersedia setelah barang selesai diperiksa dan dinyatakan siap digunakan kembali.
 22.	Sistem menyediakan fitur pencarian dan penyaringan data stok berdasarkan nama barang, kode unit, kategori, merek, ukuran, kapasitas, jenis, dan kondisi barang sesuai spesifikasi yang tersedia.
 23.	Sistem menyediakan detail informasi stok dan riwayat pergerakan setiap variasi serta unit barang.
-24.	Sistem menyediakan pengelolaan stok Barang Jual berdasarkan jumlah kuantitas barang yang tersedia, jumlah barang terjual, dan penyesuaian stok.
+24.	Sistem menyediakan pengelolaan stok Barang Jual berdasarkan jumlah kuantitas barang yang tersedia, batas minimum stok, jumlah barang terjual, dan penyesuaian stok manual melalui tab "Barang Jual" pada halaman Stok dan Ketersediaan (`/admin/stok` dan `/owner/stok`):
+	- 4 (empat) Kartu KPI Barang Jual:
+	  • Produk jual: Jumlah total jenis produk jual aktif (ditampilkan dengan kartu berlatar visual gradien gelap/dark mesh geometric).
+	  • Total stok: Akumulasi kuantitas seluruh stok fisik barang jual yang tersedia di toko.
+	  • Stok menipis / habis: Jumlah produk jual yang kuantitasnya berada di bawah atau sama dengan batas minimum (`stok <= stok_minimum`) atau telah bernilai 0 (nol).
+	  • Terjual bulan ini: Akumulasi kuantitas barang jual yang telah berhasil ditransaksikan melalui kasir pada bulan kalender berjalan.
+	- Fitur Pencarian & Filter Status Stok:
+	  • Kolom pencarian cepat berdasarkan nama produk atau kode SKU.
+	  • Tombol filter pills status stok: Semua (total item), Aman (stok > batas minimum), Menipis (0 < stok <= batas minimum), dan Habis (stok = 0).
+	- Tabel Data Stok Barang Jual:
+	  • Kolom: PRODUK - SKU, KATEGORI, HARGA JUAL, STOK (pcs), MIN. (batas minimum), STATUS (badge pill warna Aman/hijau, Menipis/oranye, Habis/merah), dan AKSI.
+	  • Tombol aksi "Penyesuaian stok" pada setiap baris produk untuk membuka modal penyesuaian stok dengan produk tersebut langsung terpilih.
+	- Modal Dialog Penyesuaian Stok (Berlaku untuk Barang Sewa dan Barang Jual):
+	  • Pilihan item yang disesuaikan (dapat dipilih langsung via dropdown atau pre-selected dari tombol baris tabel).
+	  • Pilihan jenis penyesuaian: Tambah Stok (Barang Masuk / Pembelian), Kurangi Stok (Barang Rusak / Hilang / Kadaluarsa), atau Koreksi Opname (Setel Langsung Angka Baru).
+	  • Input jumlah unit penyesuaian / jumlah stok sebenarnya.
+	  • Input alasan / keterangan penyesuaian (wajib diisi).
+	  • Pembaruan data stok secara langsung (real-time) yang memperbarui kartu KPI, status badge, kuantitas tabel, dan tersimpan ke riwayat penyesuaian stok.
+	- Kartu Riwayat Penyesuaian Stok:
+	  • Menampilkan log perubahan kuantitas manual berurutan dari yang terbaru, mencakup timestamp (tanggal & jam), nama produk, alasan penyesuaian & nama staf petugas, serta badge selisih penyesuaian nominal (+/-).
 25.	Sistem memperhitungkan kebutuhan stok setiap variasi barang penyusun paket ketika melakukan pemeriksaan ketersediaan Paket Penyewaan.
 26.	Sistem menghitung ketersediaan Paket Penyewaan berdasarkan jumlah dan kondisi unit barang penyusunnya serta alokasi penyewaan pada periode terkait.
 27.	Sistem memperhitungkan penggunaan variasi barang yang sama apabila barang tersebut disewakan secara satuan maupun melalui Paket Penyewaan agar tidak terjadi pengalokasian stok secara berlebihan.
 28.	Sistem menampilkan rincian kebutuhan dan ketersediaan setiap variasi barang penyusun Paket Penyewaan ketika dilakukan pemeriksaan ketersediaan paket.
 29.	Sistem memperbarui alokasi stok setiap variasi barang penyusun paket ketika booking berstatus Selesai, transaksi penyewaan diproses, atau booking dibatalkan sesuai dengan kondisi transaksi.
-30.	Sistem menyediakan fitur Detail Unit pada setiap variasi Barang Sewa yang dapat diakses dari halaman Detail Barang maupun Stok dan Ketersediaan (`/admin/barang/[kode]/unit/[unit]` dan `/owner/barang/[kode]/unit/[unit]`).
-31.	Sistem menampilkan halaman Detail Unit berdasarkan variasi barang yang dipilih, meliputi foto produk, nama variasi, kode produk, rentang unit, harga sewa per hari, dan kartu profil spesifikasi lengkap (Produk, Merek, Ukuran, Kapasitas, Jenis, Karakteristik lain, Kategori, serta Unit dialokasikan booking).
+30.	Sistem menyediakan fitur Detail Unit pada setiap variasi Barang Sewa yang dapat diakses langsung dari halaman Detail Barang maupun tabel Ringkasan per Variasi dan daftar Unit Individual pada halaman Stok dan Ketersediaan (`/admin/barang/[kode]/unit/[unit]` dan `/owner/barang/[kode]/unit/[unit]`). Tautan Detail Unit secara presisi mengarahkan ke identitas variasi yang bersangkutan (misalnya variasi Jaket Gunung Rimba L mengarah ke unit range `JKT009–JKT016`). Apabila parameter variasi yang dicari tidak ditemukan atau tidak terdaftar, sistem secara ketat menampilkan status informatif "Variasi Unit Tidak Ditemukan" tanpa melakukan pengalihan (fallback/redirect) otomatis ke variasi produk lain.
+31.	Sistem menampilkan halaman Detail Unit berdasarkan variasi barang yang dipilih, meliputi foto produk, nama variasi, kode produk, rentang unit fisik spesifik, harga sewa per hari, dan kartu profil spesifikasi lengkap (Produk, Merek, Ukuran, Kapasitas, Jenis, Karakteristik lain, Kategori, serta Unit dialokasikan booking).
 32.	Sistem menampilkan 7 (tujuh) kartu indikator metrik kondisi fisik unit pada bagian atas tabel unit, meliputi: Total unit, Tersedia (hijau), Disewa (biru), Dicuci (ungu), Persiapan (kuning/oranye), Rusak (merah), dan Perawatan (abu-abu).
 33.	Sistem menampilkan seluruh unit fisik dari variasi barang yang dipilih dalam bentuk tabel interaktif, di mana setiap unit ditampilkan pada satu baris tersendiri berdasarkan kode uniknya (misalnya `JKT009`, `JKT010`, dst.).
 34.	Sistem menampilkan informasi kondisi terkini, status alokasi (misalnya nomor transaksi sewa aktif atau alokasi kode booking), dan tanggal/waktu terakhir diperbarui beserta staf pengubah.

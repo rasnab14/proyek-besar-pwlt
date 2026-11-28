@@ -53,7 +53,35 @@ export function getStoredBarang(): BarangRecord[] {
       localStorage.setItem(KEY_BARANG, JSON.stringify(INITIAL_BARANG));
       return INITIAL_BARANG;
     }
-    return JSON.parse(raw);
+    const parsed: BarangRecord[] = JSON.parse(raw);
+    let hasNew = false;
+    INITIAL_BARANG.forEach((initB) => {
+      const existingIdx = parsed.findIndex((p) => p.id === initB.id || p.kode === initB.kode);
+      if (existingIdx === -1) {
+        parsed.push(initB);
+        hasNew = true;
+      } else {
+        // Sync variasi IDs if they were missing or generic
+        if (initB.variasi && parsed[existingIdx].variasi) {
+          initB.variasi.forEach((iv) => {
+            const pv = parsed[existingIdx].variasi?.find((v) => v.id === iv.id);
+            if (!pv) {
+              const matchedByName = parsed[existingIdx].variasi?.find(
+                (v) => v.namaVariasi === iv.namaVariasi || (v.merek === iv.merek && v.ukuran === iv.ukuran)
+              );
+              if (matchedByName && matchedByName.id !== iv.id) {
+                matchedByName.id = iv.id;
+                hasNew = true;
+              }
+            }
+          });
+        }
+      }
+    });
+    if (hasNew) {
+      localStorage.setItem(KEY_BARANG, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch {
     return INITIAL_BARANG;
   }
