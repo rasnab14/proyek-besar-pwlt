@@ -342,11 +342,10 @@ Dibuka dari: Form Barang (“back-href”); Form Barang Jual (“back-href”).
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
 | Header halaman / isi | **Ubah** | Form Barang → `/admin/barang/form` |
-| Header halaman / isi | **+ Tambah unit** | Form Barang → `/admin/barang/form` |
-| Informasi produk | **Ganti foto** | Form Barang → `/admin/barang/form` |
+| Header halaman / isi | **+ Tambah unit** | Modal Tambah Unit (tambah unit langsung ke variasi pilihan) |
 | Baris tabel | **Detail Unit** (baris {{r.merek}}) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
 
-- Kartu *Variasi & ringkasan stok* punya kotak pencarian (merek, ukuran, atau kode unit) yang menyaring baris secara langsung, tombol **Reset**, dan teks jumlah hasil. **Detail Unit** membuka daftar unit variasi.
+- Menampilkan kartu *Informasi produk* yang bersih (tombol "Ganti foto" dihilangkan; penggantian foto dipusatkan di formulir Ubah), informasi agregat "Rentang Unit Terdaftar" produk, 4 kartu KPI stok (Variasi, Total unit, Tersedia, Tidak siap), tabel *Variasi & ringkasan stok* dengan tombol **Detail Unit**, serta tabel riwayat pergerakan stok. Tombol **+ Tambah unit** membuka modal cepat untuk menambah stok unit fisik langsung ke variasi tanpa harus berpindah ke formulir panjang.
 
 Dibuka dari: Semua Barang (“Detail”).
 
@@ -356,11 +355,14 @@ Dibuka dari: Semua Barang (“Detail”).
 
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
-| Header halaman / isi | **Stok dan Ketersediaan** | Stok dan Ketersediaan → `/admin/stok` |
+| Header halaman / isi | **← Kembali ke Detail Produk** | Detail Barang → `/admin/barang/[kode]` |
+| Header halaman / isi | **← Ringkasan per Variasi** | Detail Barang → `/admin/barang/[kode]` |
 | Header halaman / isi | **← Kembali ke Stok dan Ketersediaan** | Stok dan Ketersediaan → `/admin/stok` |
-| Komponen `UnitList` | Tombol kembali/Batal | Stok dan Ketersediaan → `/admin/stok` |
+| Header halaman / isi | **+ Tambah unit** | Modal Tambah Unit (otomatis generate kode unit fisik berurutan) |
+| Baris tabel unit | **Detail** (per unit, mis. JKT009) | Modal Detail Unit (informasi & alokasi unit) |
+| Baris tabel unit | **Ubah kondisi** (per unit, mis. JKT012) | Modal Ubah Kondisi Unit (tersimpan ke riwayat variasi) |
 
-- Isi halaman adalah komponen **UnitList** (§5.4): filter kondisi, pencarian kode unit, dialog detail, dan dialog **Ubah kondisi**. Tombol **← Ringkasan per Variasi** → Stok.
+- Isi halaman adalah profil spesifikasi variasi lengkap, 7 KPI kondisi fisik (Total unit, Tersedia, Disewa, Dicuci, Persiapan, Rusak, Perawatan), filter pills kondisi, kotak pencarian kode unit fisik, tabel unit fisik lengkap, dan tabel Riwayat Variasi.
 
 Dibuka dari: Detail Barang (“Detail Unit”); Stok dan Ketersediaan (“Detail Unit”).
 
@@ -710,9 +712,10 @@ Dibuka dari: Owner · Form Barang (“back-href”).
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
 | Header halaman / isi | **Ubah** | Owner · Form Barang → `/owner/barang/form` |
-| Header halaman / isi | **+ Tambah unit** | Owner · Form Barang → `/owner/barang/form` |
-| Informasi produk | **Ganti foto** | Owner · Form Barang → `/owner/barang/form` |
+| Header halaman / isi | **+ Tambah unit** | Modal Tambah Unit (tambah unit langsung ke variasi pilihan) |
 | Baris tabel | **Detail Unit** (per baris, mis. Rimba, Kelana) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
+
+- Menampilkan kartu *Informasi produk* tanpa tombol ganti foto (penggantian foto dipusatkan di formulir Ubah), informasi "Rentang Unit Terdaftar", 4 kartu KPI stok, tabel *Variasi & ringkasan stok* dengan tombol **Detail Unit**, serta tabel riwayat mutasi stok. Tombol **+ Tambah unit** membuka modal cepat untuk menambah stok unit fisik langsung ke variasi tanpa harus berpindah ke formulir panjang.
 
 Dibuka dari: Owner · Semua Barang (“Detail”).
 
@@ -722,9 +725,14 @@ Dibuka dari: Owner · Semua Barang (“Detail”).
 
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
-| Header halaman / isi | **Stok dan Ketersediaan** | Owner · Stok dan Ketersediaan → `/owner/stok` |
+| Header halaman / isi | **← Kembali ke Detail Produk** | Owner · Detail Barang → `/owner/barang/[kode]` |
+| Header halaman / isi | **← Ringkasan per Variasi** | Owner · Detail Barang → `/owner/barang/[kode]` |
 | Header halaman / isi | **← Kembali ke Stok dan Ketersediaan** | Owner · Stok dan Ketersediaan → `/owner/stok` |
-| Komponen `UnitList` | Tombol kembali/Batal | Owner · Stok dan Ketersediaan → `/owner/stok` |
+| Header halaman / isi | **+ Tambah unit** | Modal Tambah Unit (otomatis generate kode unit fisik berurutan) |
+| Baris tabel unit | **Detail** (per unit, mis. JKT009) | Modal Detail Unit (informasi & alokasi unit) |
+| Baris tabel unit | **Ubah kondisi** (per unit, mis. JKT012) | Modal Ubah Kondisi Unit (tersimpan ke riwayat variasi) |
+
+- Isi halaman adalah profil spesifikasi variasi lengkap, 7 KPI kondisi fisik, filter pills kondisi, kotak pencarian kode unit fisik, tabel unit fisik lengkap, dan tabel Riwayat Variasi.
 
 Dibuka dari: Owner · Detail Barang (“Detail Unit”); Owner · Stok dan Ketersediaan (“Detail Unit”).
 

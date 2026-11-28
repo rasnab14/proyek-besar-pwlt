@@ -88,6 +88,7 @@ erDiagram
       kondisi_unit kondisi }
     PAKET { bigint id PK
       text kode UK
+      text foto
       bigint harga_sewa }
     BOOKING { bigint id PK
       text kode UK
@@ -137,7 +138,7 @@ erDiagram
 | Pelanggan | `pelanggan` | Kode otomatis `PL-xxxx`, nama & telepon wajib (unik agar tidak tercatat ganda), alamat & instansi opsional; tanpa pencatatan nomor KTP/SIM |
 | Barang | `kategori_barang`, `barang`, `barang_spesifikasi`, `variasi_barang` | Barang sewa atau jual, spesifikasi bawaan & "spesifikasi lain" (maksimal 3, dijaga trigger), variasi beserta harga, satuan, dan ambang `stok_minimum` |
 | Stok | `unit_barang`, `riwayat_kondisi_unit`, `riwayat_stok` | Unit fisik dengan kode unik, enam kondisi, riwayat perubahan kondisi dan mutasi stok (beserta `alasan` penyesuaian) |
-| Paket | `paket`, `paket_isi` | Paket (`PK-xxx`) dan barang penyusunnya (hanya Barang Sewa, dijaga trigger) |
+| Paket | `paket`, `paket_isi` | Paket (`PKT-xxx`) dan barang penyusunnya (hanya Barang Sewa, dijaga trigger), dilengkapi foto visual fleksibel (unggah berkas atau URL gambar eksternal) |
 | Booking | `booking`, `booking_item` | Booking dengan status `draft`, `selesai`, `dibatalkan` (langsung `draft → selesai` tanpa `dikonfirmasi`); menyimpan `tgl_booking`, `tgl_mulai`, `durasi_hari`, `tgl_selesai`, DP wajib & disepakati, `dp_dibayar`, `status_pembayaran`; tanpa input tanggal pengambilan aktual; item satuan/paket dengan snapshot komposisi & harga |
 | Penyewaan | `transaksi_sewa`, `transaksi_sewa_item`, `transaksi_sewa_unit` | Transaksi dari booking berstatus `selesai` atau sewa langsung; status pengambilan, pengembalian, dan pembayaran terpisah; `jaminan_jenis` ditulis manual tanpa nomor jaminan; alokasi unit per periode |
 | Pengembalian | `pengembalian`, `pengembalian_detail`, `biaya_tambahan` | Pengembalian bertahap, kondisi kembali dan `kondisi_setelah` unit (termasuk penyusun paket), denda dan biaya kerusakan/kehilangan manual dengan alasan wajib |
