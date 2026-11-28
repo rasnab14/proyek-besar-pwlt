@@ -89,6 +89,7 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
     },
   ]);
   const [jaminanFisik, setJaminanFisik] = useState("");
+  const [langsungSerahTerima, setLangsungSerahTerima] = useState(true);
   const [metodePembayaran, setMetodePembayaran] = useState<MetodePembayaran>("tunai");
 
   // Catalog UI State
@@ -199,7 +200,7 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
       setErrorMsg("Pilih minimal satu barang sewa atau paket.");
       return;
     }
-    if (!jaminanFisik.trim()) {
+    if (langsungSerahTerima && !jaminanFisik.trim()) {
       setErrorMsg("Tuliskan jaminan fisik yang diserahkan pelanggan (misal: KTP Asli / SIM A).");
       return;
     }
@@ -212,6 +213,7 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
         items: cartItems,
         jaminanFisik: jaminanFisik.trim(),
         metodePembayaran,
+        statusPengambilan: langsungSerahTerima ? "sudah_diambil" : "belum_diambil",
       });
       onSuccess(newTx);
       onClose();
@@ -553,10 +555,25 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
                 </div>
               </div>
 
+              {/* Pilihan Serah Terima Langsung vs Menunggu */}
+              <div style={{ background: "#F1F5F9", padding: "10px 12px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12.5px", fontWeight: 600, color: "#0F172A" }}>
+                  <input
+                    type="checkbox"
+                    checked={langsungSerahTerima}
+                    onChange={(e) => setLangsungSerahTerima(e.target.checked)}
+                  />
+                  Langsung Serah Terima Barang &amp; Lunas 100% Hari Ini
+                </label>
+                <p style={{ margin: "2px 0 0 22px", fontSize: "11px", color: "#64748B" }}>
+                  Jika tidak dicentang, transaksi dibuat berstatus <em>Belum Diambil</em> dengan aksi <em>Detail, Ubah, Hapus</em>.
+                </p>
+              </div>
+
               {/* Box Jaminan Fisik Wajib (§F.1.8) */}
               <div style={{ background: "#FEF9C3", border: "1px solid #FEF08A", borderRadius: "8px", padding: "14px" }}>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#854D0E", marginBottom: "4px" }}>
-                  JAMINAN FISIK DISERAHKAN (§F.1.8) <span style={{ color: "#DC2626" }}>*</span>
+                  JAMINAN FISIK DISERAHKAN (§F.1.8) {langsungSerahTerima && <span style={{ color: "#DC2626" }}>*</span>}
                 </label>
                 <p style={{ margin: "0 0 6px 0", fontSize: "11px", color: "#713F12" }}>
                   Ditulis manual jenis identitas fisik tanpa nomor identitas (misal: <em>KTP Asli Rizky Ananda</em> atau <em>SIM A Dewi Lestari</em>).
@@ -568,14 +585,14 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
                   placeholder="Contoh: KTP Asli atas nama penyewa"
                   value={jaminanFisik}
                   onChange={(e) => setJaminanFisik(e.target.value)}
-                  required
+                  required={langsungSerahTerima}
                 />
               </div>
 
               {/* Box Metode Pembayaran Kasir */}
               <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "8px", padding: "14px" }}>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#0F172A", marginBottom: "6px" }}>
-                  METODE PEMBAYARAN KASIR (LUNAS 100%)
+                  METODE PEMBAYARAN KASIR {langsungSerahTerima ? "(LUNAS 100%)" : "(OPSIONAL SAAT SERAH TERIMA)"}
                 </label>
                 <div style={{ display: "flex", gap: "8px" }}>
                   {(["tunai", "qris", "transfer"] as const).map((m) => (
@@ -625,7 +642,7 @@ export function DirectRentalModal({ isOpen, onClose, onSuccess }: DirectRentalMo
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              Simpan Transaksi &amp; Serahkan Barang
+              {langsungSerahTerima ? "Simpan Transaksi & Serahkan Barang" : "Simpan Transaksi (Menunggu Serah Terima)"}
             </button>
           </div>
         </form>

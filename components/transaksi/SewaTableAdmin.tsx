@@ -7,8 +7,10 @@ import { TransaksiSewaRecord } from "./types";
 interface SewaTableAdminProps {
   records: TransaksiSewaRecord[];
   onSelectRecord: (record: TransaksiSewaRecord) => void;
-  onPrintReceipt: (record: TransaksiSewaRecord) => void;
+  onPrintReceipt?: (record: TransaksiSewaRecord) => void;
   onProcessHandover?: (record: TransaksiSewaRecord) => void;
+  onEditRecord?: (record: TransaksiSewaRecord) => void;
+  onDeleteRecord?: (record: TransaksiSewaRecord) => void;
 }
 
 export function SewaTableAdmin({
@@ -16,6 +18,8 @@ export function SewaTableAdmin({
   onSelectRecord,
   onPrintReceipt,
   onProcessHandover,
+  onEditRecord,
+  onDeleteRecord,
 }: SewaTableAdminProps) {
   const formatRupiah = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
 
@@ -111,42 +115,85 @@ export function SewaTableAdmin({
                       </span>
                     </td>
 
-                    {/* AKSI */}
+                    {/* AKSI DINAMIS (§F.1) */}
                     <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
-                        {!isDiambil && onProcessHandover && (
+                      <div style={{ display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "flex-end" }}>
+                        {isDiambil ? (
+                          /* 3. Transaksi yang sudah serah terima -> HANYA 1 AKSI: Detail (§F.1.C) */
                           <button
                             type="button"
                             className="tx-btn-secondary"
-                            style={{ padding: "4px 8px", fontSize: "11.5px", background: "#FEF3C7", borderColor: "#FDE68A", color: "#92400E" }}
-                            onClick={() => onProcessHandover(r)}
-                            title="Proses serah terima & pelunasan di toko"
+                            style={{ padding: "4px 10px", fontSize: "11.5px" }}
+                            onClick={() => onSelectRecord(r)}
+                            title="Lihat Detail Transaksi & Cetak Struk"
                           >
-                            Serah Terima
+                            Detail
                           </button>
+                        ) : r.tipeAsal === "langsung" ? (
+                          /* 1. Transaksi Langsung & Belum Serah Terima -> 3 AKSI: Detail, Ubah, Hapus (§F.1.A) */
+                          <>
+                            <button
+                              type="button"
+                              className="tx-btn-secondary"
+                              style={{ padding: "4px 8px", fontSize: "11.5px" }}
+                              onClick={() => onSelectRecord(r)}
+                              title="Lihat Detail Transaksi & Cetak Struk"
+                            >
+                              Detail
+                            </button>
+                            <button
+                              type="button"
+                              className="tx-btn-secondary"
+                              style={{ padding: "4px 8px", fontSize: "11.5px", background: "#FEF3C7", borderColor: "#FDE68A", color: "#92400E" }}
+                              onClick={() => onEditRecord?.(r)}
+                              title="Ubah Data Transaksi"
+                            >
+                              Ubah
+                            </button>
+                            <button
+                              type="button"
+                              className="tx-btn-secondary"
+                              style={{ padding: "4px 8px", fontSize: "11.5px", background: "#FEE2E2", borderColor: "#FECACA", color: "#DC2626" }}
+                              onClick={() => onDeleteRecord?.(r)}
+                              title="Hapus Transaksi (Kembalikan Stok)"
+                            >
+                              Hapus
+                            </button>
+                          </>
+                        ) : (
+                          /* 2. Transaksi dari Booking & Belum Serah Terima -> 3 AKSI: Serah Terima, Ubah, Detail (§F.1.B) */
+                          <>
+                            {onProcessHandover && (
+                              <button
+                                type="button"
+                                className="tx-btn-secondary"
+                                style={{ padding: "4px 8px", fontSize: "11.5px", background: "#FEF3C7", borderColor: "#FDE68A", color: "#92400E" }}
+                                onClick={() => onProcessHandover(r)}
+                                title="Proses serah terima barang fisik & pelunasan kasir"
+                              >
+                                Serah Terima
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="tx-btn-secondary"
+                              style={{ padding: "4px 8px", fontSize: "11.5px", background: "#F1F5F9", borderColor: "#CBD5E1", color: "#334155" }}
+                              onClick={() => onEditRecord?.(r)}
+                              title="Ubah Data Transaksi (Melalui Form Booking)"
+                            >
+                              Ubah
+                            </button>
+                            <button
+                              type="button"
+                              className="tx-btn-secondary"
+                              style={{ padding: "4px 8px", fontSize: "11.5px" }}
+                              onClick={() => onSelectRecord(r)}
+                              title="Lihat Detail Transaksi & Cetak Struk"
+                            >
+                              Detail
+                            </button>
+                          </>
                         )}
-                        <button
-                          type="button"
-                          className="tx-btn-secondary"
-                          style={{ padding: "4px 8px", fontSize: "11.5px" }}
-                          onClick={() => onSelectRecord(r)}
-                          title="Lihat Detail"
-                        >
-                          Detail
-                        </button>
-                        <button
-                          type="button"
-                          className="tx-btn-secondary"
-                          style={{ padding: "4px 8px", fontSize: "11.5px" }}
-                          onClick={() => onPrintReceipt(r)}
-                          title="Cetak Struk"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="6 9 6 2 18 2 18 9" />
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                            <rect x="6" y="14" width="12" height="8" />
-                          </svg>
-                        </button>
                       </div>
                     </td>
                   </tr>

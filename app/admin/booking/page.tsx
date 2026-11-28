@@ -20,6 +20,7 @@ import {
   BookingDetailModal,
   BookingCancellationDialog,
 } from "@/components/booking";
+import { getStoredTransaksiSewa, deleteTransaksiSewa } from "@/components/transaksi";
 
 export default function AdminBookingPage() {
   const router = useRouter();
@@ -147,6 +148,20 @@ export default function AdminBookingPage() {
 
   const handleStartCancel = (booking: BookingRecord) => {
     setIsDetailOpen(false);
+    const allTx = getStoredTransaksiSewa();
+    const linkedTakenTx = allTx.find(
+      (t) =>
+        ((t.bookingId && t.bookingId.toLowerCase() === booking.id.toLowerCase()) ||
+          (t.bookingKode && t.bookingKode.toLowerCase() === booking.kode.toLowerCase())) &&
+        t.statusPengambilan === "sudah_diambil"
+    );
+    if (linkedTakenTx) {
+      showToast(
+        `Booking ${booking.kode} tidak dapat dibatalkan karena barang fisik telah diserahterimakan (transaksi ${linkedTakenTx.kode}).`,
+        "danger"
+      );
+      return;
+    }
     setCancellingBooking(booking);
   };
 
@@ -179,16 +194,56 @@ export default function AdminBookingPage() {
     );
     if (updatedBooking) {
       saveOrUpdateBooking(updatedBooking);
+
+      // Sesuai Poin 4: Booking yang dibatalkan tidak boleh masuk menjadi transaksi penyewaan aktif
+      const allTx = getStoredTransaksiSewa();
+      const linkedUnfinishedTx = allTx.find(
+        (t) =>
+          ((t.bookingId && t.bookingId.toLowerCase() === bookingId.toLowerCase()) ||
+            (t.bookingKode && updatedBooking && t.bookingKode.toLowerCase() === (updatedBooking as BookingRecord).kode.toLowerCase())) &&
+          t.statusPengambilan === "belum_diambil"
+      );
+      if (linkedUnfinishedTx) {
+        deleteTransaksiSewa(linkedUnfinishedTx.id);
+      }
     }
     setCancellingBooking(null);
-    showToast(`Booking berhasil dibatalkan. DP dicatat sebagai hangus sesuai SOP.`, "danger");
+    showToast(`Booking berhasil dibatalkan. Alokasi stok telah dikembalikan ke toko.`, "danger");
   };
 
   const handleConfirmDelete = () => {
     if (!deletingBooking) return;
+
+    const allTx = getStoredTransaksiSewa();
+    const linkedTakenTx = allTx.find(
+      (t) =>
+        ((t.bookingId && t.bookingId.toLowerCase() === deletingBooking.id.toLowerCase()) ||
+          (t.bookingKode && t.bookingKode.toLowerCase() === deletingBooking.kode.toLowerCase())) &&
+        t.statusPengambilan === "sudah_diambil"
+    );
+    if (linkedTakenTx) {
+      showToast(
+        `Booking ${deletingBooking.kode} tidak dapat dihapus karena barang fisik telah diserahterimakan (transaksi ${linkedTakenTx.kode}).`,
+        "danger"
+      );
+      setDeletingBooking(null);
+      return;
+    }
+
+    // Sesuai Poin 4: Bersihkan transaksi sewa aktif belum diambil jika ada
+    const linkedUnfinishedTx = allTx.find(
+      (t) =>
+        ((t.bookingId && t.bookingId.toLowerCase() === deletingBooking.id.toLowerCase()) ||
+          (t.bookingKode && t.bookingKode.toLowerCase() === deletingBooking.kode.toLowerCase())) &&
+        t.statusPengambilan === "belum_diambil"
+    );
+    if (linkedUnfinishedTx) {
+      deleteTransaksiSewa(linkedUnfinishedTx.id);
+    }
+
     deleteBookingFromStore(deletingBooking.id);
     setBookings((prev) => prev.filter((b) => b.id !== deletingBooking.id));
-    showToast(`Data booking ${deletingBooking.kode} berhasil dihapus.`, "success");
+    showToast(`Data booking ${deletingBooking.kode} berhasil dihapus dan alokasi stok telah dikembalikan.`, "success");
     setDeletingBooking(null);
   };
 
@@ -235,7 +290,23 @@ export default function AdminBookingPage() {
                 bookings={paginatedBookings}
                 onViewDetail={handleOpenDetail}
                 onEditBooking={handleOpenEdit}
-                onDeleteBooking={(b) => setDeletingBooking(b)}
+                onDeleteBooking={(b) => {
+                  const allTx = getStoredTransaksiSewa();
+                  const linkedTakenTx = allTx.find(
+                    (t) =>
+                      ((t.bookingId && t.bookingId.toLowerCase() === b.id.toLowerCase()) ||
+                        (t.bookingKode && t.bookingKode.toLowerCase() === b.kode.toLowerCase())) &&
+                      t.statusPengambilan === "sudah_diambil"
+                  );
+                  if (linkedTakenTx) {
+                    showToast(
+                      `Booking ${b.kode} tidak dapat dihapus karena barang fisik telah diserahterimakan (transaksi ${linkedTakenTx.kode}).`,
+                      "danger"
+                    );
+                    return;
+                  }
+                  setDeletingBooking(b);
+                }}
                 onCancelBooking={handleStartCancel}
               />
               <BookingPagination

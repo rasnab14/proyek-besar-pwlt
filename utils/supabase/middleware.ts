@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   // PENTING: auth.getUser() memvalidasi token sesi secara aman dengan server Supabase
-  let user = null;
+  let user: any = null;
   try {
     const { data, error } = await supabase.auth.getUser();
     if (!error && data?.user) {
@@ -53,6 +53,60 @@ export async function updateSession(request: NextRequest) {
     console.warn("Supabase auth check in middleware encountered error:", err);
     // Lewati atau biarkan request lanjut jika terjadi network/offline error agar tidak 500
     return supabaseResponse;
+  }
+
+  // Helper untuk menentukan peran pengguna secara komprehensif & presisi
+  async function resolveUserRole(): Promise<string> {
+    // 1. Cek cookie summit_user_role yang disimpan saat login
+    const cookieRole = request.cookies.get("summit_user_role")?.value?.toLowerCase();
+    if (cookieRole === "owner" || cookieRole === "admin") {
+      return cookieRole;
+    }
+
+    // 2. Cek metadata user Supabase (user_metadata / app_metadata)
+    const meta = user?.user_metadata || {};
+    const appMeta = user?.app_metadata || {};
+    const directRole = (meta.role || meta.peran || appMeta.role || appMeta.peran || "")
+      ?.toString()
+      .toLowerCase();
+    if (directRole === "owner" || directRole === "admin") {
+      return directRole;
+    }
+
+    // 3. Cek email pengguna (akun owner default seperti owner@summit.local atau memuat 'owner')
+    if (user?.email && user.email.toLowerCase().includes("owner")) {
+      return "owner";
+    }
+
+    // 4. Cek database tabel pengguna (sesuai schema.sql)
+    try {
+      const { data: pengguna } = await supabase
+        .from("pengguna")
+        .select("peran")
+        .or(`auth_user_id.eq.${user.id},email.eq.${user.email || ""}`)
+        .maybeSingle();
+      if (pengguna?.peran) {
+        return String(pengguna.peran).toLowerCase();
+      }
+    } catch {
+      // lanjut fallback
+    }
+
+    // 5. Cek database tabel profil (skema kompatibilitas)
+    try {
+      const { data: profile } = await supabase
+        .from("profil")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.role) {
+        return String(profile.role).toLowerCase();
+      }
+    } catch {
+      // lanjut fallback
+    }
+
+    return "admin";
   }
 
   const url = request.nextUrl.clone();
@@ -65,43 +119,29 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Jika sudah login dan membuka halaman /login, redirect ke dashboard sesuai role
   if (user && url.pathname === "/login") {
-    let role = "admin";
-    try {
-      const { data: profile } = await supabase
-        .from("profil")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (profile?.role) role = profile.role;
-    } catch {
-      // fallback default
-    }
+    const role = await resolveUserRole();
+    supabaseResponse.cookies.set("summit_user_role", role, { path: "/", maxAge: 604800, sameSite: "lax" });
 
     if (role === "owner") {
       url.pathname = "/owner/dashboard";
     } else {
       url.pathname = "/admin/dashboard";
     }
-    return NextResponse.redirect(url);
+    const redirectRes = NextResponse.redirect(url);
+    redirectRes.cookies.set("summit_user_role", role, { path: "/", maxAge: 604800, sameSite: "lax" });
+    return redirectRes;
   }
 
   // 3. Proteksi Khusus Role Owner: jika user bukan owner mencoba masuk ke area /owner
   if (user && url.pathname.startsWith("/owner")) {
-    let role = "admin";
-    try {
-      const { data: profile } = await supabase
-        .from("profil")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (profile?.role) role = profile.role;
-    } catch {
-      // fallback default
-    }
+    const role = await resolveUserRole();
+    supabaseResponse.cookies.set("summit_user_role", role, { path: "/", maxAge: 604800, sameSite: "lax" });
 
     if (role !== "owner") {
       url.pathname = "/admin/dashboard";
-      return NextResponse.redirect(url);
+      const redirectRes = NextResponse.redirect(url);
+      redirectRes.cookies.set("summit_user_role", role, { path: "/", maxAge: 604800, sameSite: "lax" });
+      return redirectRes;
     }
   }
 

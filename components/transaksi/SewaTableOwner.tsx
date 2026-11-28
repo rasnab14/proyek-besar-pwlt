@@ -20,12 +20,11 @@ export function SewaTableOwner({ records, onSelectRecord }: SewaTableOwnerProps)
             <tr>
               <th>KODE</th>
               <th>PELANGGAN</th>
-              <th>BARANG DI PELANGGAN</th>
-              <th>DIAMBIL</th>
-              <th>TANGGAL KEMBALI</th>
-              <th>PENGEMBALIAN</th>
-              <th>SISA TAGIHAN</th>
-              <th>BIAYA TAMBAHAN</th>
+              <th>PERIODE SEWA</th>
+              <th>TOTAL TAGIHAN</th>
+              <th>DP</th>
+              <th>SISA</th>
+              <th>PENGAMBILAN</th>
               <th>STATUS</th>
               <th style={{ textAlign: "right" }}>AKSI</th>
             </tr>
@@ -33,35 +32,41 @@ export function SewaTableOwner({ records, onSelectRecord }: SewaTableOwnerProps)
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan={10} style={{ textAlign: "center", padding: "40px", color: "#64748B" }}>
+                <td colSpan={9} style={{ textAlign: "center", padding: "40px", color: "#64748B" }}>
                   Tidak ada transaksi penyewaan yang ditemukan.
                 </td>
               </tr>
             ) : (
               records.map((r) => {
-                // Pengembalian Badge
-                let pengembalianText = "Belum Dikembalikan";
-                let pengembalianDot = "tx-dot-amber";
-                if (r.statusPengembalian === "sebagian") {
-                  pengembalianText = "Dikembalikan Sebagian";
-                  pengembalianDot = "tx-dot-blue";
-                } else if (r.statusPengembalian === "seluruhnya") {
-                  pengembalianText = "Dikembalikan Seluruhnya";
-                  pengembalianDot = "tx-dot-green";
+                // Formatting DP
+                let dpDisplay = "-";
+                if (r.dpNominal > 0) {
+                  dpDisplay = formatRupiah(r.dpNominal);
+                } else if (r.tipeAsal === "booking" && r.dpNominal === 0) {
+                  dpDisplay = "Tanpa DP";
                 }
+
+                // Pengambilan Badge
+                const isDiambil = r.statusPengambilan === "sudah_diambil";
+
+                // Status Badge (Lunas vs Belum Lunas)
+                const isLunas = r.status === "lunas" || r.sisaTagihan === 0;
 
                 return (
                   <tr key={r.id}>
                     {/* KODE */}
                     <td>
-                      <button
-                        type="button"
-                        className="tx-code-link"
-                        style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
-                        onClick={() => onSelectRecord(r)}
-                      >
-                        {r.kode}
-                      </button>
+                      <div className="tx-code-wrap">
+                        <button
+                          type="button"
+                          className="tx-code-link"
+                          style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
+                          onClick={() => onSelectRecord(r)}
+                        >
+                          {r.kode}
+                        </button>
+                        <span className="tx-code-sub">{r.bookingTag}</span>
+                      </div>
                     </td>
 
                     {/* PELANGGAN */}
@@ -69,57 +74,44 @@ export function SewaTableOwner({ records, onSelectRecord }: SewaTableOwnerProps)
                       <span className="tx-pelanggan-name">{r.pelanggan.nama}</span>
                     </td>
 
-                    {/* BARANG DI PELANGGAN */}
-                    <td style={{ maxWidth: "220px", whiteSpace: "normal" }}>
-                      {r.barangDiPelanggan || "-"}
+                    {/* PERIODE SEWA */}
+                    <td>{r.periodeDisplay}</td>
+
+                    {/* TOTAL TAGIHAN */}
+                    <td style={{ fontWeight: 500 }}>{formatRupiah(r.totalTagihan)}</td>
+
+                    {/* DP */}
+                    <td>{dpDisplay}</td>
+
+                    {/* SISA */}
+                    <td style={{ fontWeight: 500, color: r.sisaTagihan > 0 ? "#D97706" : "inherit" }}>
+                      {formatRupiah(r.sisaTagihan)}
                     </td>
 
-                    {/* DIAMBIL */}
-                    <td>{r.tglDiambilDisplay || "-"}</td>
-
-                    {/* TANGGAL KEMBALI */}
-                    <td>{r.tglKembaliDisplay || "-"}</td>
-
-                    {/* PENGEMBALIAN */}
+                    {/* PENGAMBILAN */}
                     <td>
                       <span className="tx-dot-badge">
-                        <span className={`tx-dot ${pengembalianDot}`} />
-                        {pengembalianText}
+                        <span className={`tx-dot ${isDiambil ? "tx-dot-green" : "tx-dot-amber"}`} />
+                        {isDiambil ? "Sudah diambil" : "Belum diambil"}
                       </span>
-                    </td>
-
-                    {/* SISA TAGIHAN */}
-                    <td style={{ fontWeight: 500 }}>{formatRupiah(r.sisaTagihan)}</td>
-
-                    {/* BIAYA TAMBAHAN */}
-                    <td>
-                      {r.biayaTambahan && r.biayaTambahan > 0 ? (
-                        <div>
-                          <span>{formatRupiah(r.biayaTambahan)}</span>
-                          <div style={{ fontSize: "11px", color: "#DC2626" }}>
-                            {r.biayaTambahanKet || "(denda)"}
-                          </div>
-                        </div>
-                      ) : (
-                        "-"
-                      )}
                     </td>
 
                     {/* STATUS */}
                     <td>
                       <span className="tx-dot-badge">
-                        <span className={`tx-dot ${r.status === "lunas" || r.sisaTagihan === 0 ? "tx-dot-green" : "tx-dot-amber"}`} />
-                        {r.status === "lunas" || r.sisaTagihan === 0 ? "Lunas" : "Belum Lunas"}
+                        <span className={`tx-dot ${isLunas ? "tx-dot-green" : "tx-dot-amber"}`} />
+                        {isLunas ? "Lunas" : "Belum Lunas"}
                       </span>
                     </td>
 
-                    {/* AKSI */}
+                    {/* AKSI (Owner hanya Lihat Detail) */}
                     <td style={{ textAlign: "right" }}>
                       <button
                         type="button"
                         className="tx-btn-secondary"
                         style={{ padding: "4px 10px", fontSize: "12px" }}
                         onClick={() => onSelectRecord(r)}
+                        title="Lihat Detail Transaksi"
                       >
                         Detail
                       </button>
@@ -135,13 +127,13 @@ export function SewaTableOwner({ records, onSelectRecord }: SewaTableOwnerProps)
       {/* Pagination Footer */}
       <div className="tx-pagination">
         <span>
-          Menampilkan 1-{records.length} dari 96 transaksi
+          Menampilkan 1-{records.length} dari {records.length} transaksi
         </span>
         <div className="tx-pagination-buttons">
           <button type="button" className="tx-page-btn" disabled>
             Sebelumnya
           </button>
-          <button type="button" className="tx-page-btn">
+          <button type="button" className="tx-page-btn" disabled>
             Berikutnya
           </button>
         </div>

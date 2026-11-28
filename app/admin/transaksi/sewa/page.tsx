@@ -2,12 +2,14 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import "@/components/transaksi/transaksi.css";
 import {
   TransaksiSewaRecord,
   SewaFilterState,
   getStoredTransaksiSewa,
   saveOrUpdateTransaksiSewa,
+  deleteTransaksiSewa,
   SewaHeader,
   SewaSummaryCards,
   SewaFilterBar,
@@ -28,6 +30,7 @@ export default function AdminTransaksiSewaPage() {
   });
 
   // Modal states
+  const router = useRouter();
   const [isSelectBookingOpen, setIsSelectBookingOpen] = useState(false);
   const [isDirectRentalOpen, setIsDirectRentalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<TransaksiSewaRecord | null>(null);
@@ -35,6 +38,13 @@ export default function AdminTransaksiSewaPage() {
   const [receiptRecord, setReceiptRecord] = useState<TransaksiSewaRecord | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [handoverRecord, setHandoverRecord] = useState<TransaksiSewaRecord | null>(null);
+  const [deletingRecord, setDeletingRecord] = useState<TransaksiSewaRecord | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const showToast = (text: string, type: "success" | "error" = "success") => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // Sync data with storage
   const reloadData = () => {
@@ -89,9 +99,67 @@ export default function AdminTransaksiSewaPage() {
     setHandoverRecord(r);
   };
 
+  const handleEditRecord = (r: TransaksiSewaRecord) => {
+    if (r.statusPengambilan === "sudah_diambil") {
+      showToast("Transaksi yang sudah serah terima tidak dapat diubah.", "error");
+      return;
+    }
+    // Sesuai Ketentuan Poin 2: Transaksi dari booking harus menggunakan form Booking yang sama
+    if (r.tipeAsal === "booking") {
+      router.push(`/admin/booking/baru?id=${r.bookingId || r.id}&transaksiId=${r.id}`);
+    } else {
+      router.push(`/admin/transaksi/sewa/baru?id=${r.id}`);
+    }
+  };
+
+  const handleDeleteRecord = (r: TransaksiSewaRecord) => {
+    if (r.statusPengambilan === "sudah_diambil") {
+      showToast("Transaksi yang sudah serah terima tidak dapat dihapus.", "error");
+      return;
+    }
+    setDeletingRecord(r);
+  };
+
+  const confirmDeleteRecord = () => {
+    if (!deletingRecord) return;
+    const res = deleteTransaksiSewa(deletingRecord.id);
+    if (res.success) {
+      showToast(`Transaksi ${deletingRecord.kode} berhasil dihapus dan stok barang telah dikembalikan.`, "success");
+      reloadData();
+    } else {
+      showToast(res.message || "Gagal menghapus transaksi.", "error");
+    }
+    setDeletingRecord(null);
+  };
+
   return (
     <div className="main">
       <div className="tx-page-container">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div
+            style={{
+              position: "fixed",
+              top: "24px",
+              right: "24px",
+              zIndex: 99999,
+              padding: "12px 18px",
+              borderRadius: "8px",
+              background: toastMessage.type === "success" ? "#065F46" : "#991B1B",
+              color: "#FFFFFF",
+              fontSize: "13.5px",
+              fontWeight: 600,
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <span>{toastMessage.type === "success" ? "✓" : "⚠"}</span>
+            <span>{toastMessage.text}</span>
+          </div>
+        )}
+
         {/* Header with Title, Breadcrumbs, & Action Buttons */}
         <SewaHeader role="admin" />
 
@@ -110,12 +178,14 @@ export default function AdminTransaksiSewaPage() {
           onFilterChange={(newF) => setFilters((prev) => ({ ...prev, ...newF }))}
         />
 
-        {/* Admin Data Table */}
+        {/* Admin Data Table with Dynamic Actions (§F.1) */}
         <SewaTableAdmin
           records={filteredRecords}
           onSelectRecord={handleOpenDetail}
           onPrintReceipt={handleOpenReceipt}
           onProcessHandover={handleProcessHandover}
+          onEditRecord={handleEditRecord}
+          onDeleteRecord={handleDeleteRecord}
         />
       </div>
 
@@ -165,6 +235,106 @@ export default function AdminTransaksiSewaPage() {
           handleOpenReceipt(updated);
         }}
       />
+
+      {/* Modal Konfirmasi Hapus Transaksi Sewa (§F.1.A & §F.1.D) */}
+      {deletingRecord && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            padding: "16px",
+          }}
+          onClick={() => setDeletingRecord(null)}
+        >
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "440px",
+              width: "100%",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "50%",
+                  background: "#FEE2E2",
+                  color: "#DC2626",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#0F172A" }}>
+                  Hapus Transaksi Sewa?
+                </h3>
+                <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "#64748B" }}>
+                  Kode: {deletingRecord.kode} ({deletingRecord.pelanggan.nama})
+                </p>
+              </div>
+            </div>
+            <p style={{ margin: "0 0 20px 0", fontSize: "13.5px", color: "#334155", lineHeight: "1.5" }}>
+              Apakah Anda yakin ingin menghapus transaksi sewa <strong>{deletingRecord.kode}</strong>? Stok produk yang dialokasikan akan <strong>otomatis dikembalikan</strong> ke ketersediaan toko.
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => setDeletingRecord(null)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "1px solid #CBD5E1",
+                  background: "#F8FAFC",
+                  color: "#334155",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteRecord}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "#DC2626",
+                  color: "#FFFFFF",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Ya, Hapus Transaksi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

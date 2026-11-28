@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import "@/components/transaksi/transaksi.css";
 import "@/components/booking/booking.css";
 import "@/components/booking/create/booking-create.css";
@@ -25,6 +25,8 @@ import { NewCustomerModal } from "@/components/booking/create/NewCustomerModal";
 import {
   createTransaksiLangsung,
   generateNextTransaksiKode,
+  getTransaksiByIdOrKode,
+  updateExistingTransaksiSewa,
 } from "@/components/transaksi/sewaStore";
 import { TransaksiSewaRecord, SewaItem } from "@/components/transaksi/types";
 import { PrintReceiptModal } from "@/components/transaksi/PrintReceiptModal";
@@ -34,6 +36,13 @@ const DEFAULT_RENTAL_START = "2026-11-27";
 
 function DirectRentalFormInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id") || searchParams.get("edit");
+
+  // ─── Edit Mode State ───
+  const [existingTx, setExistingTx] = useState<TransaksiSewaRecord | null>(null);
+  const [isTxLoaded, setIsTxLoaded] = useState(false);
+  const isEditMode = Boolean(existingTx);
 
   // ─── Kode Transaksi ───
   const [trxKode, setTrxKode] = useState("TRX-0451");
@@ -64,38 +73,106 @@ function DirectRentalFormInner() {
   const [isConfirmSewaOpen, setIsConfirmSewaOpen] = useState(false);
   const [toastError, setToastError] = useState<string | null>(null);
 
-  // Auto generate Next Code on mount
+  // Auto generate Next Code or Load Existing Transaction
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (editId && !isTxLoaded) {
+      const tx = getTransaksiByIdOrKode(editId);
+      if (tx) {
+        // Sesuai Ketentuan Poin 2: Jika transaksi berasal dari booking, alihkan ke form booking yang sama
+        if (tx.tipeAsal === "booking") {
+          router.replace(`/admin/booking/baru?id=${tx.bookingId || tx.id}&transaksiId=${tx.id}`);
+          return;
+        }
+
+        setExistingTx(tx);
+        setTrxKode(tx.kode);
+        setTanggalSewa(tx.tglMulai);
+        setDurasiHari(tx.durasiHari);
+        if (tx.jaminanFisik) setJaminanFisik(tx.jaminanFisik);
+        if (tx.metodePelunasan) setMetodePembayaran(tx.metodePelunasan);
+
+        // Matching Pelanggan
+        const matchCust = customers.find(
+          (c) => c.nama.toLowerCase() === tx.pelanggan.nama.toLowerCase()
+        );
+        if (matchCust) {
+          setSelectedCustomer(matchCust);
+        } else {
+          const custId = `cust-${tx.pelanggan.nama.toLowerCase().replace(/[^a-z0-9]/g, "") || "user"}`;
+          const newC: CustomerData = {
+            id: custId,
+            nama: tx.pelanggan.nama,
+            telepon: tx.pelanggan.telepon,
+            alamat: tx.pelanggan.alamat || "",
+          };
+          setCustomers((prev) => {
+            if (prev.some((c) => c.id === custId || c.nama.toLowerCase() === tx.pelanggan.nama.toLowerCase())) {
+              return prev;
+            }
+            return [newC, ...prev];
+          });
+          setSelectedCustomer(newC);
+        }
+
+        // Matching Cart Items
+        const mappedCart: CartItem[] = tx.items.map((it) => ({
+          id: it.id,
+          kode: it.id.toUpperCase(),
+          nama: it.nama,
+          tipe: it.tipe,
+          kategori: it.kategori,
+          hargaPerHari: it.hargaPerHari,
+          jumlah: it.jumlah,
+          unitTersedia: 99,
+          subtotal: it.subtotal,
+          itemsPaket: it.rincianPaket,
+        }));
+        setCart(mappedCart);
+      }
+      setIsTxLoaded(true);
+    } else if (!editId && typeof window !== "undefined") {
       setTrxKode(generateNextTransaksiKode());
     }
-  }, []);
+  }, [editId, isTxLoaded, customers]);
 
-  // Update default jaminan ketika pelanggan berubah
+  // Update default jaminan ketika pelanggan berubah (hanya jika mode tambah baru)
   useEffect(() => {
-    if (selectedCustomer) {
+    if (selectedCustomer && !isEditMode) {
       setJaminanFisik(`KTP Asli atas nama ${selectedCustomer.nama}`);
     }
-  }, [selectedCustomer]);
+  }, [selectedCustomer, isEditMode]);
 
   // Tanggal Selesai Sewa
   const tanggalSelesaiSewa = useMemo(() => {
     return calculateEndDate(tanggalSewa, durasiHari);
   }, [tanggalSewa, durasiHari]);
 
-  // Filter Pelanggan
+  // Filter Pelanggan (dengan deduplikasi id unik untuk mencegah duplicate key)
   const filteredCustomers = useMemo(() => {
-    if (!customerSearchQuery.trim()) return customers;
+    const uniqueMap = new Map<string, CustomerData>();
+    customers.forEach((c) => {
+      if (!uniqueMap.has(c.id)) {
+        uniqueMap.set(c.id, c);
+      }
+    });
+    const list = Array.from(uniqueMap.values());
+    if (!customerSearchQuery.trim()) return list;
     const q = customerSearchQuery.toLowerCase().trim();
-    return customers.filter(
+    return list.filter(
       (c) => c.nama.toLowerCase().includes(q) || c.telepon.includes(q)
     );
   }, [customers, customerSearchQuery]);
 
-  // Base stock ketersediaan
+  // Base stock ketersediaan (mengecualikan transaksi/booking yang sedang diedit agar tidak double-counting)
   const baseProducts = useMemo(() => {
-    return calculatePeriodBaseStock(MOCK_PRODUCTS, tanggalSewa, tanggalSelesaiSewa);
-  }, [tanggalSewa, tanggalSelesaiSewa]);
+    return calculatePeriodBaseStock(
+      MOCK_PRODUCTS,
+      tanggalSewa,
+      tanggalSelesaiSewa,
+      existingTx?.bookingId,
+      existingTx?.id
+    );
+  }, [tanggalSewa, tanggalSelesaiSewa, existingTx]);
 
   // Ketersediaan dinamis real-time
   const { dynamicProducts, remainingSingleStockMap, remainingPackageStockMap } = useMemo(() => {
@@ -244,7 +321,48 @@ function DirectRentalFormInner() {
         rincianPaket: it.itemsPaket,
       }));
 
-      // Poin 5: Menghasilkan transaksi sewa dengan status Sudah Diambil dan Lunas
+      // Jika dalam Mode Edit Transaksi yang Belum Serah Terima (§F.1.A & §F.1.B)
+      if (isEditMode && existingTx) {
+        if (existingTx.statusPengambilan === "sudah_diambil") {
+          showToast("Transaksi yang sudah serah terima tidak dapat diubah.");
+          return;
+        }
+
+        const total = mappedItems.reduce((acc, it) => acc + it.subtotal, 0);
+        const barangSummary = mappedItems.map((it) => `${it.nama} ×${it.jumlah}`).join(", ");
+        const sisa = Math.max(0, total - (existingTx.dpNominal || 0));
+
+        const updatedTx: TransaksiSewaRecord = {
+          ...existingTx,
+          pelanggan: {
+            nama: selectedCustomer.nama,
+            telepon: selectedCustomer.telepon,
+            alamat: selectedCustomer.alamat,
+          },
+          tglMulai: tanggalSewa,
+          tglSelesai: tanggalSelesaiSewa,
+          durasiHari,
+          periodeDisplay: `${tanggalSewa} - ${tanggalSelesaiSewa}`,
+          items: mappedItems,
+          barangDiPelanggan: barangSummary,
+          totalTagihan: total,
+          sisaTagihan: sisa,
+          status: sisa === 0 ? "lunas" : "belum_lunas",
+          statusPembayaran: sisa === 0 ? "lunas" : "belum_lunas",
+          jaminanFisik: jaminanFisik.trim(),
+          metodePelunasan: metodePembayaran,
+        };
+
+        const res = updateExistingTransaksiSewa(updatedTx, true);
+        if (res.success) {
+          setSuccessTx(updatedTx);
+        } else {
+          showToast(res.message || "Gagal memperbarui transaksi.");
+        }
+        return;
+      }
+
+      // Poin 5: Menghasilkan transaksi sewa langsung baru
       const created = createTransaksiLangsung({
         pelanggan: {
           nama: selectedCustomer.nama,
@@ -271,6 +389,34 @@ function DirectRentalFormInner() {
     setTrxKode(generateNextTransaksiKode());
   };
 
+  // Validasi jika transaksi sudah diambil (§F.1.C)
+  if (existingTx && existingTx.statusPengambilan === "sudah_diambil") {
+    return (
+      <div className="main">
+        <div style={{ maxWidth: "560px", margin: "60px auto", padding: "32px", background: "#FFFFFF", borderRadius: "12px", border: "1px solid #FECACA", textAlign: "center", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#991B1B", margin: "0 0 8px" }}>Transaksi Tidak Dapat Diubah</h2>
+          <p style={{ fontSize: "13.5px", color: "#475569", margin: "0 0 24px", lineHeight: 1.6 }}>
+            Transaksi <strong>{existingTx.kode}</strong> telah melewati tahap serah terima barang (Status: Sudah diambil). Sesuai ketentuan operasional (§F.1.C), transaksi yang sudah diserahterimakan tidak dapat diubah atau dihapus melalui form transaksi.
+          </p>
+          <Link
+            href="/admin/transaksi/sewa"
+            className="tx-btn-secondary"
+            style={{ display: "inline-flex", textDecoration: "none", padding: "8px 18px" }}
+          >
+            ← Kembali ke Transaksi Penyewaan
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="main">
       {/* Top Bar with Back Button */}
@@ -284,7 +430,7 @@ function DirectRentalFormInner() {
             Kembali ke Transaksi Penyewaan
           </Link>
           <span className="hero-badge">
-            ADMIN · TRANSAKSI LANGSUNG
+            {isEditMode ? `ADMIN · UBAH TRANSAKSI (${existingTx?.kode})` : "ADMIN · TRANSAKSI LANGSUNG"}
           </span>
         </div>
       </div>
@@ -296,7 +442,16 @@ function DirectRentalFormInner() {
           {/* Card 1: Informasi Transaksi Langsung */}
           <div className="bc-card">
             <div className="bc-card-header">
-              <h2 className="bc-card-title">Informasi transaksi langsung</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <h2 className="bc-card-title">
+                  {isEditMode ? `Ubah Data Transaksi ${trxKode}` : "Informasi transaksi langsung"}
+                </h2>
+                {existingTx?.bookingTag && (
+                  <span style={{ fontSize: "11.5px", fontWeight: 600, padding: "2px 8px", borderRadius: "4px", background: "#E0F2FE", color: "#0284C7" }}>
+                    {existingTx.bookingTag}
+                  </span>
+                )}
+              </div>
               <span className="bc-code-badge">{trxKode}</span>
             </div>
 
@@ -620,7 +775,7 @@ function DirectRentalFormInner() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                Selesaikan & Serahkan Barang
+                {isEditMode ? "Simpan Perubahan Transaksi" : "Selesaikan & Serahkan Barang"}
               </button>
             </div>
           </div>
@@ -632,13 +787,18 @@ function DirectRentalFormInner() {
         isOpen={isNewCustModalOpen}
         onClose={() => setIsNewCustModalOpen(false)}
         onAddCustomer={(newCust: CustomerData) => {
-          setCustomers((prev) => [newCust, ...prev]);
+          setCustomers((prev) => {
+            if (prev.some((c) => c.id === newCust.id || c.nama.toLowerCase() === newCust.nama.toLowerCase())) {
+              return prev;
+            }
+            return [newCust, ...prev];
+          });
           setSelectedCustomer(newCust);
           setIsNewCustModalOpen(false);
         }}
       />
 
-      {/* Modal Konfirmasi Sewa Langsung */}
+      {/* Modal Konfirmasi Sewa Langsung / Perubahan */}
       {isConfirmSewaOpen && selectedCustomer && (
         <div className="tx-modal-overlay" onClick={() => setIsConfirmSewaOpen(false)}>
           <div
@@ -656,7 +816,9 @@ function DirectRentalFormInner() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="tx-modal-title" style={{ fontSize: "16px" }}>Serahkan Barang {trxKode}?</h3>
+                  <h3 className="tx-modal-title" style={{ fontSize: "16px" }}>
+                    {isEditMode ? `Simpan Perubahan ${trxKode}?` : `Serahkan Barang ${trxKode}?`}
+                  </h3>
                   <div style={{ fontSize: "12px", color: "var(--n600)" }}>{selectedCustomer.nama}</div>
                 </div>
               </div>
@@ -678,8 +840,8 @@ function DirectRentalFormInner() {
                   <span style={{ fontWeight: 600, color: "#0F172A" }}>{cart.length} item</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E2E8F0", paddingTop: "6px" }}>
-                  <span style={{ color: "#64748B" }}>Total Lunas:</span>
-                  <span style={{ fontWeight: 700, color: "#166534" }}>{formatRupiah(totalBiaya)} ({metodePembayaran.toUpperCase()})</span>
+                  <span style={{ color: "#64748B" }}>Total Biaya:</span>
+                  <span style={{ fontWeight: 700, color: "#166534" }}>{formatRupiah(totalBiaya)}</span>
                 </div>
               </div>
             </div>
@@ -699,7 +861,7 @@ function DirectRentalFormInner() {
                 style={{ padding: "7px 14px", fontSize: "12.5px" }}
                 onClick={executeProcessTransaksiLangsung}
               >
-                Ya, Serahkan
+                {isEditMode ? "Ya, Simpan Perubahan" : "Ya, Serahkan"}
               </button>
             </div>
           </div>
@@ -718,10 +880,14 @@ function DirectRentalFormInner() {
                   </svg>
                 </div>
                 <h3 style={{ margin: "0", fontSize: "20px", fontWeight: 700, color: "#0F172A" }}>
-                  Transaksi Langsung Berhasil!
+                  {isEditMode ? "Perubahan Transaksi Berhasil Disimpan!" : "Transaksi Langsung Berhasil!"}
                 </h3>
                 <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#64748B" }}>
-                  Barang telah diserahterimakan ke pelanggan dan pembayaran tercatat lunas di kasir.
+                  {isEditMode
+                    ? (existingTx?.tipeAsal === "booking"
+                        ? "Data transaksi berhasil diperbarui dan disinkronkan ke booking asal secara otomatis."
+                        : "Data transaksi berhasil diperbarui dan alokasi stok telah disesuaikan.")
+                    : "Barang telah diserahterimakan ke pelanggan dan pembayaran tercatat lunas di kasir."}
                 </p>
               </div>
             </div>

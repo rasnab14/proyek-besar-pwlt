@@ -91,6 +91,7 @@ export const NAV: Record<Role, NavItem[]> = {
     ]),
     L("stok", "Stok dan Ketersediaan", "/owner/stok", "stok"),
     L("pelanggan", "Data Pelanggan", "/owner/pelanggan", "usr"),
+    L("pengembalian", "Monitoring Pengembalian", "/owner/pengembalian", "ret"),
     L("pengeluaran", "Pengeluaran", "/owner/pengeluaran", "wal"),
     P("laporan", "Laporan", "chart", [
       { label: "Laporan Keuangan", href: "/owner/laporan/keuangan" },

@@ -16,6 +16,7 @@ interface SelectBookingModalProps {
 export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBookingModalProps) {
   const [availableBookings, setAvailableBookings] = useState<BookingRecord[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
+  const [langsungSerahTerima, setLangsungSerahTerima] = useState<boolean>(false);
   const [jaminanFisik, setJaminanFisik] = useState<string>("");
   const [metodePelunasan, setMetodePelunasan] = useState<MetodePembayaran>("tunai");
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -30,13 +31,14 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
         existingTx
           .filter((t) => t.bookingId || t.bookingKode)
           .flatMap((t) => [t.bookingId, t.bookingKode].filter(Boolean) as string[])
+          .map((id) => id.toLowerCase())
       );
 
       const readyBookings = allBookings.filter(
         (b) =>
           b.status === "selesai" &&
-          !convertedBookingIds.has(b.id) &&
-          !convertedBookingIds.has(b.kode)
+          !convertedBookingIds.has(b.id.toLowerCase()) &&
+          !convertedBookingIds.has(b.kode.toLowerCase())
       );
 
       setAvailableBookings(readyBookings);
@@ -45,6 +47,7 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
       } else {
         setSelectedBookingId("");
       }
+      setLangsungSerahTerima(false);
       setJaminanFisik("");
       setMetodePelunasan("tunai");
       setErrorMsg("");
@@ -62,7 +65,7 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
       setErrorMsg("Pilih data booking yang valid.");
       return;
     }
-    if (!jaminanFisik.trim()) {
+    if (langsungSerahTerima && !jaminanFisik.trim()) {
       setErrorMsg("Tuliskan jenis jaminan fisik yang diserahkan pelanggan (misal: KTP Asli).");
       return;
     }
@@ -71,7 +74,9 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
       const newTx = createTransaksiFromBooking(
         selectedBooking,
         jaminanFisik.trim(),
-        metodePelunasan
+        metodePelunasan,
+        "Admin Toko",
+        langsungSerahTerima
       );
       onSuccess(newTx);
       onClose();
@@ -187,60 +192,80 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
                   </div>
                 )}
 
-                {/* Input Jaminan Fisik (§F.1.8) */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>
-                    Jaminan Fisik Diserahkan <span style={{ color: "#DC2626" }}>*</span>
+                {/* Pilihan: Langsung Serah Terima Sekarang atau Buat Transaksi Belum Diambil */}
+                <div style={{ background: "#F1F5F9", padding: "12px 14px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#0F172A" }}>
+                    <input
+                      type="checkbox"
+                      checked={langsungSerahTerima}
+                      onChange={(e) => setLangsungSerahTerima(e.target.checked)}
+                    />
+                    Langsung Serah Terima Barang &amp; Pelunasan di Kasir Hari Ini
                   </label>
-                  <p style={{ fontSize: "12px", color: "#64748B", margin: "0 0 6px 0" }}>
-                    Ditulis manual jenis identitas tanpa nomor identitas (misal: <em>KTP Asli Rizky Ananda</em> atau <em>SIM A Dewi Lestari</em>).
+                  <p style={{ margin: "4px 0 0 24px", fontSize: "11.5px", color: "#64748B", lineHeight: 1.5 }}>
+                    Jika dicentang, barang langsung diserahkan sekarang dan transaksi berstatus <strong>Sudah Diambil (Lunas)</strong>.
+                    Jika tidak dicentang, transaksi dibuat berstatus <strong>Belum Diambil</strong> dengan aksi <em>Serah Terima, Ubah, Detail</em>.
                   </p>
-                  <input
-                    type="text"
-                    className="tx-search-input"
-                    style={{ paddingLeft: "12px" }}
-                    placeholder="Contoh: KTP Asli atas nama penyewa"
-                    value={jaminanFisik}
-                    onChange={(e) => setJaminanFisik(e.target.value)}
-                    required
-                  />
                 </div>
 
-                {/* Metode Pembayaran Pelunasan (§F.1.20) */}
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "6px" }}>
-                    Metode Pembayaran Pelunasan Sisa
-                  </label>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    {(["tunai", "qris", "transfer"] as const).map((m) => (
-                      <label
-                        key={m}
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          padding: "10px 12px",
-                          border: `1px solid ${metodePelunasan === m ? "#0284C7" : "#E2E8F0"}`,
-                          borderRadius: "8px",
-                          background: metodePelunasan === m ? "#F0F9FF" : "#FFFFFF",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="pelunasan"
-                          checked={metodePelunasan === m}
-                          onChange={() => setMetodePelunasan(m)}
-                        />
-                        {m}
+                {langsungSerahTerima && (
+                  <>
+                    {/* Input Jaminan Fisik (§F.1.8) */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "4px" }}>
+                        Jaminan Fisik Diserahkan <span style={{ color: "#DC2626" }}>*</span>
                       </label>
-                    ))}
-                  </div>
-                </div>
+                      <p style={{ fontSize: "12px", color: "#64748B", margin: "0 0 6px 0" }}>
+                        Ditulis manual jenis identitas tanpa nomor identitas (misal: <em>KTP Asli Rizky Ananda</em> atau <em>SIM A Dewi Lestari</em>).
+                      </p>
+                      <input
+                        type="text"
+                        className="tx-search-input"
+                        style={{ paddingLeft: "12px" }}
+                        placeholder="Contoh: KTP Asli atas nama penyewa"
+                        value={jaminanFisik}
+                        onChange={(e) => setJaminanFisik(e.target.value)}
+                        required={langsungSerahTerima}
+                      />
+                    </div>
+
+                    {/* Metode Pembayaran Pelunasan (§F.1.20) */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: 600, marginBottom: "6px" }}>
+                        Metode Pembayaran Pelunasan Sisa
+                      </label>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        {(["tunai", "qris", "transfer"] as const).map((m) => (
+                          <label
+                            key={m}
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "10px 12px",
+                              border: `1px solid ${metodePelunasan === m ? "#0284C7" : "#E2E8F0"}`,
+                              borderRadius: "8px",
+                              background: metodePelunasan === m ? "#F0F9FF" : "#FFFFFF",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              fontWeight: 500,
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            <input
+                              type="radio"
+                              name="pelunasan"
+                              checked={metodePelunasan === m}
+                              onChange={() => setMetodePelunasan(m)}
+                            />
+                            {m}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {errorMsg && (
                   <div style={{ color: "#DC2626", fontSize: "13px", background: "#FEF2F2", padding: "8px 12px", borderRadius: "6px" }}>
@@ -256,8 +281,12 @@ export function SelectBookingModal({ isOpen, onClose, onSuccess }: SelectBooking
               Batal
             </button>
             {availableBookings.length > 0 && (
-              <button type="submit" className="tx-btn-primary">
-                Konfirmasi Serah Terima &amp; Pelunasan
+              <button
+                type="submit"
+                className="tx-btn-primary"
+                style={{ background: langsungSerahTerima ? "#0284C7" : "#D97706", borderColor: langsungSerahTerima ? "#0284C7" : "#D97706" }}
+              >
+                {langsungSerahTerima ? "Konfirmasi Serah Terima & Pelunasan" : "Simpan Transaksi (Menunggu Serah Terima)"}
               </button>
             )}
           </div>

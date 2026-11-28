@@ -77,32 +77,32 @@ export function JualDetailModal({
             <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", fontWeight: 700, color: "#0F172A" }}>
               Barang yang Dibeli ({record.items.length} item)
             </h4>
-            <div style={{ border: "1px solid #E2E8F0", borderRadius: "8px", overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px" }}>
+            <div style={{ border: "1px solid #CBD5E1", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(15, 23, 42, 0.05)" }}>
+              <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, fontSize: "12.5px" }}>
                 <thead>
-                  <tr style={{ background: "#F1F5F9", color: "#475569", fontSize: "11px", fontWeight: 700, textTransform: "uppercase" }}>
-                    <th style={{ padding: "8px 12px", textAlign: "left" }}>Nama Barang</th>
-                    <th style={{ padding: "8px 12px", textAlign: "center" }}>Qty</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Harga Satuan</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Subtotal</th>
+                  <tr style={{ background: "#F1F5F9", color: "#1E293B", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <th style={{ padding: "10px 14px", textAlign: "left", borderBottom: "2px solid #CBD5E1" }}>Nama Barang</th>
+                    <th style={{ padding: "10px 14px", textAlign: "center", borderBottom: "2px solid #CBD5E1" }}>Qty</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right", borderBottom: "2px solid #CBD5E1" }}>Harga Satuan</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right", borderBottom: "2px solid #CBD5E1" }}>Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {record.items.map((it) => (
-                    <tr key={it.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
-                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#1E293B" }}>
+                  {record.items.map((it, idx) => (
+                    <tr key={it.id} style={{ background: idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "11px 14px", borderBottom: "1px solid #E2E8F0", fontWeight: 600, color: "#1E293B" }}>
                         {it.nama}
                         <span style={{ display: "block", fontSize: "11px", color: "#64748B" }}>
                           SKU: {it.kode} · {it.kategori}
                         </span>
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 600 }}>
+                      <td style={{ padding: "11px 14px", borderBottom: "1px solid #E2E8F0", textAlign: "center", fontWeight: 600 }}>
                         {it.jumlah}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", color: "#475569" }}>
+                      <td style={{ padding: "11px 14px", borderBottom: "1px solid #E2E8F0", textAlign: "right", color: "#475569" }}>
                         {formatRupiah(it.hargaSatuan)}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "#0F172A" }}>
+                      <td style={{ padding: "11px 14px", borderBottom: "1px solid #E2E8F0", textAlign: "right", fontWeight: 700, color: "#0F172A" }}>
                         {formatRupiah(it.subtotal)}
                       </td>
                     </tr>

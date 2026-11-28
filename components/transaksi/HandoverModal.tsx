@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { TransaksiSewaRecord, MetodePembayaran } from "./types";
 import { formatRupiah } from "@/lib/format";
 import { saveOrUpdateTransaksiSewa } from "./sewaStore";
+import { getStoredBookings, saveOrUpdateBooking } from "@/components/booking/bookingStore";
 
 interface HandoverModalProps {
   isOpen: boolean;
@@ -41,6 +42,10 @@ export function HandoverModal({
   const kembalian = Math.max(0, nominalDiterima - sisa);
 
   const handleOpenConfirmation = () => {
+    if (record.statusPengambilan === "sudah_diambil") {
+      setErrorMsg("Transaksi ini sudah melakukan serah terima sebelumnya. Proses serah terima hanya dapat dilakukan satu kali.");
+      return;
+    }
     if (!jaminanFisik.trim()) {
       setErrorMsg("Wajib mencatat jenis identitas jaminan fisik (misal: KTP Asli atau SIM A).");
       return;
@@ -54,6 +59,12 @@ export function HandoverModal({
   };
 
   const handleExecuteHandover = () => {
+    if (record.statusPengambilan === "sudah_diambil") {
+      setErrorMsg("Transaksi ini sudah pernah diserahterimakan.");
+      setIsConfirmOpen(false);
+      return;
+    }
+
     const now = new Date();
     const nowStr = now.toISOString().replace("T", " ").substring(0, 16);
 
@@ -77,7 +88,34 @@ export function HandoverModal({
       ],
     };
 
+    // Update transaksi penyewaan
     saveOrUpdateTransaksiSewa(updated);
+
+    // Sinkronisasi pembaruan ke booking terkait (§F.1.B Poin 2)
+    if (record.tipeAsal === "booking" && (record.bookingId || record.bookingKode)) {
+      const allBookings = getStoredBookings();
+      const originBooking = allBookings.find(
+        (b) =>
+          (record.bookingId && b.id.toLowerCase() === record.bookingId.toLowerCase()) ||
+          (record.bookingKode && b.kode.toLowerCase() === record.bookingKode.toLowerCase())
+      );
+
+      if (originBooking) {
+        originBooking.isTodayPickup = false;
+        originBooking.sisaPelunasan = 0;
+        originBooking.riwayat = [
+          {
+            waktu: nowStr,
+            user: "Admin Toko",
+            aksi: `Serah Terima Transaksi ${record.kode} Berhasil`,
+            catatan: `Barang fisik telah diserahkan (Sudah diambil). Jaminan: ${jaminanFisik.trim()}. Sisa sewa LUNAS.`,
+          },
+          ...(originBooking.riwayat || []),
+        ];
+        saveOrUpdateBooking(originBooking);
+      }
+    }
+
     setIsConfirmOpen(false);
     onSuccess(updated);
     onClose();

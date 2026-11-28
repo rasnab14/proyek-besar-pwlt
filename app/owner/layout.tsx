@@ -1,6 +1,7 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import MobileNav from "@/components/mobile/MobileNav";
 import PageTransition from "@/components/transitions/PageTransition";
+import RouteProgressBar from "@/components/transitions/RouteProgressBar";
 
 export default function OwnerLayout({
   children,
@@ -9,6 +10,7 @@ export default function OwnerLayout({
 }) {
   return (
     <div className="app-layout">
+      <RouteProgressBar />
       <MobileNav role="owner" />
       <Sidebar role="owner" />
       <div className="app-main">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import CountUp from "@/components/transitions/CountUp";
 import "./admin-dashboard.css";
 
 export default function DashboardAdminPage() {
@@ -66,7 +67,7 @@ export default function DashboardAdminPage() {
               </svg>
             </div>
           </div>
-          <div className="kpi-value">3</div>
+          <div className="kpi-value"><CountUp end={3} /></div>
           <div className="kpi-desc">3 Selesai (siap sewa) · 2 Dibatalkan</div>
         </div>
 
@@ -82,7 +83,7 @@ export default function DashboardAdminPage() {
               </svg>
             </div>
           </div>
-          <div className="kpi-value">4</div>
+          <div className="kpi-value"><CountUp end={4} /></div>
           <div className="kpi-bottom-row">
             <span className="kpi-desc">1 sudah diambil</span>
             {/* Sparkline curve */}
@@ -103,7 +104,7 @@ export default function DashboardAdminPage() {
               </svg>
             </div>
           </div>
-          <div className="kpi-value">6</div>
+          <div className="kpi-value"><CountUp end={6} /></div>
           <div className="kpi-bottom-row">
             <span className="kpi-desc">2 sudah dikembalikan</span>
             <svg className="sparkline" viewBox="0 0 80 24" fill="none">
@@ -124,7 +125,7 @@ export default function DashboardAdminPage() {
               </svg>
             </div>
           </div>
-          <div className="kpi-value">2</div>
+          <div className="kpi-value"><CountUp end={2} /></div>
           <div className="kpi-bottom-row">
             <span className="kpi-alert-tag">• Perlu tindak lanjut</span>
             <svg className="sparkline" viewBox="0 0 80 24" fill="none">

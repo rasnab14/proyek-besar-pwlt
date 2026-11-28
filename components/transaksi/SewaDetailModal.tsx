@@ -76,6 +76,19 @@ export function SewaDetailModal({
             </div>
           </div>
 
+          {/* Relasi Booking Asal (§F.1.B) */}
+          {record.tipeAsal === "booking" && (
+            <div style={{ padding: "8px 12px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: "8px", fontSize: "12.5px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#1D4ED8", fontWeight: 600 }}>Relasi Booking Asal:</span>
+                <span style={{ fontWeight: 700, color: "#1E40AF" }}>{record.bookingKode || record.bookingId}</span>
+              </div>
+              <span style={{ fontSize: "11px", color: "#2563EB", background: "#DBEAFE", padding: "2px 8px", borderRadius: "4px", fontWeight: 600 }}>
+                Tersinkronisasi Otomatis
+              </span>
+            </div>
+          )}
+
           {/* Customer & Period Grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "13px" }}>
             <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", padding: "12px", borderRadius: "8px" }}>
@@ -102,7 +115,7 @@ export function SewaDetailModal({
             <span style={{ fontSize: "12.5px", fontWeight: 600, color: "#0F172A", display: "block", marginBottom: "6px" }}>
               Barang Sewa / Paket
             </span>
-            <div style={{ border: "1px solid #E2E8F0", borderRadius: "8px", overflow: "hidden" }}>
+            <div style={{ border: "1px solid #CBD5E1", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(15, 23, 42, 0.05)" }}>
               <table className="tx-table" style={{ fontSize: "12.5px" }}>
                 <thead>
                   <tr>

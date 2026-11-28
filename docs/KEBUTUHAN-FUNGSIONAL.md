@@ -262,6 +262,29 @@ F. Pengelolaan Transaksi
 •	4 Kartu Ringkasan (KPI): Sedang Disewa (transaksi aktif di pelanggan), Belum Diambil (transaksi yang menunggu serah terima barang), Belum Lunas (transaksi dengan sisa tagihan beserta total nominalnya), dan Sudah Lunas (transaksi yang seluruh tagihan sewanya telah lunas Rp 0 sisa). Status keterlambatan dan perhitungan denda dikelola secara eksklusif pada menu Pengembalian.
 •	Status Pengambilan: Belum Diambil (barang fisik masih di toko) dan Sudah Diambil (barang fisik telah diserahterimakan ke pelanggan).
 •	Status Transaksi: Menggunakan indikator status yang tegas, yaitu Belum Lunas (masih terdapat sisa tagihan yang harus dilunasi saat serah terima) dan Lunas (seluruh biaya sewa telah tuntas Rp 0 sisa), tanpa kolom pembayaran terpisah yang redundan pada tabel transaksi. Pemantauan keterlambatan, denda, dan kondisi fisik pengembalian unit dikelola khusus pada menu Pengembalian.
+•	Struktur Kolom AKSI Tabel Transaksi Penyewaan secara Dinamis:
+	Sistem menampilkan susunan tombol aksi secara dinamis pada setiap baris data tabel transaksi penyewaan berdasarkan sumber transaksi (asal pemesanan) dan status serah terima barang:
+	a. Transaksi Langsung (Walk-In) tanpa Booking, Belum Serah Terima (Status: Belum Diambil):
+		Menyediakan 3 tombol aksi berurutan: Detail, Ubah, dan Hapus.
+		- Detail: Membuka modal ringkasan lengkap data transaksi penyewaan. Tombol 'Cetak Struk' dipindahkan dan disediakan secara eksklusif di dalam modal Detail (bukan sebagai tombol terpisah pada baris tabel) agar tabel utama tetap ringkas dan bersih.
+		- Ubah: Mengarahkan Admin kembali ke formulir transaksi langsung (`/admin/transaksi/sewa/baru?id=[id]`) dengan seluruh data transaksi dan keranjang belanja terisi kembali (pre-filled) untuk disunting sebelum serah terima. Ketersediaan stok disesuaikan secara real-time.
+		- Hapus: Memungkinkan penghapusan transaksi langsung sebelum serah terima melalui dialog konfirmasi ringkas. Seluruh stok produk yang sebelumnya dialokasikan otomatis dikembalikan secara utuh ke ketersediaan toko tanpa risiko penambahan stok ganda.
+	b. Transaksi yang Berasal dari Booking, Belum Serah Terima (Status: Belum Diambil):
+		Menyediakan 3 tombol aksi berurutan: Serah Terima, Ubah, dan Detail.
+		- Serah Terima: Membuka formulir serah terima untuk mencatat jenis identitas jaminan fisik dan memproses pelunasan sisa tagihan di kasir toko.
+		- Ubah: Mengarahkan Admin ke formulir untuk mengubah data transaksi yang belum diserahterimakan. Setiap perubahan produk, kuantitas, tanggal sewa, durasi, dan total harga secara otomatis disinkronkan dua arah dengan data booking asal di sistem, serta memperbarui alokasi stok pada periode sewa terbaru.
+		- Detail: Menampilkan rincian transaksi, informasi relasi booking asal (kode booking), dan tombol Cetak Struk.
+	c. Setelah Serah Terima (Status: Sudah Diambil):
+		Sistem secara otomatis mengubah daftar aksi menjadi HANYA 1 tombol aksi: Detail.
+		- Aksi Serah Terima tidak boleh muncul kembali.
+		- Aksi Ubah dan Hapus tidak tersedia melalui aksi biasa guna menjamin keamanan dan integritas transaksi aktif.
+		- Detail tetap dapat dibuka untuk melihat informasi transaksi dan mencetak struk.
+		- Status serah terima tersimpan secara permanen dan konsisten saat halaman dimuat ulang.
+		- Stok produk TIDAK otomatis dikembalikan saat serah terima, melainkan tetap dialokasikan hingga proses pengembalian fisik dilakukan melalui menu Pengembalian.
+•	Integritas dan Sinkronisasi Booking, Transaksi, dan Stok:
+	- Booking yang telah dikonversi menjadi transaksi penyewaan dicegah dari menduplikasi alokasi stok dengan transaksi aktifnya (single source allocation).
+	- Booking yang dibatalkan atau dihapus sebelum menjadi transaksi dilarang keras masuk ke menu Transaksi Penyewaan.
+	- Seluruh validasi status (pencegahan ubah/hapus setelah serah terima) diterapkan pada tingkat data/store logic, bukan hanya menyembunyikan tombol antarmuka (frontend).
 11.	Sistem menyediakan detail transaksi penyewaan beserta informasi jaminan, rincian barang, dan riwayat pembayarannya.
 12.	Sistem menyediakan pencarian dan penyaringan transaksi berdasarkan kode transaksi, pelanggan, periode transaksi, dan status transaksi.
 13.	Sistem menyediakan Formulir Serah Terima Barang pada menu Transaksi Penyewaan yang dapat diakses melalui tombol 'Serah Terima' pada tabel transaksi maupun modal detail transaksi ketika status pengambilan masih 'Belum Diambil':

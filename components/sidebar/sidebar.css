@@ -33,8 +33,8 @@
   flex-shrink: 0;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  /* Smooth, deliberate expansion & collapse easing */
-  transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1), padding 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Fast, responsive, and smooth expansion & collapse easing */
+  transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1), padding 240ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: width;
 }
 
@@ -51,7 +51,7 @@
     height: 100dvh;
     pointer-events: none;
     visibility: hidden;
-    transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1), flex-basis 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1), flex-basis 240ms cubic-bezier(0.16, 1, 0.3, 1);
     will-change: width, flex-basis;
   }
 
@@ -68,9 +68,12 @@
   .side.collapsed {
     width: 62px;
     flex: 0 0 62px;
-    padding: 16px 6px 16px;
+    padding: 14px 6px 12px;
     overflow-y: auto;
     scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   .side.collapsed::-webkit-scrollbar {
@@ -533,12 +536,28 @@
    ========================================================================== */
 @media (min-width: 768px) {
   /* ─── Collapsed State (62px - Slim & Compact) ─── */
+  .side.collapsed {
+    width: 62px;
+    flex: 0 0 62px;
+    padding: 14px 6px 12px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .side.collapsed::-webkit-scrollbar {
+    display: none;
+  }
+
   .side.collapsed .side-brand {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 10px;
+    flex-shrink: 0;
   }
 
   .side.collapsed .side-logo-circle {
@@ -554,16 +573,21 @@
   }
 
   .side.collapsed .side-nav {
-    flex: 0 0 auto;
-    overflow-y: visible;
-    gap: 8px;
-    padding-right: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: hidden;
+    gap: clamp(6px, 1.8vh, 22px);
+    padding: 6px 0;
+    min-height: 0;
   }
 
   .side.collapsed .side-nav-link {
     justify-content: center;
     padding: 0;
     min-height: 38px;
+    height: 38px;
   }
 
   .side.collapsed .side-nav-link.is-active::before {
@@ -575,6 +599,7 @@
     justify-content: center;
     padding: 0;
     min-height: 38px;
+    height: 38px;
   }
 
   .side.collapsed .side-parent-btn.is-active-parent::before {
@@ -606,30 +631,51 @@
   }
 
   .side.collapsed .side-bottom-section {
-    margin-top: 14px;
-    margin-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 4px;
     flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .side.collapsed .side-collapsed-logout-wrap {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
   }
 
   .side.collapsed .side-collapsed-divider {
     width: 32px;
     height: 1px;
     background: rgba(255, 255, 255, 0.12);
-    margin: 0 auto 10px;
+    margin: 8px auto 8px;
   }
 
   /* ─── Expanded State (300px) ─── */
+  .side.expanded {
+    width: 300px;
+    flex: 0 0 300px;
+    padding: 18px 14px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
   .side.expanded .side-nav {
     flex: 1 1 0%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     gap: 4px;
+    overflow-y: auto;
   }
 
   .side.expanded .side-bottom-section {
     margin-top: auto;
+    margin-bottom: 0;
+    flex: 0 0 auto;
   }
 
   .side.expanded .side-collapsed-logout-wrap {
@@ -647,7 +693,7 @@
   .side.expanded .side-brand-info {
     display: flex;
     opacity: 1;
-    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+    transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
   }
 
   .side.expanded .side-pin-btn {
@@ -679,13 +725,13 @@
   .side.expanded .side-chevron-box {
     display: flex;
     opacity: 1;
-    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+    transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
   }
 
   .side.expanded .side-label {
     display: inline-block;
     opacity: 1;
-    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+    transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
   }
 
   .side.expanded .side-profile {
@@ -704,13 +750,13 @@
   .side.expanded .side-profile-meta {
     display: flex;
     opacity: 1;
-    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+    transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
   }
 
   .side.expanded .side-logout-btn {
     display: inline-block;
     opacity: 1;
-    transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+    transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
   }
 }
 

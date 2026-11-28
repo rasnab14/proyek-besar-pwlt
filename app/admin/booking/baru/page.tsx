@@ -33,6 +33,13 @@ import {
   BookingRecord,
   BookingItem,
 } from "@/components/booking";
+import {
+  getStoredTransaksiSewa,
+  saveOrUpdateTransaksiSewa,
+  getTransaksiByIdOrKode,
+  TransaksiSewaRecord,
+  SewaItem,
+} from "@/components/transaksi";
 
 // Deterministic default dates for safe SSR hydration matching
 const DEFAULT_BOOKING_DATE = "2026-11-27";
@@ -41,9 +48,12 @@ const DEFAULT_RENTAL_START = "2026-11-30";
 function BookingFormInner() {
   const searchParams = useSearchParams();
   const editId = searchParams.get("id") || searchParams.get("edit");
+  const searchTransaksiId = searchParams.get("transaksiId");
 
-  // ─── Existing Draft Lookup ───
+  // ─── Existing Draft Lookup & Linked Transaksi ───
   const [existingDraft, setExistingDraft] = useState<BookingRecord | null>(null);
+  const [linkedTxRecord, setLinkedTxRecord] = useState<TransaksiSewaRecord | null>(null);
+  const [isAlreadyHandedOver, setIsAlreadyHandedOver] = useState(false);
   const [isDraftLoaded, setIsDraftLoaded] = useState(false);
 
   // ─── Customer State ───
@@ -72,28 +82,110 @@ function BookingFormInner() {
   const [isConfirmBookingOpen, setIsConfirmBookingOpen] = useState(false);
   const [toastError, setToastError] = useState<string | null>(null);
 
-  // ─── Load Existing Draft Data on Mount if editId is provided (§1, §2, §4) ───
+  // ─── Load Existing Draft Data on Mount if editId or transaksiId is provided (§1, §2, §4) ───
   useEffect(() => {
-    if (editId && !isDraftLoaded) {
-      const draft = getBookingByIdOrCode(editId);
+    if ((editId || searchTransaksiId) && !isDraftLoaded) {
+      let draft = editId ? getBookingByIdOrCode(editId) : undefined;
+      let tx = searchTransaksiId ? getTransaksiByIdOrKode(searchTransaksiId) : undefined;
+
+      // Jika editId mengarah ke kode transaksi (misal TS-0413)
+      if (!draft && editId) {
+        const foundTx = getTransaksiByIdOrKode(editId);
+        if (foundTx) {
+          tx = foundTx;
+          if (foundTx.bookingId || foundTx.bookingKode) {
+            draft = getBookingByIdOrCode(foundTx.bookingId || foundTx.bookingKode || "");
+          }
+        }
+      }
+
+      // Cari relasi transaksi jika belum ketemu
+      if (!tx && draft) {
+        const allTx = getStoredTransaksiSewa();
+        tx = allTx.find(
+          (t) =>
+            (t.bookingId && t.bookingId.toLowerCase() === draft!.id.toLowerCase()) ||
+            (t.bookingKode && t.bookingKode.toLowerCase() === draft!.kode.toLowerCase())
+        );
+      }
+
+      // Jika transaksi sudah diserahterimakan, blokir aksi Ubah (§F.1.C & Poin 3)
+      if (tx && tx.statusPengambilan === "sudah_diambil") {
+        setIsAlreadyHandedOver(true);
+        setLinkedTxRecord(tx);
+        setIsDraftLoaded(true);
+        return;
+      }
+
+      if (tx) {
+        setLinkedTxRecord(tx);
+      }
+
+      // Jika draft belum ada di store tetapi ada data transaksi relasi, buatkan draft representatif
+      if (!draft && tx) {
+        draft = {
+          id: tx.bookingId || `bk-${tx.id}`,
+          kode: tx.bookingKode || `BK-${tx.kode.replace(/[^0-9]/g, "")}`,
+          pelanggan: {
+            nama: tx.pelanggan.nama,
+            telepon: tx.pelanggan.telepon,
+            alamat: tx.pelanggan.alamat,
+          },
+          items: tx.items.map((it) => ({
+            id: it.id,
+            nama: it.nama,
+            tipe: it.tipe,
+            kategori: it.kategori,
+            jumlah: it.jumlah,
+            hargaPerHari: it.hargaPerHari,
+            subtotal: it.subtotal,
+            itemsPaket: it.rincianPaket,
+          })),
+          tanggalBooking: tx.waktuDibuat ? tx.waktuDibuat.split(" ")[0] : DEFAULT_BOOKING_DATE,
+          tanggalMulaiSewa: tx.tglMulai,
+          tanggalPengambilan: tx.tglMulai,
+          jamPengambilan: "09:00 WIB",
+          durasiHari: tx.durasiHari,
+          tanggalSelesaiSewa: tx.tglSelesai,
+          tanggalPengembalian: tx.tglSelesai,
+          jamPengembalian: "20:00 WIB",
+          totalBiaya: tx.totalTagihan,
+          dpPersen: tx.totalTagihan > 0 ? Math.round((tx.dpNominal / tx.totalTagihan) * 100) : 0,
+          dpNominal: tx.dpNominal,
+          dpStatus: tx.dpNominal > 0 ? "lunas" : "tidak_perlu",
+          dpMetode: tx.metodePelunasan || "tunai",
+          sisaPelunasan: tx.sisaTagihan,
+          status: "selesai",
+          dibuatOleh: tx.dibuatOleh || "Staf Admin",
+          waktuDibuat: tx.waktuDibuat || "Hari Ini",
+          riwayat: [],
+        };
+      }
+
       if (draft) {
         setExistingDraft(draft);
         setCreatedBookingCode(draft.kode);
 
         // 1. Pelanggan
         const matchCust = customers.find(
-          (c) => c.nama.toLowerCase() === draft.pelanggan.nama.toLowerCase()
+          (c) => c.nama.toLowerCase() === draft!.pelanggan.nama.toLowerCase()
         );
         if (matchCust) {
           setSelectedCustomer(matchCust);
         } else {
+          const custId = `cust-${draft.pelanggan.nama.toLowerCase().replace(/[^a-z0-9]/g, "") || "user"}`;
           const newCust: CustomerData = {
-            id: `cust-${Date.now()}`,
+            id: custId,
             nama: draft.pelanggan.nama,
             telepon: draft.pelanggan.telepon,
             alamat: draft.pelanggan.alamat,
           };
-          setCustomers((prev) => [newCust, ...prev]);
+          setCustomers((prev) => {
+            if (prev.some((c) => c.id === custId || c.nama.toLowerCase() === draft!.pelanggan.nama.toLowerCase())) {
+              return prev;
+            }
+            return [newCust, ...prev];
+          });
           setSelectedCustomer(newCust);
         }
 
@@ -132,7 +224,7 @@ function BookingFormInner() {
 
         setIsDraftLoaded(true);
       }
-    } else if (!editId) {
+    } else if (!editId && !searchTransaksiId) {
       // Sync client-side actual current date on mount for new booking
       const today = getTodayString();
       if (today && today !== DEFAULT_BOOKING_DATE) {
@@ -140,7 +232,7 @@ function BookingFormInner() {
         setTanggalMulaiSewa(addDays(today, 3));
       }
     }
-  }, [editId, isDraftLoaded, customers]);
+  }, [editId, searchTransaksiId, isDraftLoaded, customers]);
 
   // ─── Derived Calculations ───
   const hDiff = useMemo(() => {
@@ -158,15 +250,16 @@ function BookingFormInner() {
     return calculateEndDate(tanggalMulaiSewa, durasiHari);
   }, [tanggalMulaiSewa, durasiHari]);
 
-  // Base stock ketersediaan per rentang tanggal pemesanan (mengecualikan booking yang sedang diubah agar tidak double-counted)
+  // Base stock ketersediaan per rentang tanggal pemesanan (mengecualikan booking & transaksi yang sedang diubah agar tidak double-counted)
   const baseProducts = useMemo(() => {
     return calculatePeriodBaseStock(
       MOCK_PRODUCTS,
       tanggalMulaiSewa,
       tanggalSelesaiSewa,
-      editId || undefined
+      existingDraft?.id || (editId ? editId : undefined),
+      linkedTxRecord?.id || (searchTransaksiId ? searchTransaksiId : undefined)
     );
-  }, [tanggalMulaiSewa, tanggalSelesaiSewa, editId]);
+  }, [tanggalMulaiSewa, tanggalSelesaiSewa, existingDraft, editId, linkedTxRecord, searchTransaksiId]);
 
   // Ketersediaan dinamis real-time (base stock dikurangi item & paket di dalam keranjang)
   const { dynamicProducts, remainingSingleStockMap, remainingPackageStockMap } = useMemo(() => {
@@ -402,6 +495,70 @@ function BookingFormInner() {
     const finishedRecord = buildBookingRecord("selesai");
     saveOrUpdateBooking(finishedRecord);
 
+    // Sinkronisasi otomatis ke transaksi penyewaan terkait jika ada (§F.1.B & Poin 2 & Poin 4)
+    const allTx = getStoredTransaksiSewa();
+    const targetTx =
+      linkedTxRecord ||
+      (searchTransaksiId ? getTransaksiByIdOrKode(searchTransaksiId) : undefined) ||
+      allTx.find(
+        (t) =>
+          (t.bookingId && t.bookingId.toLowerCase() === finishedRecord.id.toLowerCase()) ||
+          (t.bookingKode && t.bookingKode.toLowerCase() === finishedRecord.kode.toLowerCase())
+      );
+
+    if (targetTx && targetTx.statusPengambilan === "belum_diambil") {
+      const formatShort = (dStr: string) => {
+        if (!dStr) return "-";
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+        const d = new Date(dStr);
+        if (isNaN(d.getTime())) return dStr;
+        return `${d.getDate()} ${months[d.getMonth()]}`;
+      };
+
+      const barangSummary = cart.map((it) => `${it.nama} ×${it.jumlah}`).join(", ");
+      const sisa = Math.max(0, totalBiaya - nominalDpDisepakati);
+
+      const updatedTx: TransaksiSewaRecord = {
+        ...targetTx,
+        pelanggan: {
+          nama: selectedCustomer?.nama || targetTx.pelanggan.nama,
+          telepon: selectedCustomer?.telepon || targetTx.pelanggan.telepon,
+          alamat: selectedCustomer?.alamat || targetTx.pelanggan.alamat,
+        },
+        tglMulai: tanggalMulaiSewa,
+        tglSelesai: tanggalSelesaiSewa,
+        durasiHari,
+        periodeDisplay: `${formatShort(tanggalMulaiSewa)} - ${formatShort(tanggalSelesaiSewa)}`,
+        tglKembaliDisplay: `${formatShort(tanggalSelesaiSewa)} (s.d. 21.00)`,
+        items: cart.map((it) => ({
+          id: it.id,
+          nama: it.nama,
+          tipe: it.tipe === "paket" ? "paket" : "satuan",
+          kategori: it.kategori,
+          jumlah: it.jumlah,
+          hargaPerHari: it.hargaPerHari,
+          subtotal: it.subtotal,
+          rincianPaket: it.itemsPaket,
+        })),
+        barangDiPelanggan: barangSummary,
+        totalTagihan: totalBiaya,
+        dpNominal: nominalDpDisepakati,
+        sisaTagihan: sisa,
+        status: sisa === 0 ? "lunas" : "belum_lunas",
+        statusPembayaran: sisa === 0 ? "lunas" : "belum_lunas",
+        riwayat: [
+          {
+            waktu: new Date().toISOString().replace("T", " ").substring(0, 16),
+            user: "Admin Toko",
+            aksi: "Data Transaksi Diperbarui Sinkron dari Form Booking",
+            catatan: `Perubahan tanggal sewa (${tanggalMulaiSewa} s.d. ${tanggalSelesaiSewa}), durasi ${durasiHari} hari, ${cart.length} item, total: Rp ${totalBiaya.toLocaleString("id-ID")}.`,
+          },
+          ...(targetTx.riwayat || []),
+        ],
+      };
+      saveOrUpdateTransaksiSewa(updatedTx);
+    }
+
     setIsSuccessDraft(false);
     setIsSuccessOpen(true);
   };
@@ -412,8 +569,37 @@ function BookingFormInner() {
     setNominalDpDisepakati(0);
     setDpDiterimaSekarang(0);
     setExistingDraft(null);
+    setLinkedTxRecord(null);
     setCreatedBookingCode(`BK-0${Math.floor(Math.random() * 800 + 100)}`);
   };
+
+  if (isAlreadyHandedOver) {
+    return (
+      <div className="main">
+        <div style={{ maxWidth: "560px", margin: "60px auto", padding: "32px", background: "#FFFFFF", borderRadius: "12px", border: "1px solid #FECACA", textAlign: "center", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#991B1B", margin: "0 0 8px" }}>Transaksi Telah Diserahterimakan</h2>
+          <p style={{ fontSize: "13.5px", color: "#475569", margin: "0 0 24px", lineHeight: 1.6 }}>
+            Booking / Transaksi <strong>{linkedTxRecord?.kode || createdBookingCode}</strong> telah melewati proses serah terima barang (Status: Sudah Diambil). Sesuai ketentuan operasional (§F.1.C &amp; Poin 3), transaksi yang sudah diserahterimakan tidak dapat diubah lagi.
+          </p>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+            <Link href="/admin/transaksi/sewa" className="btn pri sm" style={{ background: "#0284C7" }}>
+              ← Kembali ke Transaksi Penyewaan
+            </Link>
+            <Link href="/admin/booking" className="btn sm">
+              Daftar Booking
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="main">
@@ -569,6 +755,7 @@ function BookingFormInner() {
         dpNominal={dpDiterimaSekarang}
         sisaPembayaran={Math.max(0, totalBiaya - dpDiterimaSekarang)}
         isDraft={isSuccessDraft}
+        returnToTransaksi={Boolean(linkedTxRecord || searchTransaksiId)}
         onReset={handleResetForm}
       />
 

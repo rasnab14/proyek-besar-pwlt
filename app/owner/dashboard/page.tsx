@@ -489,12 +489,10 @@ export default function OwnerDashboardPage() {
               <span className="kondisi-val">38 unit</span>
             </div>
 
-            <div
+            <Link
+              href="/owner/pengembalian"
               className="kondisi-row"
-              onClick={() => {
-                setSelectedKondisiTitle("Jadwal Dikembalikan Hari Ini (2 Transaksi)");
-                setActiveModal("kondisi-barang");
-              }}
+              style={{ textDecoration: "none" }}
               title="Klik untuk melihat transaksi pengembalian"
             >
               <span className="pill-badge pill-green">
@@ -502,7 +500,7 @@ export default function OwnerDashboardPage() {
                 Dikembalikan hari ini
               </span>
               <span className="kondisi-val">2 transaksi</span>
-            </div>
+            </Link>
 
             <div
               className="kondisi-row"

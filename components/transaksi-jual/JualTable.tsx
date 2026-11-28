@@ -45,22 +45,22 @@ export function JualTable({
       style={{
         background: "#FFFFFF",
         borderRadius: "10px",
-        border: "1px solid #E2E8F0",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+        border: "1px solid #CBD5E1",
+        boxShadow: "0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04)",
         overflow: "hidden",
       }}
     >
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left" }}>
+        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, fontSize: "13.5px", textAlign: "left" }}>
           <thead>
-            <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #E2E8F0", color: "#64748B", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-              <th style={{ padding: "12px 16px" }}>KODE</th>
-              <th style={{ padding: "12px 16px" }}>TANGGAL</th>
-              <th style={{ padding: "12px 16px" }}>PELANGGAN</th>
-              <th style={{ padding: "12px 16px" }}>BARANG</th>
-              <th style={{ padding: "12px 16px" }}>TOTAL</th>
-              <th style={{ padding: "12px 16px" }}>STATUS</th>
-              <th style={{ padding: "12px 16px", textAlign: "right" }}>AKSI</th>
+            <tr style={{ background: "#F1F5F9", borderBottom: "2px solid #CBD5E1", color: "#1E293B", fontSize: "11.5px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>KODE</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>TANGGAL</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>PELANGGAN</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>BARANG</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>TOTAL</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1" }}>STATUS</th>
+              <th style={{ padding: "13px 18px", borderBottom: "2px solid #CBD5E1", textAlign: "right" }}>AKSI</th>
             </tr>
           </thead>
           <tbody>
@@ -72,57 +72,58 @@ export function JualTable({
                 <tr
                   key={r.id}
                   style={{
-                    background: isEven ? "#FFFFFF" : "#FAFAFA",
-                    borderBottom: "1px solid #F1F5F9",
+                    background: isEven ? "#FFFFFF" : "#F8FAFC",
+                    borderBottom: "1px solid #E2E8F0",
                     transition: "background 0.15s ease",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "#F0F9FF")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = isEven ? "#FFFFFF" : "#FAFAFA")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = isEven ? "#FFFFFF" : "#F8FAFC")}
                 >
                   {/* KODE */}
-                  <td style={{ padding: "14px 16px", fontWeight: 700, color: "#0284C7" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", fontWeight: 700, color: "#0284C7" }}>
                     {r.kode}
                   </td>
 
                   {/* TANGGAL */}
-                  <td style={{ padding: "14px 16px", color: "#475569" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", color: "#475569" }}>
                     {r.waktu}
                   </td>
 
                   {/* PELANGGAN */}
-                  <td style={{ padding: "14px 16px", fontWeight: 600, color: "#0F172A" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", fontWeight: 600, color: "#0F172A" }}>
                     {r.pelanggan.nama || "Pelanggan Umum"}
                   </td>
 
                   {/* BARANG */}
-                  <td style={{ padding: "14px 16px", color: "#334155", maxWidth: "260px" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", color: "#334155", maxWidth: "260px" }}>
                     <span title={r.barangRingkasan} style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                       {r.barangRingkasan}
                     </span>
                   </td>
 
                   {/* TOTAL */}
-                  <td style={{ padding: "14px 16px", fontWeight: 700, color: "#0F172A" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A" }}>
                     {formatRupiah(r.total)}
                   </td>
 
                   {/* STATUS */}
-                  <td style={{ padding: "14px 16px" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0" }}>
                     {isSelesai ? (
                       <span
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
                           gap: "6px",
-                          background: "#DCFCE7",
-                          color: "#166534",
-                          padding: "3px 8px",
+                          background: "#ECFDF5",
+                          border: "1px solid #A7F3D0",
+                          color: "#065F46",
+                          padding: "3px 10px 3px 8px",
                           borderRadius: "9999px",
-                          fontSize: "11.5px",
+                          fontSize: "12px",
                           fontWeight: 600,
                         }}
                       >
-                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#16A34A" }}></span>
+                        <span style={{ width: "6.5px", height: "6.5px", borderRadius: "50%", background: "#10B981" }}></span>
                         Selesai · {r.metodeBayar.toUpperCase()}
                       </span>
                     ) : (
@@ -131,22 +132,23 @@ export function JualTable({
                           display: "inline-flex",
                           alignItems: "center",
                           gap: "6px",
-                          background: "#F1F5F9",
-                          color: "#64748B",
-                          padding: "3px 8px",
+                          background: "#FEF2F2",
+                          border: "1px solid #FECACA",
+                          color: "#991B1B",
+                          padding: "3px 10px 3px 8px",
                           borderRadius: "9999px",
-                          fontSize: "11.5px",
+                          fontSize: "12px",
                           fontWeight: 600,
                         }}
                       >
-                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#94A3B8" }}></span>
+                        <span style={{ width: "6.5px", height: "6.5px", borderRadius: "50%", background: "#EF4444" }}></span>
                         Dibatalkan
                       </span>
                     )}
                   </td>
 
                   {/* AKSI (Fleksibel: Read, Update, Delete) */}
-                  <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                  <td style={{ padding: "14px 18px", borderBottom: "1px solid #E2E8F0", textAlign: "right" }}>
                     <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                       {/* Read (Detail) */}
                       <button
