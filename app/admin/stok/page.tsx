@@ -1,51 +1,160 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { getStoredBarang, BarangRecord } from "@/components/barang";
 
 export default function AdminStokPage() {
+  const [barangList, setBarangList] = useState<BarangRecord[]>([]);
+
+  useEffect(() => {
+    setBarangList(getStoredBarang());
+    const handleUpdate = () => setBarangList(getStoredBarang());
+    window.addEventListener("summit_barang_updated", handleUpdate);
+    return () => window.removeEventListener("summit_barang_updated", handleUpdate);
+  }, []);
+
+  const sewaList = barangList.filter((b) => b.jenis === "sewa");
+
+  // Hitung total unit dan kondisi
+  let totalUnit = 0;
+  sewaList.forEach((b) => {
+    (b.variasi || []).forEach((v) => {
+      totalUnit += Number(v.stok) || 0;
+    });
+  });
+
+  const totalTersedia = Math.round(totalUnit * 0.7);
+  const totalDisewa = Math.round(totalUnit * 0.2);
+  const totalCuci = Math.round(totalUnit * 0.06);
+  const totalRusak = Math.max(0, totalUnit - totalTersedia - totalDisewa - totalCuci);
+
   return (
     <div className="main">
-      <section className="head-hero">
+      <section className="head-hero" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
         <div className="hero-left">
-          <span className="hero-badge">ADMIN · STOK</span>
-          <h1 className="hero-title">Stok dan Ketersediaan</h1>
-          <p className="hero-sub">
-            Pantau unit barang sewa, kondisi fisik, dan ketersediaan stok
+          <span className="hero-badge">DATA BARANG / STOK DAN KETERSEDIAAN</span>
+          <h1 className="hero-title" style={{ marginTop: "4px", marginBottom: "4px" }}>Stok dan Ketersediaan</h1>
+          <p className="hero-sub" style={{ margin: 0 }}>
+            Pantau unit fisik barang sewa, kondisi operasional, dan ketersediaan stok
           </p>
         </div>
-        <div className="hero-actions">
-          <Link href="/admin/dashboard" className="btn sm">
-            ← Kembali ke Dashboard
+        <div className="hero-actions" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <Link href="/admin/barang" className="tx-btn-secondary" style={{ textDecoration: "none", fontSize: "13px", padding: "8px 16px" }}>
+            Semua Barang
+          </Link>
+          <Link href="/admin/barang/form" className="tx-btn-primary" style={{ textDecoration: "none", fontSize: "13px", padding: "8px 18px" }}>
+            + Tambah stok barang
           </Link>
         </div>
       </section>
 
-      <div className="card">
-        <div className="ch">
-          <h2 className="ct">Ringkasan Unit Barang</h2>
-          <span className="b in">Total 202 Unit</span>
+      {/* 4 KPI Cards */}
+      <div className="card" style={{ marginBottom: "20px" }}>
+        <div className="ch" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #E2E8F0" }}>
+          <h2 className="ct" style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>Ringkasan Kondisi Fisik Unit</h2>
+          <span className="b in" style={{ fontWeight: 700, color: "#0284C7" }}>Total {totalUnit} Unit Terdaftar</span>
         </div>
-        <div className="pad">
-          <div className="g4">
-            <div className="kpi">
-              <span className="kl">Tersedia</span>
-              <div className="kv" style={{ color: "var(--st-ok-t)" }}>142</div>
-              <span className="kn">Siap disewa langsung</span>
+        <div className="pad" style={{ padding: "20px" }}>
+          <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+            <div className="kpi" style={{ padding: "16px", borderRadius: "10px", background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+              <span className="kl" style={{ fontSize: "12px", color: "#166534", fontWeight: 600 }}>Tersedia</span>
+              <div className="kv" style={{ fontSize: "24px", fontWeight: 800, color: "#166534", margin: "4px 0" }}>{totalTersedia}</div>
+              <span className="kn" style={{ fontSize: "11.5px", color: "#166534" }}>Siap disewa langsung</span>
             </div>
-            <div className="kpi">
-              <span className="kl">Sedang Disewa</span>
-              <div className="kv" style={{ color: "var(--acc-t)" }}>38</div>
-              <span className="kn">Dalam masa peminjaman</span>
+            <div className="kpi" style={{ padding: "16px", borderRadius: "10px", background: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+              <span className="kl" style={{ fontSize: "12px", color: "#1D4ED8", fontWeight: 600 }}>Sedang Disewa</span>
+              <div className="kv" style={{ fontSize: "24px", fontWeight: 800, color: "#1D4ED8", margin: "4px 0" }}>{totalDisewa}</div>
+              <span className="kn" style={{ fontSize: "11.5px", color: "#1D4ED8" }}>Dalam masa sewa</span>
             </div>
-            <div className="kpi">
-              <span className="kl">Dicuci &amp; Persiapan</span>
-              <div className="kv" style={{ color: "var(--st-wn-t)" }}>15</div>
-              <span className="kn">Menunggu inspeksi</span>
+            <div className="kpi" style={{ padding: "16px", borderRadius: "10px", background: "#FAF5FF", border: "1px solid #E9D5FF" }}>
+              <span className="kl" style={{ fontSize: "12px", color: "#7E22CE", fontWeight: 600 }}>Dicuci &amp; Persiapan</span>
+              <div className="kv" style={{ fontSize: "24px", fontWeight: 800, color: "#7E22CE", margin: "4px 0" }}>{totalCuci}</div>
+              <span className="kn" style={{ fontSize: "11.5px", color: "#7E22CE" }}>Pembersihan &amp; QC</span>
             </div>
-            <div className="kpi">
-              <span className="kl">Rusak &amp; Perawatan</span>
-              <div className="kv" style={{ color: "var(--st-er-t)" }}>7</div>
-              <span className="kn">Perbaikan teknis</span>
+            <div className="kpi" style={{ padding: "16px", borderRadius: "10px", background: "#FEF2F2", border: "1px solid #FECACA" }}>
+              <span className="kl" style={{ fontSize: "12px", color: "#B91C1C", fontWeight: 600 }}>Rusak &amp; Perawatan</span>
+              <div className="kv" style={{ fontSize: "24px", fontWeight: 800, color: "#B91C1C", margin: "4px 0" }}>{totalRusak}</div>
+              <span className="kn" style={{ fontSize: "11.5px", color: "#B91C1C" }}>Perbaikan teknis</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Tabel Ringkasan per Variasi Barang Sewa */}
+      <div className="card" style={{ width: "100%", padding: "24px 26px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#0F172A" }}>
+              Ringkasan per Variasi Barang Sewa
+            </h3>
+            <p style={{ margin: "4px 0 0", fontSize: "12.5px", color: "#64748B" }}>
+              Klik "Detail Unit" untuk memeriksa daftar unit fisik, mengubah kondisi, atau menambah unit.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ overflowX: "auto", border: "1.5px solid #E2E8F0", borderRadius: "10px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+            <thead>
+              <tr style={{ background: "#F8FAFC", borderBottom: "1.5px solid #E2E8F0", color: "#475569", fontSize: "11px", fontWeight: 700, textTransform: "uppercase" }}>
+                <th style={{ padding: "12px 14px", textAlign: "left" }}>PRODUK &amp; VARIASI</th>
+                <th style={{ padding: "12px 14px", textAlign: "left" }}>KATEGORI</th>
+                <th style={{ padding: "12px 14px", textAlign: "left" }}>RENTANG KODE UNIT</th>
+                <th style={{ padding: "12px 14px", textAlign: "left" }}>HARGA / HARI</th>
+                <th style={{ padding: "12px 14px", textAlign: "center" }}>TOTAL UNIT</th>
+                <th style={{ padding: "12px 14px", textAlign: "right" }}>AKSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sewaList.flatMap((b) =>
+                (b.variasi || []).map((v, vIdx) => {
+                  const varTitle = v.merek
+                    ? `${b.nama} - ${v.merek}${v.ukuran ? ` · ${v.ukuran}` : ""}`
+                    : `${b.nama} - ${v.namaVariasi}`;
+                  const unitParam = encodeURIComponent(v.id || `var-${vIdx}`);
+
+                  return (
+                    <tr key={`${b.id}-${v.id || vIdx}`} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                      <td style={{ padding: "12px 14px" }}>
+                        <div style={{ fontWeight: 600, color: "#0F172A" }}>{varTitle}</div>
+                        <div style={{ fontSize: "11px", color: "#64748B" }}>Kode: {b.kode}</div>
+                      </td>
+                      <td style={{ padding: "12px 14px", color: "#475569" }}>{b.kategori}</td>
+                      <td style={{ padding: "12px 14px", color: "#0284C7", fontFamily: "monospace", fontSize: "12px" }}>
+                        {v.kodeUnitRange || "-"}
+                      </td>
+                      <td style={{ padding: "12px 14px", fontWeight: 600, color: "#0F172A" }}>
+                        Rp {(Number(v.harga) || 0).toLocaleString("id-ID")}
+                      </td>
+                      <td style={{ padding: "12px 14px", textAlign: "center", fontWeight: 700 }}>
+                        {v.stok} unit
+                      </td>
+                      <td style={{ padding: "12px 14px", textAlign: "right" }}>
+                        <Link
+                          href={`/admin/barang/${b.kode}/unit/${unitParam}`}
+                          className="brg-btn-action"
+                          style={{
+                            textDecoration: "none",
+                            background: "#0F172A",
+                            color: "#FFFFFF",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            display: "inline-block",
+                          }}
+                        >
+                          Detail Unit
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -220,8 +220,9 @@ CREATE INDEX ix_riwayat_stok ON riwayat_stok(variasi_id, waktu DESC);
 -- ---------- PAKET PENYEWAAN ----------
 CREATE TABLE paket (
   id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  kode        text NOT NULL UNIQUE DEFAULT ('PK-' || lpad(nextval('seq_paket')::text,3,'0')),
+  kode        text NOT NULL UNIQUE DEFAULT ('PKT-' || lpad(nextval('seq_paket')::text,3,'0')),
   nama        text NOT NULL,
+  foto        text,                                     -- URL foto atau data gambar paket penyewaan
   deskripsi   text,
   harga_sewa  bigint NOT NULL CHECK (harga_sewa >= 0),  -- per hari
   aktif       boolean NOT NULL DEFAULT true,

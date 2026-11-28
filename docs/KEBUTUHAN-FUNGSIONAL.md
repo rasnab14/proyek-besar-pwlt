@@ -47,25 +47,25 @@ C. Pengelolaan Data Barang
 12.	Sistem menyediakan fitur penambahan jumlah unit Barang Sewa berdasarkan variasi barang yang dipilih. Setiap unit yang ditambahkan akan dibuat sebagai data unit tersendiri dengan kode unik secara otomatis.
 13.	Sistem menyediakan informasi harga jual dan jumlah stok untuk Barang Jual. Pengelolaan stok Barang Jual dilakukan berdasarkan kuantitas dan tidak memerlukan pencatatan unit fisik secara individual.
 14.	Sistem menyediakan fitur pencarian dan penyaringan data barang berdasarkan nama, kode, kategori, dan jenis barang.
-15.	Sistem menampilkan detail informasi barang yang dipilih.
+15.	Sistem menampilkan halaman Detail Barang (`/admin/barang/[kode]` dan `/owner/barang/[kode]`) yang memuat informasi umum produk (tanpa tombol ganti foto pada kartu informasi; penggantian foto dipusatkan pada formulir Ubah), informasi agregat "Rentang Unit Terdaftar" yang mencakup rentang seluruh variasi produk, 4 kartu KPI stok (Variasi, Total unit, Tersedia, dan Tidak siap), tabel variasi & ringkasan stok per spesifikasi dengan tombol aksi "Detail Unit", serta tabel riwayat pergerakan stok.
 16.	Sistem memberikan konfirmasi sebelum pengguna menghapus data barang.
 17.	Sistem mencegah penghapusan data barang yang masih memiliki keterkaitan dengan transaksi atau riwayat penting tanpa melalui mekanisme yang sesuai.
 18.	Sistem menyediakan pengelolaan Paket Penyewaan untuk mengelola kumpulan beberapa barang sewa yang ditawarkan dalam satu paket.
 19.	Sistem menyediakan submenu Paket Penyewaan untuk menampilkan dan mengelola data paket.
-20.	Sistem menyediakan fitur tambah, lihat, ubah, dan nonaktifkan data paket sesuai hak akses pengguna (bisa admin dan owner).
-21.	Sistem menyediakan informasi paket yang meliputi kode paket, nama paket, deskripsi, harga sewa paket, dan daftar barang penyusun paket.
-22.	Sistem memungkinkan Admin menentukan barang dan jumlah masing-masing barang yang termasuk dalam satu paket.
+20.	Sistem menyediakan fitur tambah, lihat, ubah, dan nonaktifkan data paket sesuai hak akses pengguna (bisa admin dan owner) melalui halaman mandiri Form Paket (`/admin/paket/form` dan `/owner/paket/form`).
+21.	Sistem menyediakan informasi paket yang meliputi kode paket, nama paket, foto/gambar paket, deskripsi, harga sewa paket, dan daftar barang penyusun paket. Kode paket dibuat secara otomatis berurutan (misalnya `PKT-001`, `PKT-002`, dst.) dan bersifat *read-only* bagi pengguna.
+22.	Sistem memungkinkan Admin dan Owner menentukan barang dan jumlah masing-masing barang yang termasuk dalam satu paket menggunakan jendela modal pemilihan barang (*visual product picker modal*) yang dilengkapi kotak pencarian live, penyaringan kategori, foto produk, spesifikasi variasi, ketersediaan stok, dan penambahan kuantitas.
 23.	Sistem hanya memungkinkan barang dengan jenis Barang Sewa untuk dimasukkan ke dalam Paket Penyewaan.
 24.	Sistem menyediakan fitur pencarian dan penyaringan paket berdasarkan kode paket dan nama paket.
 25.	Sistem menampilkan detail paket beserta daftar barang dan jumlah masing-masing barang di dalamnya.
 26.	Sistem menghubungkan data Paket Penyewaan dengan data barang penyusunnya sehingga perubahan data barang dapat diperhitungkan dalam pengelolaan stok dan ketersediaan.
 27.	Sistem mempertahankan informasi komposisi dan harga paket yang telah digunakan dalam booking atau transaksi agar perubahan paket tidak mengubah catatan transaksi sebelumnya.
-28.	Sistem menyediakan fitur unggah foto atau gambar produk pada formulir tambah dan ubah data barang untuk memberikan gambaran visual terhadap barang yang dikelola.
-29.	Sistem menampilkan foto produk pada halaman Semua Barang dan Detail Barang sehingga Admin dan Pemilik dapat mengenali produk dengan lebih mudah.
-30.	Sistem menyediakan pilihan spesifikasi Barang Sewa dalam bentuk kotak centang (misalnya merek, ukuran, kapasitas, dan jenis) yang menentukan kolom isian pada tabel variasi; kolom spesifikasi yang tidak dipilih tidak ditampilkan.
-31.	Sistem menyediakan fitur penambahan baris variasi pada formulir Barang Sewa, yang setiap barisnya memuat nilai spesifikasi, harga sewa, jumlah unit, dan rentang kode unit yang dibuat otomatis.
-32.	Sistem menyediakan fitur penambahan spesifikasi lain di luar spesifikasi bawaan dengan jumlah maksimal tiga spesifikasi tambahan per barang, dilengkapi validasi nama spesifikasi dan fitur penghapusan spesifikasi tambahan.
-33.	Sistem menampilkan daftar Paket Penyewaan dalam bentuk kartu yang memuat kode paket, nama paket, harga sewa, daftar barang penyusun, dan status paket, sehingga paket lebih mudah dikenali.
+28.	Sistem menyediakan fitur unggah foto atau gambar visual pada formulir barang maupun paket penyewaan (mendukung unggah berkas lokal JPG/PNG/WebP hingga 5 MB dengan pratinjau dan opsi hapus, serta dukungan tautan URL eksternal) untuk memberikan representasi visual yang jelas.
+29.	Sistem menampilkan foto produk pada halaman Semua Barang, Detail Barang, Detail Unit, dan kartu Paket Penyewaan sehingga pengguna dapat mengenali item dengan cepat.
+30.	Sistem menyediakan formulir Tambah/Ubah Barang dalam bentuk halaman mandiri (`/admin/barang/form` dan `/owner/barang/form`) dengan tata letak responsif (desktop, tablet, mobile), serta menyediakan pilihan spesifikasi Barang Sewa dalam bentuk kotak centang (merek, ukuran, kapasitas, dan jenis) yang secara langsung menyinkronkan kolom isian pada tabel variasi.
+31.	Sistem menyediakan fitur penambahan baris variasi pada formulir Barang Sewa, yang setiap barisnya memuat nilai spesifikasi sesuai kolom yang aktif, harga sewa, jumlah unit, dan rentang kode unit yang dibuat otomatis berlanjut tanpa bentrok.
+32.	Sistem menyediakan fitur penambahan spesifikasi lain di luar spesifikasi bawaan melalui tombol inline `+ Spesifikasi lain` dengan komponen input pill interaktif; penambahan spesifikasi kustom langsung menambahkan kolom baru pada kepala dan baris tabel variasi.
+33.	Sistem menampilkan daftar Paket Penyewaan dalam bentuk kartu (*card grid layout*) yang memuat foto paket, kode paket, status paket (Aktif/Nonaktif), nama paket, harga sewa per hari, daftar ringkasan barang penyusun beserta kuantitasnya, dan tombol aksi (Detail/ubah, Nonaktifkan/Aktifkan).
 
 D. Pengelolaan Stok dan Ketersediaan (Revisi)
 1.	Sistem menyediakan menu Stok dan Ketersediaan untuk mengelola serta memantau jumlah stok dan kondisi barang.
@@ -118,17 +118,17 @@ D. Pengelolaan Stok dan Ketersediaan (Revisi)
 27.	Sistem memperhitungkan penggunaan variasi barang yang sama apabila barang tersebut disewakan secara satuan maupun melalui Paket Penyewaan agar tidak terjadi pengalokasian stok secara berlebihan.
 28.	Sistem menampilkan rincian kebutuhan dan ketersediaan setiap variasi barang penyusun Paket Penyewaan ketika dilakukan pemeriksaan ketersediaan paket.
 29.	Sistem memperbarui alokasi stok setiap variasi barang penyusun paket ketika booking berstatus Selesai, transaksi penyewaan diproses, atau booking dibatalkan sesuai dengan kondisi transaksi.
-30.	Sistem menyediakan fitur Detail Unit pada setiap variasi Barang Sewa yang ditampilkan dalam Ringkasan per Variasi.
-31.	Sistem menampilkan halaman Detail Unit berdasarkan variasi barang yang dipilih, meliputi nama produk, merek, ukuran, kapasitas, jenis, dan spesifikasi lainnya sesuai karakteristik produk.
-32.	Sistem menampilkan seluruh unit fisik dari variasi barang yang dipilih dalam bentuk daftar atau tabel, dengan setiap unit ditampilkan pada baris tersendiri berdasarkan kode uniknya.
-33.	Sistem menampilkan informasi kondisi terkini setiap unit Barang Sewa, meliputi Tersedia, Disewa, Dicuci, Persiapan, Rusak, dan Perawatan.
-34.	Sistem menyediakan fitur untuk melihat detail setiap unit barang berdasarkan kode unit yang dipilih.
-35.	Sistem menyediakan fitur perubahan kondisi setiap unit Barang Sewa secara individual oleh Admin sesuai dengan hasil pemeriksaan atau kondisi fisik barang.
-36.	Sistem menyediakan pilihan perubahan kondisi unit barang sesuai dengan status operasional yang telah ditentukan, yaitu Tersedia, Disewa, Dicuci, Persiapan, Rusak, dan Perawatan.
-37.	Sistem mencatat setiap perubahan kondisi unit barang secara terpisah, termasuk kondisi sebelumnya, kondisi terbaru, waktu perubahan, dan pengguna yang melakukan perubahan.
-38.	Sistem memperbarui ringkasan jumlah stok berdasarkan perubahan kondisi setiap unit barang sehingga jumlah unit dalam setiap kategori kondisi selalu sesuai dengan data unit individual.
-39.	Sistem menyediakan fitur pencarian dan penyaringan unit barang berdasarkan kode unit dan kondisi barang pada halaman Detail Unit.
-40.	Sistem menyediakan navigasi kembali dari halaman Detail Unit ke halaman Stok dan Ketersediaan atau Ringkasan per Variasi.
+30.	Sistem menyediakan fitur Detail Unit pada setiap variasi Barang Sewa yang dapat diakses dari halaman Detail Barang maupun Stok dan Ketersediaan (`/admin/barang/[kode]/unit/[unit]` dan `/owner/barang/[kode]/unit/[unit]`).
+31.	Sistem menampilkan halaman Detail Unit berdasarkan variasi barang yang dipilih, meliputi foto produk, nama variasi, kode produk, rentang unit, harga sewa per hari, dan kartu profil spesifikasi lengkap (Produk, Merek, Ukuran, Kapasitas, Jenis, Karakteristik lain, Kategori, serta Unit dialokasikan booking).
+32.	Sistem menampilkan 7 (tujuh) kartu indikator metrik kondisi fisik unit pada bagian atas tabel unit, meliputi: Total unit, Tersedia (hijau), Disewa (biru), Dicuci (ungu), Persiapan (kuning/oranye), Rusak (merah), dan Perawatan (abu-abu).
+33.	Sistem menampilkan seluruh unit fisik dari variasi barang yang dipilih dalam bentuk tabel interaktif, di mana setiap unit ditampilkan pada satu baris tersendiri berdasarkan kode uniknya (misalnya `JKT009`, `JKT010`, dst.).
+34.	Sistem menampilkan informasi kondisi terkini, status alokasi (misalnya nomor transaksi sewa aktif atau alokasi kode booking), dan tanggal/waktu terakhir diperbarui beserta staf pengubah.
+35.	Sistem menyediakan tombol aksi "Detail" pada baris unit untuk melihat jendela popup modal informasi fisik dan riwayat alokasi unit tersebut.
+36.	Sistem menyediakan tombol aksi "Ubah kondisi" pada baris unit yang membuka modal dialog interaktif untuk memperbarui kondisi operasional (Tersedia, Disewa, Dicuci, Persiapan, Rusak, Perawatan) disertai kolom isian catatan hasil pemeriksaan fisik.
+37.	Sistem mencatat setiap perubahan kondisi unit barang secara otomatis ke dalam tabel Riwayat Variasi di bagian bawah halaman, mencakup waktu pembaruan, kode unit, rincian aktivitas perpindahan status kondisi, nama staf pengubah, dan catatan inspeksi.
+38.	Sistem memperbarui ringkasan jumlah stok dan kartu KPI secara langsung (real-time) berdasarkan perubahan kondisi setiap unit barang.
+39.	Sistem menyediakan fitur pencarian cepat berdasarkan kode unik unit fisik (misalnya `JKT012`) serta tombol filter pills kondisi fisik (Semua, Tersedia, Disewa, Dicuci, Persiapan, Rusak, Perawatan) lengkap dengan penghitung jumlah unit.
+40.	Sistem menyediakan navigasi kembali dari halaman Detail Unit ke halaman Detail Produk (`← Kembali ke Detail Produk`), halaman Semua Barang, serta Ringkasan per Variasi.
 
 E. Pengelolaan Booking
 1.	Sistem menyediakan menu Booking bagi Admin dan Owner untuk mencatat dan mengelola pemesanan barang sewa bagi periode sewa yang direncanakan melalui operasi CRUD (Create: membuat booking baru, Read: melihat daftar dan detail booking, Update: mengubah data booking, Delete: menghapus atau membatalkan booking sesuai ketentuan sistem).
