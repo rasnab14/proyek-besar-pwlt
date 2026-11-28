@@ -33,6 +33,8 @@ export interface BarangRecord {
   informasiSpesifikasi?: string; // e.g. "Waterproof, bahan ripstop"
   deskripsi: string;
   foto?: string;
+  sku?: string;
+  stokMinimum?: number;
   rentangHargaDisplay: string; // e.g. "Rp 25.000 – 35.000 / hari"
   totalStokDisplay: string; // e.g. "38 unit" | "64 pcs"
   ringkasanVariasi: string; // e.g. "5 variasi · ukuran S–XXL, 2 merek"

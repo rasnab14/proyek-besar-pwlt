@@ -90,14 +90,14 @@ export function DetailUnitContent({ kode, unitParam, role }: DetailUnitContentPr
       // Match by id or match by index or decodedParam
       let foundVar = varList.find((v) => v.id === decodedUnitParam || v.id === unitParam);
       if (!foundVar) {
-        // Try match by prefix/index or fallback
+        // Try match by prefix/index if passed as var-X
         if (decodedUnitParam.startsWith("var-")) {
           const idx = parseInt(decodedUnitParam.replace("var-", ""), 10);
           if (!isNaN(idx) && varList[idx]) foundVar = varList[idx];
         }
       }
       if (!foundVar) {
-        // Try match by merek or range
+        // Try match by merek, range, or namaVariasi
         foundVar = varList.find(
           (v) =>
             v.merek?.toLowerCase() === decodedUnitParam.toLowerCase() ||
@@ -105,9 +105,7 @@ export function DetailUnitContent({ kode, unitParam, role }: DetailUnitContentPr
             v.namaVariasi?.toLowerCase() === decodedUnitParam.toLowerCase()
         );
       }
-      if (!foundVar && varList.length > 0) {
-        foundVar = varList[0];
-      }
+      // If not found, strictly set to null so "Variasi Unit Tidak Ditemukan" is displayed without redirecting to another variation
       setVariasi(foundVar || null);
     }
   }, [kode, unitParam, decodedUnitParam]);

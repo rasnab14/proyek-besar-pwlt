@@ -443,16 +443,24 @@ Dibuka dari: Paket Penyewaan (“+ Tambah paket”).
 
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
-| Header halaman / isi | **+ Tambah stok** | Form Barang → `/admin/barang/form` |
-| Header halaman / isi | **Barang Jual** | Stok Barang Jual → `/admin/stok/jual` |
-| Baris tabel | **Detail Unit** (per baris, mis. Jaket, Tenda, Carrier …) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Riwayat** (per baris, mis. SPT001, SPT002) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Tandai siap** (baris SPT003) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Ubah kondisi** (baris JKT012) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
+| Header halaman / isi | **Penyesuaian stok** | Modal Penyesuaian Stok (tambah/kurang/koreksi opname kuantitas barang sewa maupun jual) |
+| Header halaman / isi | **+ Tambah stok** (Tab Sewa) | Form Barang → `/admin/barang/form` |
+| Header halaman / isi | **+ Tambah barang jual** (Tab Jual) | Form Barang Jual → `/admin/barang/form?jenis=jual` |
+| Header halaman / isi | **Barang Sewa** | Tab Barang Sewa (tampilan 4 KPI sewa, cek ketersediaan, ringkasan per variasi, dan unit individual) |
+| Header halaman / isi | **Barang Jual** | Tab Barang Jual (4 KPI jual, filter pills status, tabel stok kuantitas, aksi penyesuaian stok per baris, dan riwayat penyesuaian) |
+| Cek ketersediaan | **Periksa** | Menghitung dan menampilkan status kecukupan stok variasi penyusun paket atau satuan pada rentang tanggal sewa |
+| Baris tabel variasi | **Detail Unit** (per baris variasi) | Detail Unit → `/admin/barang/[kode]/unit/[unit]` (mengarah presisi ke variasi spesifik, mis. Rimba L ke range `JKT009–JKT016`) |
+| Baris tabel unit | **Tandai siap** (unit non-tersedia) | Mengubah status kondisi unit menjadi Tersedia |
+| Baris tabel unit | **Ubah kondisi** | Modal Ubah Kondisi Unit Cepat |
+| Baris tabel unit | **Detail Unit** | Detail Unit → `/admin/barang/[kode]/unit/[unit]` |
+| Baris tabel jual | **Penyesuaian stok** | Modal Penyesuaian Stok (pre-selected produk bersangkutan) |
+| Filter tabel jual | **Pills Semua / Aman / Menipis / Habis** | Menyaring tabel barang jual secara instan berdasarkan status ambang batas minimum stok |
 
-- Tab **Barang Jual** membuka Stok Barang Jual (`/admin/stok/jual`). **+ Tambah stok** membuka Form Barang. Semua tombol pada tabel unit (**Riwayat**, **Tandai siap**, **Ubah kondisi**) membuka Detail Unit (di desain statis, tombolnya hanya berbeda label sesuai kondisi unit).
+- Halaman memuat 2 tab utama:
+  1. **Tab Barang Sewa**: 4 KPI metrik sewa (Total unit sewa, Tersedia, Disewa, Tidak siap), bagian **Cek ketersediaan berdasarkan tanggal dan variasi** dengan status Cukup/Kurang, tabel **Ringkasan per variasi** dengan filter kategori/merek/ukuran/kapasitas/jenis/kondisi, serta bagian **Unit individual yang memerlukan perhatian operasional**.
+  2. **Tab Barang Jual**: 4 KPI metrik jual (Produk jual [dark mesh gradient], Total stok, Stok menipis / habis, Terjual bulan ini), kotak pencarian produk/SKU, filter pills status stok, tabel stok per kuantitas (PRODUK - SKU, KATEGORI, HARGA JUAL, STOK, MIN., STATUS, AKSI), dan kartu **Riwayat penyesuaian stok** manual.
 
-Dibuka dari: Dashboard Admin (“Cek ketersediaan”); Detail Unit (“Stok dan Ketersediaan”); Stok Barang Jual (“Barang Sewa”).
+Dibuka dari: Dashboard Admin (“Cek ketersediaan”, “Lihat stok”); Detail Unit (“← Kembali ke Stok dan Ketersediaan”); Sidebar (“Stok dan Ketersediaan”).
 
 #### Stok Barang Jual  `StokJual` → `/admin/stok/jual`
 
@@ -798,16 +806,24 @@ Dibuka dari: Owner · Paket Penyewaan (“+ Tambah paket”).
 
 | Lokasi | Elemen | Tujuan |
 |---|---|---|
-| Header halaman / isi | **Penyesuaian stok** | Owner · Stok dan Ketersediaan → `/owner/stok` |
-| Header halaman / isi | **+ Tambah stok** | Owner · Form Barang → `/owner/barang/form` |
-| Header halaman / isi | **Barang Sewa** | Owner · Stok dan Ketersediaan → `/owner/stok` |
-| Header halaman / isi | **Barang Jual** | Owner · Stok Barang Jual → `/owner/stok/jual` |
-| Baris tabel | **Detail Unit** (per baris, mis. Jaket, Tenda, Carrier …) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Riwayat** (per baris, mis. SPT001, SPT002) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Tandai siap** (baris SPT003) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
-| Baris tabel | **Ubah kondisi** (baris JKT012) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
+| Header halaman / isi | **Penyesuaian stok** | Modal Penyesuaian Stok (tambah/kurang/koreksi opname kuantitas barang sewa maupun jual) |
+| Header halaman / isi | **+ Tambah stok** (Tab Sewa) | Owner · Form Barang → `/owner/barang/form` |
+| Header halaman / isi | **+ Tambah barang jual** (Tab Jual) | Owner · Form Barang Jual → `/owner/barang/form?jenis=jual` |
+| Header halaman / isi | **Barang Sewa** | Tab Barang Sewa (tampilan 4 KPI sewa, cek ketersediaan, ringkasan per variasi, dan unit individual) |
+| Header halaman / isi | **Barang Jual** | Tab Barang Jual (4 KPI jual, filter pills status, tabel stok kuantitas, aksi penyesuaian stok per baris, dan riwayat penyesuaian) |
+| Cek ketersediaan | **Periksa** | Menghitung dan menampilkan status kecukupan stok variasi penyusun paket atau satuan pada rentang tanggal sewa |
+| Baris tabel variasi | **Detail Unit** (per baris variasi) | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` (mengarah presisi ke variasi spesifik, mis. Rimba L ke range `JKT009–JKT016`) |
+| Baris tabel unit | **Tandai siap** (unit non-tersedia) | Mengubah status kondisi unit menjadi Tersedia |
+| Baris tabel unit | **Ubah kondisi** | Modal Ubah Kondisi Unit Cepat |
+| Baris tabel unit | **Detail Unit** | Owner · Detail Unit → `/owner/barang/[kode]/unit/[unit]` |
+| Baris tabel jual | **Penyesuaian stok** | Modal Penyesuaian Stok (pre-selected produk bersangkutan) |
+| Filter tabel jual | **Pills Semua / Aman / Menipis / Habis** | Menyaring tabel barang jual secara instan berdasarkan status ambang batas minimum stok |
 
-Dibuka dari: Owner · Detail Unit (“Stok dan Ketersediaan”); Owner · Stok Barang Jual (“Barang Sewa”).
+- Halaman memuat 2 tab utama:
+  1. **Tab Barang Sewa**: 4 KPI metrik sewa (Total unit sewa, Tersedia, Disewa, Tidak siap), bagian **Cek ketersediaan berdasarkan tanggal dan variasi** dengan status Cukup/Kurang, tabel **Ringkasan per variasi** dengan filter kategori/merek/ukuran/kapasitas/jenis/kondisi, serta bagian **Unit individual yang memerlukan perhatian operasional**.
+  2. **Tab Barang Jual**: 4 KPI metrik jual (Produk jual [dark mesh gradient], Total stok, Stok menipis / habis, Terjual bulan ini), kotak pencarian produk/SKU, filter pills status stok, tabel stok per kuantitas (PRODUK - SKU, KATEGORI, HARGA JUAL, STOK, MIN., STATUS, AKSI), dan kartu **Riwayat penyesuaian stok** manual.
+
+Dibuka dari: Owner · Dashboard (“Cek ketersediaan”, “Lihat stok”); Owner · Detail Unit (“← Kembali ke Stok dan Ketersediaan”); Sidebar (“Stok dan Ketersediaan”).
 
 #### Owner · Stok Barang Jual  `OwStokJual` → `/owner/stok/jual`
 
